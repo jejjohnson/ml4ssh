@@ -62,13 +62,13 @@ def generate_eval_data(args):
     lon_coords, lat_coords, time_coords = create_spatiotemporal_grid(
         lon_min=args.eval_lon_min,
         lon_max=args.eval_lon_max,
-        lon_dx=args.eval_dlon if args.smoke_test else 2,
+        lon_dx=args.eval_dlon if not args.smoke_test else 2,
         lat_min=args.eval_lat_min,
         lat_max=args.eval_lat_max,
-        lat_dy=args.eval_dlat if args.smoke_test else 2,
+        lat_dy=args.eval_dlat if not args.smoke_test else 2,
         time_min=np.datetime64(args.eval_time_min),
         time_max=np.datetime64(args.eval_time_max),
-        time_dt=np.timedelta64(*args.eval_dtime.split("_")) if args.smoke_test else np.timedelta64(5, "D"),
+        time_dt=np.timedelta64(*args.eval_dtime.split("_")) if not args.smoke_test else np.timedelta64(5, "D"),
     )
 
     # temporal subset

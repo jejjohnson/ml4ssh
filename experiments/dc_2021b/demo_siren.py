@@ -10,6 +10,8 @@ from pyprojroot import here
 root = here(project_files=[".root"])
 # append to path
 sys.path.append(str(root))
+# current file
+filepath = os.path.dirname(__file__)
 
 
 
@@ -100,7 +102,7 @@ def main(args):
     opt_state = optimizer.init(model)
 
     n_steps_per_epoch = args.n_train / args.batch_size
-    steps = int(n_steps_per_epoch * args.n_epochs) if args.smoke_test else 5
+    steps = int(n_steps_per_epoch * args.n_epochs) if not args.smoke_test else 100
 
 
     wandb.config.update(
@@ -255,16 +257,16 @@ def main(args):
 
     # MOVIES
 
-
+    save_path = wandb.run.dir #Path(root).joinpath("experiments/dc_2021b")
     if args.smoke_test:
-        create_movie(ds_oi.ssh.isel(time=slice(50,60)), "pred", "time", cmap="viridis")
+        create_movie(ds_oi.ssh.isel(time=slice(50,60)), f"pred", "time", cmap="viridis", file_path=save_path)
     else:
-        create_movie(ds_oi.ssh, "pred", "time", cmap="viridis")
+        create_movie(ds_oi.ssh, f"pred", "time", cmap="viridis", file_path=save_path)
 
     
     wandb.log(
         {
-            "predictions_gif": wandb.Image("movie_pred.gif"),
+            "predictions_gif": wandb.Image(f"{save_path}/movie_pred.gif"),
         }
     )
 
@@ -278,14 +280,14 @@ def main(args):
 
 
     if args.smoke_test:
-        create_movie(ds_oi.ssh_grad.isel(time=slice(50,60)), "pred_grad", "time", cmap="Spectral_r")
+        create_movie(ds_oi.ssh_grad.isel(time=slice(50,60)), f"pred_grad", "time", cmap="Spectral_r", file_path=save_path)
     else:
-        create_movie(ds_oi.ssh_grad, "pred_grad", "time", cmap="Spectral_r")
+        create_movie(ds_oi.ssh_grad, f"pred_grad", "time", cmap="Spectral_r", file_path=save_path)
 
 
     wandb.log(
         {
-            "predictions_grad_gif": wandb.Image("movie_pred_grad.gif"),
+            "predictions_grad_gif": wandb.Image(f"{save_path}/movie_pred_grad.gif"),
         }
     )
 
@@ -297,15 +299,15 @@ def main(args):
 
 
     if args.smoke_test:
-        create_movie(ds_oi.ssh_lap.isel(time=slice(50,60)), "pred_lap", "time", cmap="RdBu_r")
+        create_movie(ds_oi.ssh_lap.isel(time=slice(50,60)), f"pred_lap", "time", cmap="RdBu_r", file_path=save_path)
     else:
-        create_movie(ds_oi.ssh_lap, "pred_lap", "time", cmap="RdBu_r")
+        create_movie(ds_oi.ssh_lap, f"pred_lap", "time", cmap="RdBu_r", file_path=save_path)
 
     
 
     wandb.log(
         {
-            "predictions_laplacian_gif": wandb.Image("movie_pred_lap.gif"),
+            "predictions_laplacian_gif": wandb.Image(f"{save_path}/movie_pred_lap.gif"),
         }
     )
 
