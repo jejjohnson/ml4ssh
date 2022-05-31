@@ -20,7 +20,7 @@ def make_mini_batcher(
     ds = ds.cache()
     ds = ds.repeat()
     if shuffle:
-        ds = ds.shuffle(buffer_size=10 * batch_size)
+        ds = ds.shuffle(buffer_size=batch_size)
     ds = ds.batch(batch_size)
     ds = ds.prefetch(prefetch_buffer)
 
