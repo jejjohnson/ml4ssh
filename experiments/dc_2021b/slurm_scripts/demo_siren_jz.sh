@@ -30,8 +30,10 @@ export PYTHONPATH=$WORK/projects/ml4ssh:${PYTHONPATH}
 # loading of modules
 source activate jax_gpu_py39
 
+XLA_PYTHON_CLIENT_PREALLOCATE=false
+
 # code execution
-srun python experiments/dc_2021b/demo_siren.py \
+srun python experiments/dc_2021b/scripts/demo_siren.py \
     --wandb-mode offline \
     --log-dir /gpfswork/rech/cli/uvo53rl/logs \
     --model mlp \
