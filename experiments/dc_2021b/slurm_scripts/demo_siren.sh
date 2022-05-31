@@ -33,7 +33,7 @@ source activate jax_cpu_py39
 
 
 # code execution
-srun python experiments/dc_2021b/demo_siren.py \
+srun python experiments/dc_2021b/scripts/demo_siren.py \
     --wandb-mode online \
     --model mlp \
     --n-epochs 300 \
