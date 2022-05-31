@@ -13,9 +13,9 @@ sys.path.append(str(root))
 # current file
 filepath = os.path.dirname(__file__)
 
-import tensorflow as tf
+# import tensorflow as tf
 # Ensure TF does not see GPU and grab all GPU memory.
-tf.config.set_visible_devices([], device_type='GPU')
+# tf.config.set_visible_devices([], device_type='GPU')
 # ENSURE JAX SEES GPU
 os.environ["JAX_PLATFORM_NAME"] = "GPU"
 # ENSURE JAX DOESNT PREALLOCATE
@@ -32,6 +32,7 @@ import seaborn as sns
 sns.reset_defaults()
 sns.set_context(context="talk", font_scale=0.7)
 
+import numpy as np
 import jax
 import jax.random as jrandom
 import jax.numpy as jnp
@@ -136,17 +137,25 @@ def main(args):
     with tqdm.trange(steps) as pbar:
         for step in pbar:
             
-            ix, iy = train_ds()
-            loss, grads = make_step(model, ix, iy)
+            ix, iy = next(train_ds)
+            loss, grads = make_step(
+                model, 
+                jnp.asarray(ix.astype(np.float32)), 
+                jnp.asarray(iy.astype(np.float32))
+            )
             
             updates, opt_state = optimizer.update(grads, opt_state)
             model = eqx.apply_updates(model, updates)
             
             losses["train"].append(loss)
             wandb.log({"train_loss": loss}, step=step)
-            ix, iy = valid_ds()
+            ix, iy = next(valid_ds)
             # validation step
-            vloss = val_step(model, ix, iy)
+            vloss = val_step(
+                model, 
+                jnp.asarray(ix.astype(np.float32)), 
+                jnp.asarray(iy.astype(np.float32))
+            )
             losses["valid"].append(vloss)
             
             
