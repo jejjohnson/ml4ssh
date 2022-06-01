@@ -2,20 +2,8 @@ from typing import Callable, List, Optional
 import jax
 import jax.random as jrandom
 import equinox as eqx
+from .activations import ReLU
 
-class ReLU(eqx.Module):
-
-    def __call__(self, x):
-        return jax.nn.relu(x)
-    
-class Swish(eqx.Module):
-    beta: float = eqx.static_field()
-    
-    def __init__(self, beta: float=1.0):
-        self.beta = beta
-
-    def __call__(self, x):
-        return x * jax.nn.sigmoid(self.beta * x)
     
     
 class MLP(eqx.Module):
