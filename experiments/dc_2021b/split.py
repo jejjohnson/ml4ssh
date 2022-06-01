@@ -15,8 +15,8 @@ def split_data(df, args):
     df.loc[idx_train, "split"] = 1
     df.loc[idx_valid, "split"] = 2
     
-    cols = ["time_transform", "longitude", "latitude"]
-    var_cols = ["sla_unfiltered"] 
+    cols = df.attrs["input_cols"]
+    var_cols = df.attrs["output_cols"] 
 
     xtrain = df[df["split"].isin([1])][cols].values
     ytrain = df[df["split"].isin([1])][var_cols].values
