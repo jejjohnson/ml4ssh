@@ -13,9 +13,9 @@ sys.path.append(str(root))
 # current file
 filepath = os.path.dirname(__file__)
 
-# import tensorflow as tf
+#import tensorflow as tf
 # Ensure TF does not see GPU and grab all GPU memory.
-# tf.config.set_visible_devices([], device_type='GPU')
+#tf.config.set_visible_devices([], device_type='GPU')
 # ENSURE JAX SEES GPU
 os.environ["JAX_PLATFORM_NAME"] = "GPU"
 # ENSURE JAX DOESNT PREALLOCATE
@@ -56,7 +56,9 @@ from optimizer import add_optimizer_args, get_optimizer
 from postprocess import add_postprocess_args, postprocess_data, generate_eval_data
 from evaluation import add_eval_args, get_rmse_metrics, get_psd_metrics
 
-
+import tensorflow as tf
+# Ensure TF does not see GPU and grab all GPU memory.
+tf.config.set_visible_devices([], device_type='GPU')
 
 
 def main(args):

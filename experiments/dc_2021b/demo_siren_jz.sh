@@ -16,7 +16,7 @@
 # loading of modules
 module purge
 
-module load cuda/10.2
+module load cuda/11.2
 module load cudnn/9.2-v7.5.1.10
 module load git/2.31.1
 module load github-cli/1.13.1
@@ -30,15 +30,14 @@ export PYTHONPATH=$WORK/projects/ml4ssh:${PYTHONPATH}
 # loading of modules
 source activate jax_gpu_py39
 
-XLA_PYTHON_CLIENT_PREALLOCATE=false
 
 # code execution
-srun python experiments/dc_2021b/scripts/demo_siren.py \
+srun python experiments/dc_2021b/demo_siren.py \
     --wandb-mode offline \
     --log-dir /gpfswork/rech/cli/uvo53rl/logs \
-    --model mlp \
-    --n-epochs 300 \
-    --batch-size 2048 \
+    --model siren \
+    --n-epochs 500 \
+    --batch-size 4096 \
     --train-data-dir /gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/train \
     --ref-data-dir /gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/ref \
     --test-data-dir /gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/test
