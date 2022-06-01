@@ -127,8 +127,8 @@ def main(args):
     # Training
     # ============
 
-    train_ds = make_mini_batcher(xtrain, ytrain, args.batch_size, 1, shuffle=True)
-    valid_ds = make_mini_batcher(xvalid, yvalid, args.batch_size, 1, shuffle=False)
+    train_ds = make_mini_batcher(xtrain.astype(np.float32), ytrain.astype(np.float32), args.batch_size, 1, shuffle=True)
+    valid_ds = make_mini_batcher(xvalid.astype(np.float32), yvalid.astype(np.float32), args.batch_size, 1, shuffle=False)
 
 
     losses = {} 
