@@ -31,16 +31,27 @@ def add_preprocess_args(parser):
 
 
 def preprocess_data(ds_obs, args):
-
+    
+    time_min = np.datetime64(args.time_min)
+    time_max = np.datetime64(args.time_max)
+    dtime = np.timedelta64(*args.dtime.split("_"))
     # temporal subset
     ds_obs = temporal_subset(
         ds_obs,
-        time_min=np.datetime64(args.time_min),
-        time_max=np.datetime64(args.time_max),
+        time_min=time_min,
+        time_max=time_max,
         time_buffer=args.time_buffer)
 
 
     # convert to dataframe
     data = ds_obs.to_dataframe().reset_index().dropna()
+    
+    # add vtime 
+    # NOTE: THIS IS THE GLOBAL MINIMUM TIME FOR THE DATASET
+    data["vtime"] = (data['time'].values - np.datetime64("2016-12-01")) / dtime
+    
+    # add column attributes
+    data.attrs["input_cols"] = ["longitude", "latitude", "vtime"]
+    data.attrs["output_cols"] = ["sla_unfiltered"]
     
     return data

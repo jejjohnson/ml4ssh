@@ -77,6 +77,15 @@ def generate_eval_data(args):
         "latitude": lat_coords,
         "time": time_coords,
     })
+    
+    # add vtime 
+    # NOTE: THIS IS THE GLOBAL MINIMUM TIME FOR THE DATASET
+    dtime = np.timedelta64(*args.eval_dtime.split("_"))
+    df_grid["vtime"] = (df_grid['time'].values - np.datetime64("2016-12-01")) / dtime
+    
+    # add column attributes
+    df_grid.attrs["input_cols"] = ["longitude", "latitude", "vtime"]
+    df_grid.attrs["output_cols"] = ["sla_unfiltered"]
 
     
     return df_grid
