@@ -2,10 +2,10 @@ import numpy as np
 import pyinterp
 import xarray as xr
 
-def temporal_subset(ds, time_min, time_max, time_buffer):
+def temporal_subset(ds, time_min, time_max, time_buffer: int=7.0, time_buffer_order: str="D"):
     ds = ds.sel(
-        time=slice(time_min - np.timedelta64(int(2*time_buffer), 'D'), 
-                   time_max + np.timedelta64(int(2*time_buffer), 'D')),
+        time=slice(time_min - np.timedelta64(int(2*time_buffer), time_buffer_order), 
+                   time_max + np.timedelta64(int(2*time_buffer), time_buffer_order)),
         drop=True
     )
     return ds
