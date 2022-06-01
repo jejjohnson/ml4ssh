@@ -133,6 +133,12 @@ class RMSEStats(NamedTuple):
     rmse_std : float
     nrmse_mean : float
     nrmse_std : float
+    
+    def __str__(self):
+        return (f"RMSE (Mean): {self.rmse_mean:.3f}"
+              f"\nRMSE (Std): {self.rmse_std:.3f}"
+              f"\nNRMSE (Mean): {self.nrmse_mean:.3f}"
+              f"\nNRMSE (Std): {self.nrmse_std:.3f}")
 
 class PSDStats(NamedTuple):
     wavenumber : float
@@ -140,4 +146,8 @@ class PSDStats(NamedTuple):
     psd_ref : np.ndarray
     psd_study : np.ndarray
     psd_diff : np.ndarray
+    
+    def __str__(self):
+        return (f"Resolved Scale: {self.resolved_scale:.3f} (km)")
+
     
