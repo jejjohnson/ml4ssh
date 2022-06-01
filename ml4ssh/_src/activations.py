@@ -35,7 +35,7 @@ class Sine(eqx.Module):
         return jnp.sin(self.w0 * x)
 
 
-def get_activation(activation: str="relu", *kwargs):
+def get_activation(activation: str="relu", **kwargs):
     if activation == "identity":
         return eqx.nn.Identity()
     elif activation == "relu":
