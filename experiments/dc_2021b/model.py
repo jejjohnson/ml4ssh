@@ -1,9 +1,11 @@
 import sys, os
 from pyprojroot import here
+
 root = here(project_files=[".root"])
 sys.path.append(str(root))
 
 from ml4ssh._src.siren import SirenNet
+from ml4ssh._src.activations import get_activation
 from ml4ssh._src.mlp import MLPNet
 import jax.random as jrandom
 
@@ -48,12 +50,15 @@ def get_model(config):
 
     elif config.model == "mlp":
 
+        activation = get_activation(config.activation)
+
         model = MLPNet(
             in_dim=config.in_dim,
             out_dim=config.out_dim,
-            hidden_dim=config.hidden_dim, 
-            n_hidden=config.n_hidden, 
-            key=init_key
+            hidden_dim=config.hidden_dim,
+            n_hidden=config.n_hidden,
+            key=init_key,
+            activation=activation
         )
 
     else:
