@@ -13,12 +13,11 @@
 # loading of modules
 module purge
 
-module load cuda/10.2
-module load cudnn/9.2-v7.5.1.10
 module load git/2.31.1
 module load github-cli/1.13.1
 module load git-lfs/3.0.2
 module load anaconda-py3/2021.05
+module load ffmpeg/4.2.2
 
 # go to appropriate directory
 cd $WORK/projects/ml4ssh
@@ -27,7 +26,8 @@ export PYTHONPATH=$WORK/projects/ml4ssh:${PYTHONPATH}
 # loading of modules
 source activate jax_gpu_py39
 
-XLA_PYTHON_CLIENT_PREALLOCATE=false
+export XLA_PYTHON_CLIENT_PREALLOCATE=false
+export JAX_PLATFORM_NAME=CPU
 
 # code execution
 srun python experiments/dc_2021b/demo_siren.py \
