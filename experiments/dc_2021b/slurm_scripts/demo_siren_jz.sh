@@ -8,7 +8,7 @@
 #SBATCH -C v100-16g                          # V100 GPU + 16 GBs RAM
 #SBATCH --qos=qos_gpu-t4                     # GPU partition (max 100 hrs)
 #SBATCH --gres=gpu:1                         # number of GPUs (1/4 of GPUs)
-#SBATCH --time=20:00:00                      # maximum execution time requested (HH:MM:SS)
+#SBATCH --time=48:00:00                      # maximum execution time requested (HH:MM:SS)
 #SBATCH --output=/gpfswork/rech/cli/uvo53rl/logs/slurm/logs/ml4ssh_dc_2021b_%j.log      # name of output file
 #SBATCH --error=/gpfswork/rech/cli/uvo53rl/logs/slurm/errs/ml4ssh_dc_2021b_%j.err       # name of error file
 #SBATCH --export=ALL
