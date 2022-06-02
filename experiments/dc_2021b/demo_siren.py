@@ -76,7 +76,7 @@ def main(args):
     data, scaler = feature_transform(data, args)
 
     # split data
-    xtrain, ytrain, xvalid, yvalid = split_data(data, args)
+    xtrain, ytrain, xvalid, yvalid = split_data(data, args)    
 
     args.in_dim = xtrain.shape[-1]
     args.n_train = xtrain.shape[0]
@@ -204,7 +204,7 @@ def main(args):
     # time predictions
     t0 = time.time()
 
-    df_grid["pred"] = batch_predict(df_pred, fn, args.eval_batch_size)
+    df_grid["pred"] = batch_predict(df_pred, fn, args.eval_batch_size, jnp.asarray)
 
     t1 = time.time() - t0
 
