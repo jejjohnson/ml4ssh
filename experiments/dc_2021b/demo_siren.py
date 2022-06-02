@@ -13,15 +13,6 @@ sys.path.append(str(root))
 # current file
 filepath = os.path.dirname(__file__)
 
-#import tensorflow as tf
-# Ensure TF does not see GPU and grab all GPU memory.
-#tf.config.set_visible_devices([], device_type='GPU')
-# ENSURE JAX SEES GPU
-#os.environ["JAX_PLATFORM_NAME"] = "GPU"
-# ENSURE JAX DOESNT PREALLOCATE
-#os.environ["XLA_PYTHON_CLIENT_PREALLOCATE"] = str(False)
-
-
 from pathlib import Path
 import argparse
 import wandb
