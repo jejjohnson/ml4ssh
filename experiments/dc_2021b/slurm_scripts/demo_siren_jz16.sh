@@ -5,7 +5,6 @@
 #SBATCH --nodes=1                            # we ALWAYS request one node
 #SBATCH --ntasks-per-node=1                  # number of tasks per node
 #SBATCH --cpus-per-task=10                   # number of cpus per task
-#SBATCH -C v100-16g                          # V100 GPU + 16 GBs RAM
 #SBATCH --qos=qos_gpu-t4                     # GPU partition (max 100 hrs)
 #SBATCH --gres=gpu:1                         # number of GPUs (1/4 of GPUs)
 #SBATCH --time=48:00:00                      # maximum execution time requested (HH:MM:SS)
@@ -39,8 +38,8 @@ export JAX_PLATFORM_NAME=GPU
 srun python experiments/dc_2021b/demo_siren.py \
     --wandb-mode offline \
     --log-dir /gpfswork/rech/cli/uvo53rl/logs \
-    --model siren \
-    --activation sine \
+    --model mlp \
+    --activation relu \
     --n-epochs 1200 \
     --batch-size 4096 \
     --train-data-dir /gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/train \
