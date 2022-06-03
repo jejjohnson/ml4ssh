@@ -15,7 +15,7 @@ class MLP(eqx.Module):
         self.linear = eqx.nn.Linear(in_dim, out_dim, key=key)
         self.activation = activation if not None else eqx.nn.Identity()
         
-    def __call__(self, x):
+    def __call__(self, x, *, key: Optional["jax.random.PRNGKey"] = None):
         x = self.linear(x)
         x = self.activation(x)
         return x
@@ -54,7 +54,7 @@ class MLPNet(eqx.Module):
         # Output Layer
         self.layers.append(eqx.nn.Linear(hidden_dim, out_dim, key=keys[-1]))
         
-    def __call__(self, x):
+    def __call__(self, x, *, key: Optional["jax.random.PRNGKey"] = None):
         for layer in self.layers[:-1]:
             x = layer(x)
             x = self.activation(x)

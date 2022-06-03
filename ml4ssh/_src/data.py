@@ -11,7 +11,8 @@ def make_mini_batcher(
     batch_size: Optional[int] = 32,
     prefetch_buffer: Optional[int] = 5,
     shuffle: Optional[bool] = True,
-    buffer_size: Optional[int]=None
+    buffer_size: Optional[int]=None,
+    seed: Optional[int]=None,
  ) -> Iterator:
 
     n = X.shape[0]
@@ -21,7 +22,7 @@ def make_mini_batcher(
     # Make dataloader, set batch size and prefetch buffer:
     ds = tfd.Dataset.from_tensor_slices((X, y))
     if shuffle:
-        ds = ds.shuffle(buffer_size=10 * batch_size)
+        ds = ds.shuffle(buffer_size=10 * batch_size, seed=seed)
     ds = ds.batch(batch_size)
     ds = ds.prefetch(prefetch_buffer)
     ds = ds.repeat()

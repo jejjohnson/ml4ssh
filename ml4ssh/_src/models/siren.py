@@ -1,4 +1,4 @@
-from typing import Callable, List
+from typing import Callable, List, Optional
 import jax
 import jax.numpy as jnp
 import jax.random as jrandom
@@ -10,11 +10,18 @@ class Sine(eqx.Module):
     """Sine Activation Function"""
     w0: Array = eqx.static_field()
 
-    def __init__(self, w0):
+    def __init__(self, w0: float=1.0, *args, **kwargs):
+        """**Arguments:**
+        
+        - `w0` : the weight for the activation
+        """
         super().__init__()
         self.w0 = w0
 
-    def __call__(self, x: Array) -> Array:
+    def __call__(self, x: Array, *, key: Optional["jax.random.PRNGKey"] = None) -> Array:
+        """**Arguments**
+        - `x`: The input. JAX Array, shape `(in_features,)`
+        """
         return jnp.sin(self.w0 * x)
 
     
@@ -50,7 +57,7 @@ class Siren(eqx.Module):
         self.w0 = w0
         self.activation = Sine(w0) if activation is None else activation
 
-    def __call__(self, x: Array) -> Array:
+    def __call__(self, x: Array, *, key: Optional["jax.random.PRNGKey"] = None) -> Array:
         x = self.weight @ x + self.bias
         x = self.activation(x)
         return x
@@ -59,7 +66,8 @@ class Siren(eqx.Module):
 class SirenNet(eqx.Module):
     """SirenNet"""
     layers: List[Siren]
-    w0: Array = eqx.static_field()
+    num_layers: Array = eqx.static_field()
+    hidden_dim: Array = eqx.static_field()
     final_scale: Array = eqx.static_field()
     final_activation: Callable[[Array], Array]
 
@@ -77,7 +85,8 @@ class SirenNet(eqx.Module):
         final_activation: Callable[[Array], Array] = eqx.nn.Identity()
     ):
         super().__init__()
-        keys = jrandom.split(key, n_hidden + 2)
+        """"""
+        keys = jrandom.split(key, n_hidden + 1)
         
         # First layer
         self.layers = [
@@ -100,11 +109,12 @@ class SirenNet(eqx.Module):
             )
         )
 
-        self.w0 = w0
+        self.num_layers = n_hidden + 1
+        self.hidden_dim = hidden_dim
         self.final_scale = final_scale
         self.final_activation = final_activation
 
-    def __call__(self, x: Array) -> Array:
+    def __call__(self, x: Array, *, key: Optional["jax.random.PRNGKey"] = None) -> Array:
         for layer in self.layers:
             x = layer(x)
         return self.final_activation(x * self.final_scale)
