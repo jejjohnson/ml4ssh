@@ -11,6 +11,8 @@ def feature_transform(df, args, scaler=None):
     # transform to julian time
     if args.julian_time == True:
         df["time"] = pd.DatetimeIndex(df['time']).to_julian_date()
+    else:
+        df["time"] = df["vtime"].copy()
     
     # column transformer
     cols = ["time", "longitude", "latitude"]
