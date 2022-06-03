@@ -9,8 +9,8 @@
 #SBATCH --qos=qos_gpu-t3                     # GPU partition (max 20â hrs)
 #SBATCH --gres=gpu:1                         # number of GPUs (1/4 of GPUs)
 #SBATCH --time=20:00:00                      # maximum execution time requested (HH:MM:SS)
-#SBATCH --output=/gpfswork/rech/cli/uvo53rl/logs/slurm/logs/ml4ssh_dc_2021b_%j.log      # name of output file
-#SBATCH --error=/gpfswork/rech/cli/uvo53rl/logs/slurm/errs/ml4ssh_dc_2021b_%j.err       # name of error file
+#SBATCH --output=/gpfsscratch/rech/cli/uvo53rl/logs/logs/ml4ssh_dc_2021b_%j.log      # name of output file
+#SBATCH --error=/gpfsscratch/rech/cli/uvo53rl/logs/errs/ml4ssh_dc_2021b_%j.err       # name of error file
 #SBATCH --export=ALL
 
 # loading of modules
@@ -38,12 +38,12 @@ export JAX_PLATFORM_NAME=GPU
 # code execution
 srun python experiments/dc_2021b/demo_siren.py \
     --wandb-mode offline \
-    --log-dir /gpfswork/rech/cli/uvo53rl/logs \
+    --log-dir /gpfsscratch/rech/cli/uvo53rl/logs \
     --model siren \
     --activation sine \
-    --n-epochs 800 \
+    --n-epochs 1200 \
     --batch-size 4096 \
-    --hidden-dim 128 \
+    --hidden-dim 512 \
     --learning-rate 1e-4 \
     --train-data-dir /gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/train \
     --ref-data-dir /gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/ref \

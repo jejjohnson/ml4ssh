@@ -7,8 +7,8 @@
 #SBATCH --ntasks-per-node=1                 # number of tasks per node
 #SBATCH --cpus-per-task=32                   # number of cpus per task
 #SBATCH --time=48:00:00                      # maximum execution time requested (HH:MM:SS)
-#SBATCH --output=/gpfswork/rech/cli/uvo53rl/logs/slurm/logs/ml4ssh_dc_2021b_%j.log      # name of output file
-#SBATCH --error=/gpfswork/rech/cli/uvo53rl/logs/slurm/errs/ml4ssh_dc_2021b_%j.err       # name of error file
+#SBATCH --output=/gpfsscratch/rech/cli/uvo53rl/logs/logs/ml4ssh_dc_2021b_%j.log      # name of output file
+#SBATCH --error=/gpfsscratch/rech/cli/uvo53rl/logs/errs/ml4ssh_dc_2021b_%j.err       # name of error file
 #SBATCH --export=ALL
 
 # loading of modules
@@ -33,7 +33,7 @@ export JAX_PLATFORM_NAME=CPU
 # code execution
 srun python experiments/dc_2021b/demo_siren.py \
     --wandb-mode offline \
-    --log-dir /gpfswork/rech/cli/uvo53rl/logs \
+    --log-dir /gpfsscratch/rech/cli/uvo53rl/logs \
     --model siren \
     --n-epochs 2000 \
     --activation sine \
