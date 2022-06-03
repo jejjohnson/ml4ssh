@@ -41,9 +41,10 @@ srun python experiments/dc_2021b/demo_siren.py \
     --log-dir /gpfswork/rech/cli/uvo53rl/logs \
     --model siren \
     --activation sine \
-    --n-epochs 1200 \
+    --n-epochs 800 \
     --batch-size 4096 \
-    --learning-rate 1e-3 \
+    --hidden-dim 128 \
+    --learning-rate 1e-4 \
     --train-data-dir /gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/train \
     --ref-data-dir /gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/ref \
     --test-data-dir /gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/test
