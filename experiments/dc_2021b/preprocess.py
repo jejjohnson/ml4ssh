@@ -51,7 +51,7 @@ def preprocess_data(ds_obs, args):
     data["vtime"] = (data['time'].values - np.datetime64("2016-12-01")) / dtime
     
     # add column attributes
-    data.attrs["input_cols"] = ["longitude", "latitude", "vtime"]
+    data.attrs["input_cols"] = ["longitude", "latitude", "time"]
     data.attrs["output_cols"] = ["sla_unfiltered"]
     
     return data

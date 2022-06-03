@@ -3,6 +3,7 @@ from sklearn.model_selection import train_test_split
 def add_split_args(parser):
     parser.add_argument("--train-size", type=float, default=0.90)
     parser.add_argument("--split-seed", type=int, default=666)
+    parser.add_argument("--shuffle-seed", type=int, default=1234)
     return parser
 
 def split_data(df, args):

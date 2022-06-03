@@ -4,9 +4,9 @@ from pyprojroot import here
 root = here(project_files=[".root"])
 sys.path.append(str(root))
 
-from ml4ssh._src.siren import SirenNet
-from ml4ssh._src.activations import get_activation
-from ml4ssh._src.mlp import MLPNet
+from ml4ssh._src.models.siren import SirenNet
+from ml4ssh._src.models.activations import get_activation
+from ml4ssh._src.models.mlp import MLPNet
 import jax.random as jrandom
 
 def add_model_args(parser):

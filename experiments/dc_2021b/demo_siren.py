@@ -28,7 +28,6 @@ import jax
 import jax.random as jrandom
 import jax.numpy as jnp
 import equinox as eqx
-from ml4ssh._src.data import make_mini_batcher
 from ml4ssh._src.io import load_object, save_object
 from ml4ssh._src.viz import create_movie, plot_psd_spectrum, plot_psd_score
 from ml4ssh._src.utils import get_meshgrid, calculate_gradient, calculate_laplacian
@@ -36,7 +35,7 @@ from ml4ssh._src.utils import get_meshgrid, calculate_gradient, calculate_laplac
 
 
 # import parsers
-from data import get_data_args, load_data
+from data import get_data_args, load_data, make_mini_batcher
 from preprocess import add_preprocess_args, preprocess_data
 from features import add_feature_args, feature_transform
 from split import add_split_args, split_data
@@ -118,8 +117,8 @@ def main(args):
     # Training
     # ============
 
-    train_ds = make_mini_batcher(xtrain.astype(np.float32), ytrain.astype(np.float32), args.batch_size, 1, shuffle=True)
-    valid_ds = make_mini_batcher(xvalid.astype(np.float32), yvalid.astype(np.float32), args.batch_size, 1, shuffle=False)
+    train_ds = make_mini_batcher(xtrain.astype(np.float32), ytrain.astype(np.float32), args.batch_size, 1, shuffle=True, seed=args.shuffle_seed)
+    valid_ds = make_mini_batcher(xvalid.astype(np.float32), yvalid.astype(np.float32), args.batch_size, 1, shuffle=False, seed=None)
 
 
     losses = {} 
@@ -192,7 +191,7 @@ def main(args):
         return jax.vmap(model)(data)
 
 
-    from ml4ssh._src.model_utils import batch_predict
+    from ml4ssh._src.models.model_utils import batch_predict
     from functools import partial
 
 
@@ -264,61 +263,61 @@ def main(args):
     )
 
 
-    # MOVIES
+#     # MOVIES
 
-    save_path = wandb.run.dir #Path(root).joinpath("experiments/dc_2021b")
-    if args.smoke_test:
-        create_movie(ds_oi.ssh.isel(time=slice(50,60)), f"pred", "time", cmap="viridis", file_path=save_path)
-    else:
-        create_movie(ds_oi.ssh, f"pred", "time", cmap="viridis", file_path=save_path)
-
-    
-    wandb.log(
-        {
-            "predictions_gif": wandb.Image(f"{save_path}/movie_pred.gif"),
-        }
-    )
-
-
-    # GRADIENTS
-
-
-    ds_oi["ssh_grad"] = calculate_gradient(ds_oi["ssh"], "longitude", "latitude")
-
-
-
-
-    if args.smoke_test:
-        create_movie(ds_oi.ssh_grad.isel(time=slice(50,60)), f"pred_grad", "time", cmap="Spectral_r", file_path=save_path)
-    else:
-        create_movie(ds_oi.ssh_grad, f"pred_grad", "time", cmap="Spectral_r", file_path=save_path)
-
-
-    wandb.log(
-        {
-            "predictions_grad_gif": wandb.Image(f"{save_path}/movie_pred_grad.gif"),
-        }
-    )
-
-
-    # LAPLACIAN
-
-
-    ds_oi["ssh_lap"] = calculate_laplacian(ds_oi["ssh"], "longitude", "latitude")
-
-
-    if args.smoke_test:
-        create_movie(ds_oi.ssh_lap.isel(time=slice(50,60)), f"pred_lap", "time", cmap="RdBu_r", file_path=save_path)
-    else:
-        create_movie(ds_oi.ssh_lap, f"pred_lap", "time", cmap="RdBu_r", file_path=save_path)
+#     save_path = wandb.run.dir #Path(root).joinpath("experiments/dc_2021b")
+#     if args.smoke_test:
+#         create_movie(ds_oi.ssh.isel(time=slice(50,60)), f"pred", "time", cmap="viridis", file_path=save_path)
+#     else:
+#         create_movie(ds_oi.ssh, f"pred", "time", cmap="viridis", file_path=save_path)
 
     
+#     wandb.log(
+#         {
+#             "predictions_gif": wandb.Image(f"{save_path}/movie_pred.gif"),
+#         }
+#     )
 
-    wandb.log(
-        {
-            "predictions_laplacian_gif": wandb.Image(f"{save_path}/movie_pred_lap.gif"),
-        }
-    )
+
+#     # GRADIENTS
+
+
+#     ds_oi["ssh_grad"] = calculate_gradient(ds_oi["ssh"], "longitude", "latitude")
+
+
+
+
+#     if args.smoke_test:
+#         create_movie(ds_oi.ssh_grad.isel(time=slice(50,60)), f"pred_grad", "time", cmap="Spectral_r", file_path=save_path)
+#     else:
+#         create_movie(ds_oi.ssh_grad, f"pred_grad", "time", cmap="Spectral_r", file_path=save_path)
+
+
+#     wandb.log(
+#         {
+#             "predictions_grad_gif": wandb.Image(f"{save_path}/movie_pred_grad.gif"),
+#         }
+#     )
+
+
+#     # LAPLACIAN
+
+
+#     ds_oi["ssh_lap"] = calculate_laplacian(ds_oi["ssh"], "longitude", "latitude")
+
+
+#     if args.smoke_test:
+#         create_movie(ds_oi.ssh_lap.isel(time=slice(50,60)), f"pred_lap", "time", cmap="RdBu_r", file_path=save_path)
+#     else:
+#         create_movie(ds_oi.ssh_lap, f"pred_lap", "time", cmap="RdBu_r", file_path=save_path)
+
+    
+
+#     wandb.log(
+#         {
+#             "predictions_laplacian_gif": wandb.Image(f"{save_path}/movie_pred_lap.gif"),
+#         }
+#     )
 
             
 
