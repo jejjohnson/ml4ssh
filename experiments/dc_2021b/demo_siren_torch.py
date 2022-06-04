@@ -44,7 +44,6 @@ from evaluation import add_eval_args, get_rmse_metrics, get_psd_metrics
 import torch
 from torch import nn
 from torch.utils.data import Dataset, DataLoader
-from ml4ssh._src.models_torch.siren import SirenNet
 import pytorch_lightning as pl
 from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
@@ -52,6 +51,7 @@ from pytorch_lightning.callbacks.model_checkpoint import ModelCheckpoint
 from pytorch_lightning.utilities.argparse import add_argparse_args
 from pytorch_lightning.loggers import WandbLogger
 seed_everything(123)
+
 from loguru import logger
 
 
@@ -226,7 +226,7 @@ def main(args):
 
     # objects
     logger.info("saving scaler value...")
-    path_scaler = "./scaler.pickle"
+    path_scaler = "scaler.pickle"
 
     # models to save
     save_object(scaler, path_scaler)
