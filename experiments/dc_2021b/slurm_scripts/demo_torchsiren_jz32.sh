@@ -36,11 +36,11 @@ srun python experiments/dc_2021b/demo_siren_torch.py \
     --log-dir /gpfsscratch/rech/cli/uvo53rl/ \
     --model siren \
     --activation sine \
-    --n-epochs 1200 \
-    --batch-size 4096 \
+    --n-epochs 3000 \
+    --batch-size 1024 \
     --hidden-dim 512 \
-    --n_hidden 3 \
-    --patience 200 \
+    --n-hidden 5 \
+    --patience 1000 \
     --gpus 1 \
     --num-workers 10 \
     --learning-rate 1e-4 \
