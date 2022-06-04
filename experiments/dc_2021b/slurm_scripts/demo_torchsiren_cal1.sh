@@ -34,7 +34,7 @@ source activate jaxtftorch_cpu_py39
 
 # code execution
 srun python experiments/dc_2021b/demo_siren_torch.py \
-    --wandb-mode disabled \
+    --wandb-mode offline \
     --smoke-test \
     --log-dir /mnt/meom/workdir/johnsonj/logs \
     --model siren \

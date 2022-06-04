@@ -199,9 +199,13 @@ def main(args):
     logger.info("Initializing callbacks...")
     callbacks = [
         ModelCheckpoint(
-            dirpath = "checkpoints",
+        dirpath = f"{wandb_logger.experiment.dir}/checkpoints",
+        monitor="valid_loss",
+        mode="min",
+        save_top_k=1,
+        save_last=True,
         ),
-        EarlyStopping(monitor="valid_loss", mode="min", patience=3),
+        EarlyStopping(monitor="valid_loss", mode="min", patience=20),
 
     ]
     # ============
@@ -256,7 +260,8 @@ def main(args):
     )
     
     t0 = time.time()
-    predictions = trainer.predict(learn, dataloaders=dl_test)
+    predictions = trainer.predict(learn, dataloaders=dl_test, return_predictions=True)
+    predictions = torch.cat(predictions)
     t1 = time.time() - t0
     
     wandb_logger.log_metrics(
@@ -266,7 +271,7 @@ def main(args):
     )
     
     
-    df_grid["pred"] = predictions[0].numpy()
+    df_grid["pred"] = predictions.numpy()
     
     logger.info("Creating Final OI Product...")
 
