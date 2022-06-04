@@ -33,11 +33,10 @@ source activate torch_gpu_py39
 # code execution (TEST)
 srun python experiments/dc_2021b/demo_siren_torch.py \
     --wandb-mode offline \
-    --smoke-test \
     --log-dir /gpfsscratch/rech/cli/uvo53rl/ \
     --model siren \
     --activation sine \
-    --n-epochs 10 \
+    --n-epochs 1200 \
     --batch-size 4096 \
     --hidden-dim 512 \
     --gpus 1 \
