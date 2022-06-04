@@ -21,7 +21,6 @@ module load cudnn/9.2-v7.5.1.10
 module load git/2.31.1
 module load github-cli/1.13.1
 module load git-lfs/3.0.2
-module load anaconda-py3/2021.05
 module load ffmpeg/4.2.2
 
 # go to appropriate directory
@@ -29,7 +28,7 @@ cd $WORK/projects/ml4ssh
 export PYTHONPATH=$WORK/projects/ml4ssh:${PYTHONPATH}
 
 # loading of modules
-source activate jaxtftorch_gpu_py39
+source activate torch_gpu_py39
 
 # code execution (TEST)
 srun python experiments/dc_2021b/demo_siren_torch.py \

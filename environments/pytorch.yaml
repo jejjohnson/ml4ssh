@@ -1,4 +1,4 @@
-name: oi_torch_gpu_py39
+name: torch_gpu_py39
 channels:
 - defaults
 - conda-forge
@@ -7,7 +7,7 @@ dependencies:
 # PYTORCH ECOSYSTEM
 - pytorch::pytorch           # tensor library
 - pytorch::torchvision       # pytorch visual library
-- pytorch::cudatoolkit=11.3  # cuda libraries
+- anaconda::cudatoolkit==11.3  # cuda libraries
 # Standard Libraries
 - scipy
 - xarray            # Data structures
