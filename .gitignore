@@ -140,3 +140,5 @@ outputs/*
 *.nc
 *.pickle
 *.pkl
+*.ckpt
+\lightning_logs/
