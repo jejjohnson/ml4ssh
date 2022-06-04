@@ -9,8 +9,8 @@
 #SBATCH --qos=qos_gpu-t3                     # GPU partition (max 20� hrs)
 #SBATCH --gres=gpu:1                         # number of GPUs (1/4 of GPUs)
 #SBATCH --time=20:00:00                      # maximum execution time requested (HH:MM:SS)
-#SBATCH --output=/gpfsscratch/rech/cli/uvo53rl/logs/logs/ml4ssh_dc_2021b_%j.log      # name of output file
-#SBATCH --error=/gpfsscratch/rech/cli/uvo53rl/logs/errs/ml4ssh_dc_2021b_%j.err       # name of error file
+#SBATCH --output=/gpfsscratch/rech/cli/uvo53rl/logs/ml4ssh_gp_dc_2021b_%j.log      # name of output file
+#SBATCH --error=/gpfsscratch/rech/cli/uvo53rl/errs/ml4ssh_gp_dc_2021b_%j.err       # name of error file
 #SBATCH --export=ALL
 
 # loading of modules
