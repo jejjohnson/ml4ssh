@@ -1,0 +1,73 @@
+name: jax_gpu_py39
+channels:
+- defaults
+- conda-forge
+dependencies:
+- python=3.9
+# Standard Libraries
+- numpy
+- scipy
+- xarray            # Data structures
+- pandas            # Data structure
+- scikit-learn      # Machine Learning
+# EARTH SCI LIBRARIES
+- conda-forge::pooch
+- conda-forge::cftime
+- conda-forge::pyinterp
+# SCALING LIBRARIES
+- dask              # Out-of-Core processing
+- dask-ml           # Out-of-Core machine learning
+# PLOTTING LIBRARY
+- matplotlib        # standard plotting library
+- seaborn           # Stats viz library
+- bokeh
+- pyviz::geoviews
+- conda-forge::xmovie
+- conda-forge::ffmpeg
+- datashader       
+# Storage
+- hdf5              # standard large storage h5
+- conda-forge::zarr
+- conda-forge::cudatoolkit==11.2
+# GUI
+- ipykernel
+- pyviz::hvplot
+- conda-forge::tqdm
+- pip
+- pip:
+  # Jax framework
+  - "jax[cuda] -f https://storage.googleapis.com/jax-releases/jax_releases.html"
+  - chex
+  - equinox
+  - diffrax
+  - einops
+  # TensorFlow
+  - tensorflow==2.8
+  - tensorflow_datasets
+  - gpflow
+  - gpflux
+  # OTHER EO
+  - netCDF4
+  # formatting
+  - black
+  - pylint
+  - isort
+  - flake8
+  - mypy
+  - pytest
+  - pre-commit
+  - rich
+  - sh
+  - pudb
+  # Extra stuff
+  - pydap
+  # Notebook stuff
+  - pyprojroot
+  - python-dotenv
+  # logging
+  - wandb
+  - loguru
+  # plotting
+  - celluloid
+  - corner
+  - tabulate
