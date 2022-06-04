@@ -25,6 +25,7 @@ sns.set_context(context="talk", font_scale=0.7)
 
 import numpy as np
 from ml4ssh._src.io import load_object, save_object
+from ml4ssh._src.models_torch.siren import SirenNet
 from ml4ssh._src.viz import create_movie, plot_psd_spectrum, plot_psd_score
 from ml4ssh._src.utils import get_meshgrid, calculate_gradient, calculate_laplacian
 
@@ -35,7 +36,7 @@ from data import get_data_args, load_data, make_mini_batcher
 from preprocess import add_preprocess_args, preprocess_data
 from features import add_feature_args, feature_transform
 from split import add_split_args, split_data
-from model import add_model_args
+from models.siren_torch import add_model_args
 from loss import add_loss_args
 from logger import add_logger_args
 from optimizer import add_optimizer_args
@@ -226,7 +227,7 @@ def main(args):
 
     # objects
     logger.info("saving scaler value...")
-    path_scaler = "scaler.pickle"
+    path_scaler = "./scaler.pickle"
 
     # models to save
     save_object(scaler, path_scaler)
