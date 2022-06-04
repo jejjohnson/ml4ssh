@@ -7,7 +7,7 @@ sys.path.append(str(root))
 from ml4ssh._src.models_jax.siren import SirenNet
 from ml4ssh._src.models_jax.activations import get_activation
 from ml4ssh._src.models_jax.mlp import MLPNet
-import jax.random as jrandom
+
 
 def add_model_args(parser):
     parser.add_argument('--model', type=str, default="siren")
@@ -34,6 +34,7 @@ def get_model(config):
     Args:
         model (str, optional): _description_. Defaults to "siren".
     """
+    import jax.random as jrandom
     init_key = jrandom.PRNGKey(config.model_seed)
 
     if config.model == "siren":

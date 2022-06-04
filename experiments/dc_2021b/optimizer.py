@@ -1,5 +1,4 @@
-from multiprocessing.sharedctypes import Value
-import optax
+
 
 def add_optimizer_args(parser):
     parser.add_argument('--optimizer', type=str, default="adam")
@@ -21,6 +20,7 @@ def add_optimizer_gpflow_args(parser):
 
 
 def get_optimizer(config):
+    import optax
 
     if config.optimizer == "adam":
         optimizer = optax.adam(config.learning_rate)

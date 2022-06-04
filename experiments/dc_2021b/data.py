@@ -1,9 +1,6 @@
 
 from typing import Optional, Iterator
-import tensorflow.data as tfd
-import jax.numpy as jnp
 import pandas as pd
-import tensorflow_datasets as tfds
 import tqdm
 from pathlib import Path
 import xarray as xr
@@ -59,6 +56,8 @@ def make_mini_batcher(
     buffer_size: Optional[int]=None,
     seed: Optional[int]=None,
  ) -> Iterator:
+    
+    import tensorflow.data as tfd
 
     n = X.shape[0]
 

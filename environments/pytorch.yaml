@@ -1,0 +1,73 @@
+name: oi_torch_gpu_py39
+channels:
+- defaults
+- conda-forge
+dependencies:
+- python=3.9
+# PYTORCH ECOSYSTEM
+- pytorch::pytorch           # tensor library
+- pytorch::torchvision       # pytorch visual library
+- pytorch::cudatoolkit=11.3  # cuda libraries
+# Standard Libraries
+- scipy
+- xarray            # Data structures
+- pandas            # Data structure
+- scikit-learn      # Machine Learning
+# EARTH SCI LIBRARIES
+- conda-forge::pooch
+- conda-forge::cftime
+- conda-forge::pyinterp
+# SCALING LIBRARIES
+- dask              # Out-of-Core processing
+- dask-ml           # Out-of-Core machine learning
+# PLOTTING LIBRARY
+- matplotlib        # standard plotting library
+- seaborn           # Stats viz library
+- bokeh
+- pyviz::geoviews
+- conda-forge::xmovie
+- conda-forge::ffmpeg
+- datashader       
+# Storage
+- hdf5              # standard large storage h5
+- conda-forge::zarr
+# GUI
+- ipykernel
+- pyviz::hvplot
+- conda-forge::tqdm
+- pip
+- pip:
+  # OTHER EO
+  - netCDF4
+  # PYTORCH ECOSYSTEM
+  - pyro-ppl        # probabilistic programming library
+  - gpytorch        # Gaussian Processes
+  - pytorch-lightning
+  - torchmetrics
+  - lightning-bolts
+  # - rastervision
+  - pytorch-eo
+  - einops
+  # formatting
+  - black
+  - pylint
+  - isort
+  - flake8
+  - mypy
+  - pytest
+  - pre-commit
+  - rich
+  - sh
+  - pudb
+  # Extra stuff
+  - pydap
+  # Notebook stuff
+  - pyprojroot
+  - python-dotenv
+  # logging
+  - wandb
+  - loguru
+  # plotting
+  - celluloid
+  - corner
+  - tabulate

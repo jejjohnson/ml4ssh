@@ -1,6 +1,4 @@
-import equinox as eqx
-import jax
-import jax.numpy as jnp
+
 
 
 def add_loss_args(parser):
@@ -8,6 +6,10 @@ def add_loss_args(parser):
     return parser
 
 def get_loss_fn(args):
+    
+    import equinox as eqx
+    import jax
+    import jax.numpy as jnp
 
     if args.loss == "mse":
         @eqx.filter_jit
