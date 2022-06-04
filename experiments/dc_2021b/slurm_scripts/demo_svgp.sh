@@ -34,7 +34,7 @@ source activate jaxtf_gpu_py39
 srun python experiments/dc_2021b/demo_svgp.py \
     --wandb-mode offline \
     --smoke-test \
-    --log-dir /gpfsscratch/rech/cli/uvo53rl/logs \
+    --log-dir /gpfsscratch/rech/cli/uvo53rl/ \
     --model svgp \
     --kernel rbf \
     --likelihood gaussian \
