@@ -4,9 +4,7 @@ from pyprojroot import here
 root = here(project_files=[".root"])
 sys.path.append(str(root))
 
-from ml4ssh._src.models_jax.siren import SirenNet
-from ml4ssh._src.models_jax.activations import get_activation
-from ml4ssh._src.models_jax.mlp import MLPNet
+
 
 
 def add_model_args(parser):
@@ -35,6 +33,9 @@ def get_model(config):
         model (str, optional): _description_. Defaults to "siren".
     """
     import jax.random as jrandom
+    from ml4ssh._src.models_jax.siren import SirenNet
+    from ml4ssh._src.models_jax.activations import get_activation
+    from ml4ssh._src.models_jax.mlp import MLPNet
     init_key = jrandom.PRNGKey(config.model_seed)
 
     if config.model == "siren":
