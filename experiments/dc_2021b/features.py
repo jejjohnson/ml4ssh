@@ -15,8 +15,9 @@ def feature_transform(df, args, scaler=None):
         df["time"] = df["vtime"].copy()
     
     # column transformer
-    cols = ["time", "longitude", "latitude"]
+    cols = df.attrs["input_cols"]
     if scaler is not None:
+        print(cols)
         df[cols] = scaler.transform(df[cols].values.copy())
 
         return df

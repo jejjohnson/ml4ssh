@@ -84,7 +84,7 @@ def generate_eval_data(args):
     df_grid["vtime"] = (df_grid['time'].values - np.datetime64("2016-12-01")) / dtime
     
     # add column attributes
-    df_grid.attrs["input_cols"] = ["longitude", "latitude", "vtime"]
+    df_grid.attrs["input_cols"] = ["longitude", "latitude", "time"]
     df_grid.attrs["output_cols"] = ["sla_unfiltered"]
 
     
