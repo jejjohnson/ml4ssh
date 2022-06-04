@@ -39,6 +39,8 @@ srun python experiments/dc_2021b/demo_siren_torch.py \
     --n-epochs 1200 \
     --batch-size 4096 \
     --hidden-dim 512 \
+    --n_hidden 3 \
+    --patience 200 \
     --gpus 1 \
     --num-workers 10 \
     --learning-rate 1e-4 \

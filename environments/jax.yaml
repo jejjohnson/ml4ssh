@@ -41,6 +41,8 @@ dependencies:
   - equinox
   - diffrax
   - einops
+  - tensor_annotations
+  - tensor_annotations_jax_stubs
   # TensorFlow
   - tensorflow==2.8
   - tensorflow_datasets

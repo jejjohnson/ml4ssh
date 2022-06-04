@@ -205,7 +205,7 @@ def main(args):
         save_top_k=1,
         save_last=True,
         ),
-        EarlyStopping(monitor="valid_loss", mode="min", patience=20),
+        EarlyStopping(monitor="valid_loss", mode="min", patience=args.patience),
 
     ]
     # ============

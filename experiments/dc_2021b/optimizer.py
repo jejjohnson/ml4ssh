@@ -7,6 +7,7 @@ def add_optimizer_args(parser):
     parser.add_argument("--batch-size", type=int, default=4096)
     parser.add_argument("--prefetch-buffer", type=int, default=5)
     parser.add_argument("--num-workers", type=int, default=0)
+    parser.add_argument("--patience", type=int, default=100)
     return parser
 
 def add_optimizer_gpflow_args(parser):
