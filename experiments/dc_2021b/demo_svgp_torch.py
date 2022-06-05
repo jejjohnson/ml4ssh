@@ -141,7 +141,7 @@ def main(args):
         ds_train, 
         batch_size=args.batch_size, 
         shuffle=True, 
-        pin_memory=True,
+        pin_memory=False,
         num_workers=args.num_workers
     )
     
@@ -266,7 +266,7 @@ def main(args):
         ds_test, 
         batch_size=args.eval_batch_size, 
         shuffle=False, 
-        pin_memory=True
+        pin_memory=False
     )
     
     model.eval()
