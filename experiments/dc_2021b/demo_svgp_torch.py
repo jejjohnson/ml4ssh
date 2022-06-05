@@ -127,13 +127,13 @@ def main(args):
 
     
     # initialize dataset
-    xtrain = torch.Tensor(xtrain)
-    ytrain = torch.Tensor(ytrain)
+    xtrain_tensor = torch.Tensor(xtrain)
+    ytrain_tensor = torch.Tensor(ytrain)
     if torch.cuda.is_available():
-        xtrain, ytrain = xtrain.cuda(), ytrain.cuda()
+        xtrain_tensor, ytrain_tensor = xtrain_tensor.cuda(), ytrain_tensor.cuda()
 
     logger.info("Initializing dataset...")
-    ds_train = TensorDataset(xtrain, ytrain)
+    ds_train = TensorDataset(xtrain_tensor, ytrain_tensor)
     
     # initialize dataloader
     logger.info("Initializing dataloaders...")
