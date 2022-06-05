@@ -211,7 +211,7 @@ def main(args):
     # Training
     # ============
 
-    epochs_iter = tqdm.tqdm(range(100), desc="Epoch")
+    epochs_iter = tqdm.tqdm(range(args.n_epochs), desc="Epoch")
 
     for i in epochs_iter:
         minibatch_iter = tqdm.tqdm(dl_train, desc="Minibatch", leave=False)
