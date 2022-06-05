@@ -40,7 +40,7 @@ srun python experiments/dc_2021b/demo_svgp_torch.py \
     --n-epochs 10 \
     --batch-size 4096 \
     --gpus 1 \
-    --num-workers 10 \
+    --num-workers 0 \
     --train-data-dir /gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/train \
     --ref-data-dir /gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/ref \
     --test-data-dir /gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/test
