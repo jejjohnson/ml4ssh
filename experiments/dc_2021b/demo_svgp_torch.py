@@ -148,7 +148,7 @@ def main(args):
     # ==============
     # MODEL
     # ==============
-    logger.info("Initializing siren model...")
+    
     class SVGPModel(gpytorch.models.ApproximateGP):
         def __init__(self, kernel, inducing_points, variational_dist):
             variational_strategy = gpytorch.variational.VariationalStrategy(
@@ -164,15 +164,19 @@ def main(args):
             return gpytorch.distributions.MultivariateNormal(mean_x, covar_x)
    
     # get inducing points
+    logger.info("Initializing inducing points...")
     inducing_points = get_inducing_points(xtrain, args)
 
     # get kernel
+    logger.info("Initializing kernel...")
     kernel = get_kernel(args)
 
     # get variational dist
+    logger.info("Initializing variational dist...")
     variational_dist = get_variational_dist(torch.Tensor(inducing_points), args)
 
     # initialize model
+    logger.info("Initializing svgp model...")
     model = SVGPModel(
         kernel=kernel,
         variational_dist=variational_dist,
@@ -180,12 +184,13 @@ def main(args):
     )
 
     # initialize likelihood
+    logger.info("Initializing likelihood...")
     likelihood = get_likelihood(args)
     
     # ==============
     # TRAINER
     # ==============
-    logger.info("Initializing training...")
+    logger.info("Initializing optimizers...")
     
     variational_ngd_optimizer = gpytorch.optim.NGD(
         model.variational_parameters(), 
@@ -197,7 +202,8 @@ def main(args):
         {'params': model.hyperparameters()},
         {'params': likelihood.parameters()},
     ], lr=args.learning_rate)
-
+    
+    logger.info("Put things to GPU...")
     if torch.cuda.is_available() and args.gpus > 0:
         model = model.cuda()
         likelihood = likelihood.cuda()
@@ -210,7 +216,7 @@ def main(args):
     # ============
     # Training
     # ============
-
+    logger.info("Starting Training......")
     epochs_iter = tqdm.tqdm(range(args.n_epochs), desc="Epoch")
 
     for i in epochs_iter:

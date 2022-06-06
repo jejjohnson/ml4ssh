@@ -61,7 +61,7 @@ def get_kernel(args):
             nu=1.5,
             ard_num_dims=args.in_dim
         )
-    elif args.kernel == "matern35":
+    elif args.kernel == "matern32":
         kernel = gpytorch.kernels.MaternKernel(
             nu=2.5,
             ard_num_dims=args.in_dim
