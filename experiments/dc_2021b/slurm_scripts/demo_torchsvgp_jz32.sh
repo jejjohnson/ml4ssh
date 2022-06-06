@@ -8,6 +8,7 @@
 #SBATCH -C v100-32g                          # V100 GPU + 16 GBs RAM
 #SBATCH --qos=qos_gpu-t3                     # GPU partition (max 20� hrs)
 #SBATCH --gres=gpu:1                         # number of GPUs (1/4 of GPUs)
+#SBATCH --hint=nomultithread
 #SBATCH --time=20:00:00                      # maximum execution time requested (HH:MM:SS)
 #SBATCH --output=/gpfsscratch/rech/cli/uvo53rl/logs/ml4ssh_dc_2021b_%j.log      # name of output file
 #SBATCH --error=/gpfsscratch/rech/cli/uvo53rl/errs/ml4ssh_dc_2021b_%j.err       # name of error file
@@ -37,9 +38,10 @@ srun python experiments/dc_2021b/demo_svgp_torch.py \
     --project "gps4ssh" \
     --feature-scaler standard \
     --model svgp \
+    --kernel rq \
     --n-epochs 300 \
-    --batch-size 256 \
-    --n-inducing 8000 \
+    --batch-size 4096 \
+    --n-inducing 5000 \
     --gpus 1 \
     --num-workers 0 \
     --learning-rate 1e-3 \
