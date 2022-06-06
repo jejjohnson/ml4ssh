@@ -38,10 +38,12 @@ srun python experiments/dc_2021b/demo_svgp_torch.py \
     --feature-scaler standard \
     --model svgp \
     --n-epochs 300 \
-    --batch-size 4096 \
-    --n-inducing 2000 \
+    --batch-size 256 \
+    --n-inducing 8000 \
     --gpus 1 \
     --num-workers 0 \
+    --learning-rate 1e-3 \
+    --learning-rate-ng 1e-1 \
     --train-data-dir /gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/train \
     --ref-data-dir /gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/ref \
     --test-data-dir /gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/test
