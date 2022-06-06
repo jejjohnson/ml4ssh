@@ -29,7 +29,7 @@ def get_inducing_points(data, args):
     
     n_inducing = args.n_inducing if not args.smoke_test else 100
     
-    if args.n_inducing > 2_000:
+    if args.n_inducing < 2_000:
     
         inducing = kmeans2(data, n_inducing, minit="points")[0]
     else:
