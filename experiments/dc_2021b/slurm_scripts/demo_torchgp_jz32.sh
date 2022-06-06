@@ -5,9 +5,10 @@
 #SBATCH --nodes=1                            # we ALWAYS request one node
 #SBATCH --ntasks-per-node=1                  # number of tasks per node
 #SBATCH --cpus-per-task=10                   # number of cpus per task
-#SBATCH -C v100-32g                          # V100 GPU + 16 GBs RAM
-#SBATCH --qos=qos_gpu-t3                     # GPU partition (max 20� hrs)
-#SBATCH --gres=gpu:1                         # number of GPUs (1/4 of GPUs)
+##SBATCH -C v100-32g                          # V100 GPU + 16 GBs RAM
+#SBATCH --partition=gpu_p4
+##SBATCH --qos=qos_gpu-t3                     # GPU partition (max 20� hrs)
+#SBATCH --gres=gpu:8                         # number of GPUs (1/4 of GPUs)
 #SBATCH --time=20:00:00                      # maximum execution time requested (HH:MM:SS)
 #SBATCH --output=/gpfsscratch/rech/cli/uvo53rl/logs/ml4ssh_dc_2021b_%j.log      # name of output file
 #SBATCH --error=/gpfsscratch/rech/cli/uvo53rl/errs/ml4ssh_dc_2021b_%j.err       # name of error file
