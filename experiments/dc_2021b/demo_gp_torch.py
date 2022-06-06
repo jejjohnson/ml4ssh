@@ -51,7 +51,7 @@ from optimizers.gp_torch import add_optimizer_args
 from postprocess import add_postprocess_args, postprocess_data, generate_eval_data
 from evaluation import add_eval_args, get_rmse_metrics, get_psd_metrics
 
-
+import gc
 import torch
 import gpytorch
 from torch import nn
