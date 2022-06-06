@@ -132,6 +132,7 @@ def main(args):
     ytrain_tensor = torch.Tensor(ytrain)
     if torch.cuda.is_available():
         n_devices = torch.cuda.device_count()
+        logger.info(f" {n_devices} found...!")
         output_device = torch.device("cuda:0")
         xtrain_tensor, ytrain_tensor = xtrain_tensor.cuda(output_device), ytrain_tensor.cuda(output_device)
         
