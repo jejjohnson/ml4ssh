@@ -38,10 +38,10 @@ srun python experiments/dc_2021b/demo_svgp_torch.py \
     --project "gps4ssh" \
     --feature-scaler standard \
     --model svgp \
-    --kernel rq \
-    --n-epochs 300 \
+    --kernel ard \
+    --n-epochs 100 \
     --batch-size 4096 \
-    --n-inducing 5000 \
+    --n-inducing 10000 \
     --gpus 1 \
     --num-workers 0 \
     --learning-rate 1e-3 \
