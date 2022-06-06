@@ -119,3 +119,7 @@ def get_variational_dist(inducing_points: torch.Tensor, args):
     return variational_distribution
 
 
+# def get_variational_strategy(variational_dist, args):
+    
+#     if args.n_inducing > 5_000:
+#         variationa
