@@ -171,7 +171,7 @@ def main(args):
     # Set a large enough preconditioner size to reduce the number of CG iterations run
     preconditioner_size = 100
     checkpoint_size = find_best_gpu_setting(
-        train_x, train_y,
+        xtrain_tensor, ytrain_tensor,
         n_devices=n_devices,
         output_device=output_device,
         preconditioner_size=preconditioner_size
