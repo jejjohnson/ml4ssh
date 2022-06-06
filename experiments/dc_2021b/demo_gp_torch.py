@@ -130,6 +130,10 @@ def main(args):
     # initialize dataset
     xtrain_tensor = torch.Tensor(xtrain)
     ytrain_tensor = torch.Tensor(ytrain)
+    
+    xtrain_tensor = xtrain_tensor.contiguous()
+    ytrain_tensor = ytrain_tensor.contiguous()
+    
     if torch.cuda.is_available():
         n_devices = torch.cuda.device_count()
         logger.info(f" {n_devices} found...!")
