@@ -69,7 +69,7 @@ class Siren(nn.Module):
         out =  F.linear(x, self.weight, self.bias)
         out = self.activation(out)
         if self.resnet:
-            out = x + out
+            out = 0.5 * ( x + out )
         return out
 
 class SirenNet(nn.Module):

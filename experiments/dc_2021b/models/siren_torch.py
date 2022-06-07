@@ -7,6 +7,7 @@ def add_model_args(parser):
     parser.add_argument('--n-hidden', type=int, default=6)
     parser.add_argument('--model-seed', type=str, default=42)
     parser.add_argument('--activation', type=str, default="sine")
+    parser.add_argument('--resnet', type=bool, default=False)
 
     # SIREN SPECIFIC
     parser.add_argument('--w0-initial', type=float, default=30.0)

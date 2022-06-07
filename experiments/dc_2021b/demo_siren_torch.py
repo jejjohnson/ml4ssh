@@ -145,7 +145,8 @@ def main(args):
         w0=args.w0,
         w0_initial=args.w0_initial,
         use_bias=True,
-        final_activation=None
+        final_activation=None,
+        resnet=args.resnet
     )
    
     
