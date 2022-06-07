@@ -83,6 +83,7 @@ class SirenNet(nn.Module):
             is_first = ind == 0
             layer_w0 = w0_initial if is_first else w0
             layer_dim_in = dim_in if is_first else dim_hidden
+            res_first = False
 
             self.layers.append(Siren(
                 dim_in = layer_dim_in,
@@ -90,8 +91,10 @@ class SirenNet(nn.Module):
                 w0 = layer_w0,
                 use_bias = use_bias,
                 is_first = is_first,
-                resnet = resnet
+                resnet = True if resnet and res_first else False
             ))
+            if res_first:
+                res_first = False
 
         final_activation = nn.Identity() if not exists(final_activation) else final_activation
         self.last_layer = Siren(dim_in = dim_hidden, dim_out = dim_out, w0 = w0, use_bias = use_bias, activation = final_activation)
