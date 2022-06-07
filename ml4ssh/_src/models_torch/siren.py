@@ -73,7 +73,7 @@ class Siren(nn.Module):
         return out
 
 class SirenNet(nn.Module):
-    def __init__(self, dim_in, dim_hidden, dim_out, num_layers, w0 = 1., w0_initial = 30., use_bias = True, final_activation = None):
+    def __init__(self, dim_in, dim_hidden, dim_out, num_layers, w0 = 1., w0_initial = 30., use_bias = True, final_activation = None, resnet = False):
         super().__init__()
         self.num_layers = num_layers
         self.dim_hidden = dim_hidden
@@ -89,7 +89,8 @@ class SirenNet(nn.Module):
                 dim_out = dim_hidden,
                 w0 = layer_w0,
                 use_bias = use_bias,
-                is_first = is_first
+                is_first = is_first,
+                resnet = resnet
             ))
 
         final_activation = nn.Identity() if not exists(final_activation) else final_activation
