@@ -54,7 +54,7 @@ class Siren(nn.Module):
         self.weight = nn.Parameter(weight)
         self.bias = nn.Parameter(bias) if use_bias else None
         self.activation = Sine(w0) if activation is None else activation
-        self.resnet
+        self.resnet = resnet
 
     def init_(self, weight, bias, c, w0):
         dim = self.dim_in
