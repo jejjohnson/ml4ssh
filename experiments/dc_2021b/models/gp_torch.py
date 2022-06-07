@@ -4,6 +4,7 @@ import torch
 
 def add_model_args(parser):
     parser.add_argument('--model', type=str, default="svgp")
+    parser.add_argument('--subsample', type=int, default=0)
     
     
     # likelihood params
