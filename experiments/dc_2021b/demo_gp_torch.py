@@ -300,8 +300,8 @@ def main(args):
     
     # initialize dataset
     xtest = torch.Tensor(xtest)
-    # if torch.cuda.is_available():
-    #     xtest = xtest.cuda()
+    if torch.cuda.is_available():
+        xtest = xtest.cuda()
         
     ds_test = TensorDataset(xtest)
     # initialize dataloader
