@@ -115,7 +115,7 @@ def main(args):
     if args.smoke_test:
 
         rng = np.random.RandomState(args.split_seed)
-        idx = rng.choice(np.arange(args.n_train), size=arg0.subsample)
+        idx = rng.choice(np.arange(args.n_train), size=args.subsample)
         xtrain = xtrain[idx]
         ytrain = ytrain[idx]
 
