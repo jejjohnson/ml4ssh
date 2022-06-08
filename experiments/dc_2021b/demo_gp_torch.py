@@ -165,6 +165,7 @@ def main(args):
               checkpoint_size,
               preconditioner_size,
               n_training_iter,
+              wandb_logger=False
     ):
         likelihood = gpytorch.likelihoods.GaussianLikelihood().to(output_device)
         model = ExactGPModel(train_x, train_y, likelihood, n_devices).to(output_device)
@@ -187,16 +188,19 @@ def main(args):
 
             loss = closure()
             loss.backward()
+            with tqdm.tqdm(n_training_iter) as pbar:
+                for i in pbar:
+                    options = {'closure': closure, 'current_loss': loss, 'max_ls': 10}
+                    loss, _, _, _, _, _, _, fail = optimizer.step(options)
 
-            for i in range(n_training_iter):
-                options = {'closure': closure, 'current_loss': loss, 'max_ls': 10}
-                loss, _, _, _, _, _, _, fail = optimizer.step(options)
+                    if wandb_logger:
+                        wandb.log({"nll_loss": loss.item(), "epoch": i})
+                        
+                    pbar.set_description(f"nll_loss: {loss.item()}")
 
-                logger.info(f'Iter {i + 1}/{n_training_iter} - Loss: {loss.item():.3f}   lengthscale: {model.covar_module.module.base_kernel.lengthscale.item()}   noise: {model.likelihood.noise.item():.3f}')
-
-                if fail:
-                    logger.info('Convergence reached!')
-                    break
+                    if fail:
+                        logger.info('Convergence reached!')
+                        break
 
         print(f"Finished training on {args.n_train} data points using {n_devices} GPUs.")
         return model, likelihood
@@ -241,176 +245,139 @@ def main(args):
         xtrain_tensor, ytrain_tensor,
         n_devices=n_devices,
         output_device=output_device,
-        preconditioner_size=preconditioner_size
+        preconditioner_size=preconditioner_size,
+        wandb_logger=None
+    )
+    model, likelihood = train(
+        xtrain_tensor,
+        ytrain_tensor,
+        n_devices,
+        output_device,
+        checkpoint_size,
+        preconditioner_size,
+        n_training_iter,
+        wandb_logger=True
+    )
+    # objects
+    path_scaler = "scaler.pickle"
+    path_model = "model.pickle"
+    path_likelihood = "likelihood.pickle"
+
+    # models to save
+    torch.save(model.state_dict(), path_model)
+    torch.save(likelihood.state_dict(), path_likelihood)
+    save_object(scaler, path_scaler)
+
+    # save with wandb
+    wandb.save(str(path_scaler))
+    wandb.save(str(path_model))
+    wandb.save(str(path_likelihood))
+    
+    # =================
+    # POST PROCESSING
+    # =================
+
+    df_grid = generate_eval_data(args)
+
+    df_pred = feature_transform(df_grid.copy(), args, scaler=scaler)
+    
+    # set input columns
+    xtest = df_pred[df_pred.attrs["input_cols"]].values
+    
+    # initialize dataset
+    xtest = torch.Tensor(xtest)
+    if torch.cuda.is_available():
+        xtest = xtest.cuda()
+        
+    ds_test = TensorDataset(xtest)
+    # initialize dataloader
+    dl_test = DataLoader(
+        ds_test, 
+        batch_size=args.eval_batch_size, 
+        shuffle=False, 
+        pin_memory=False
+    )
+    
+    model.eval()
+    likelihood.eval()
+    means = torch.tensor([])
+    variances = torch.tensor([])
+    
+    t0 = time.time()
+
+    with torch.no_grad():
+        for x_batch in tqdm.tqdm(dl_test):
+            preds = model(x_batch[0])
+            means = torch.cat([means, preds.mean.cpu()])
+            variances = torch.cat([variances, preds.variance.cpu()])
+            
+    t1 = time.time() - t0
+    
+    wandb.log(
+        {
+            "time_predict_batches": t1,
+        }
+    )
+    
+    
+    df_grid["pred"] = means.numpy()
+    df_grid["var"] = variances.numpy()
+    
+    logger.info("Creating Final OI Product...")
+
+    ds_oi = postprocess_data(df_grid, args)
+
+
+    logger.info("Getting Metrics...")
+    rmse_metrics = get_rmse_metrics(ds_oi, args)
+
+    wandb.log(
+        {
+            "model_rmse_mean": rmse_metrics[0],
+            "model_rmse_std": rmse_metrics[1],
+            "model_nrmse_mean": rmse_metrics[2],
+            "model_nrmse_std": rmse_metrics[3],
+        }
     )
 
-    
-#     # ==============
-#     # TRAINER
-#     # ==============
-#     logger.info("Initializing training...")
-    
-#     variational_ngd_optimizer = gpytorch.optim.NGD(
-#         model.variational_parameters(), 
-#         num_data=args.n_train, 
-#         lr=args.learning_rate_ng
-#     )
+    psd_metrics = get_psd_metrics(ds_oi, args)
 
-#     hyperparameter_optimizer = torch.optim.Adam([
-#         {'params': model.hyperparameters()},
-#         {'params': likelihood.parameters()},
-#     ], lr=args.learning_rate)
+    wandb.log(
+        {
+            "resolved_scale": psd_metrics.resolved_scale,
+        }
+    )
 
-#     if torch.cuda.is_available() and args.gpus > 0:
-#         model = model.cuda()
-#         likelihood = likelihood.cuda()
-        
-        
-#     model.train()
-#     likelihood.train()
-#     mll = get_loss_fn(likelihood, model, args.n_train, args=args)
-        
-#     # ============
-#     # Training
-#     # ============
+    # FIGURES
 
-#     epochs_iter = tqdm.tqdm(range(args.n_epochs), desc="Epoch")
-
-#     for i in epochs_iter:
-#         minibatch_iter = tqdm.tqdm(dl_train, desc="Minibatch", leave=False)
-
-#         for j, (x_batch, y_batch) in enumerate(minibatch_iter):
-#             ### Perform NGD step to optimize variational parameters
-#             variational_ngd_optimizer.zero_grad()
-#             hyperparameter_optimizer.zero_grad()
-#             output = model(x_batch)
-#             loss = -mll(output, y_batch)
-#             minibatch_iter.set_postfix(loss=loss.item())
-#             loss.backward()
-#             variational_ngd_optimizer.step()
-#             hyperparameter_optimizer.step()
-#             wandb.log({"nll_loss": loss.item(), "batch":j , "epoch":i})
+    logger.info("Creating Figures...")
+    fig, ax = plot_psd_spectrum(
+        psd_metrics.psd_study, 
+        psd_metrics.psd_ref, 
+        psd_metrics.wavenumber
+    )
 
 
-#     # ============
-#     # SAVING
-#     # ============
-    
-#     # objects
-#     path_scaler = "scaler.pickle"
-#     path_model = "model.pickle"
-
-#     # models to save
-#     torch.save(model.state_dict(), path_model)
-#     save_object(scaler, path_scaler)
-
-#     # save with wandb
-#     wandb.save(str(path_scaler))
-#     wandb.save(str(path_model))
+    wandb.log(
+        {
+            "model_psd_spectrum": wandb.Image(fig),
+        }
+    )
 
 
-#     # POST PROCESSING
+    fig, ax = plot_psd_score(
+        psd_metrics.psd_diff, 
+        psd_metrics.psd_ref, 
+        psd_metrics.wavenumber, 
+        psd_metrics.resolved_scale)
 
-#     df_grid = generate_eval_data(args)
+    wandb.log(
+        {
+            "model_psd_score": wandb.Image(fig),
+        }
+    )
+    logger.info("Done...!")
 
-#     df_pred = feature_transform(df_grid.copy(), args, scaler=scaler)
-    
-#     # set input columns
-#     xtest = df_pred[df_pred.attrs["input_cols"]].values
-    
-#     # initialize dataset
-#     xtest = torch.Tensor(xtest)
-#     if torch.cuda.is_available():
-#         xtest = xtest.cuda()
-        
-#     ds_test = TensorDataset(xtest)
-#     # initialize dataloader
-#     dl_test = DataLoader(
-#         ds_test, 
-#         batch_size=args.eval_batch_size, 
-#         shuffle=False, 
-#         pin_memory=False
-#     )
-    
-#     model.eval()
-#     likelihood.eval()
-#     means = torch.tensor([])
-#     variances = torch.tensor([])
-    
-#     t0 = time.time()
-
-#     with torch.no_grad():
-#         for x_batch in tqdm.tqdm(dl_test):
-#             preds = model(x_batch[0])
-#             means = torch.cat([means, preds.mean.cpu()])
-#             variances = torch.cat([variances, preds.variance.cpu()])
-            
-#     t1 = time.time() - t0
-    
-#     wandb.log(
-#         {
-#             "time_predict_batches": t1,
-#         }
-#     )
-    
-    
-#     df_grid["pred"] = means.numpy()
-#     df_grid["var"] = variances.numpy()
-    
-#     logger.info("Creating Final OI Product...")
-
-#     ds_oi = postprocess_data(df_grid, args)
-
-
-#     logger.info("Getting Metrics...")
-#     rmse_metrics = get_rmse_metrics(ds_oi, args)
-
-#     wandb.log(
-#         {
-#             "model_rmse_mean": rmse_metrics[0],
-#             "model_rmse_std": rmse_metrics[1],
-#             "model_nrmse_mean": rmse_metrics[2],
-#             "model_nrmse_std": rmse_metrics[3],
-#         }
-#     )
-
-#     psd_metrics = get_psd_metrics(ds_oi, args)
-
-#     wandb.log(
-#         {
-#             "resolved_scale": psd_metrics.resolved_scale,
-#         }
-#     )
-
-#     # FIGURES
-
-#     logger.info("Creating Figures...")
-#     fig, ax = plot_psd_spectrum(
-#         psd_metrics.psd_study, 
-#         psd_metrics.psd_ref, 
-#         psd_metrics.wavenumber
-#     )
-
-
-#     wandb.log(
-#         {
-#             "model_psd_spectrum": wandb.Image(fig),
-#         }
-#     )
-
-
-#     fig, ax = plot_psd_score(
-#         psd_metrics.psd_diff, 
-#         psd_metrics.psd_ref, 
-#         psd_metrics.wavenumber, 
-#         psd_metrics.resolved_scale)
-
-#     wandb.log(
-#         {
-#             "model_psd_score": wandb.Image(fig),
-#         }
-#     )
-#     logger.info("Done...!")
 
             
 
