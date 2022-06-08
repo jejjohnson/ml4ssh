@@ -243,14 +243,14 @@ def main(args):
                 gc.collect()
                 torch.cuda.empty_cache()
             
-        return model, likelihood
+        return model, likelihood, checkpoint_size
     
     
     # Set a large enough preconditioner size to reduce the number of CG iterations run
     logger.info("Training with the best GPU settings!")
     preconditioner_size = 100
     
-    model, likelihood = find_best_gpu_setting(
+    model, likelihood, checkpoint_size = find_best_gpu_setting(
         train_x=xtrain_tensor, 
         train_y=ytrain_tensor,
         n_devices=n_devices,
@@ -300,8 +300,8 @@ def main(args):
     
     # initialize dataset
     xtest = torch.Tensor(xtest)
-    if torch.cuda.is_available():
-        xtest = xtest.cuda()
+    # if torch.cuda.is_available():
+    #     xtest = xtest.cuda()
         
     ds_test = TensorDataset(xtest)
     # initialize dataloader
@@ -319,7 +319,7 @@ def main(args):
     
     t0 = time.time()
 
-    with torch.no_grad():
+    with torch.no_grad(), gpytorch.settings.fast_pred_var(), gpytorch.beta_features.checkpoint_kernel(checkpoint_size):
         for x_batch in tqdm.tqdm(dl_test):
             preds = model(x_batch[0])
             means = torch.cat([means, preds.mean.cpu()])
