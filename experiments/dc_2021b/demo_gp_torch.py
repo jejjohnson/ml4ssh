@@ -192,14 +192,14 @@ def main(args):
                 options = {'closure': closure, 'current_loss': loss, 'max_ls': 10}
                 loss, _, _, _, _, _, _, fail = optimizer.step(options)
 
-                print('Iter %d/%d - Loss: %.3f   lengthscale: %.3f   noise: %.3f' % (
+                logger.info('Iter %d/%d - Loss: %.3f   lengthscale: %.3f   noise: %.3f' % (
                     i + 1, n_training_iter, loss.item(),
                     model.covar_module.module.base_kernel.lengthscale.item(),
                     model.likelihood.noise.item()
                 ))
 
                 if fail:
-                    print('Convergence reached!')
+                    logger.info('Convergence reached!')
                     break
 
         print(f"Finished training on {train_x.size(0)} data points using {n_devices} GPUs.")
