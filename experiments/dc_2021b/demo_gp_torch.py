@@ -181,20 +181,23 @@ def main(args):
         with gpytorch.beta_features.checkpoint_kernel(checkpoint_size), \
              gpytorch.settings.max_preconditioner_size(preconditioner_size):
 
-            def closure():
-                optimizer.zero_grad()
-                output = model(train_x)
-                loss = -mll(output, train_y)
-                return loss
+            # def closure():
+            #     optimizer.zero_grad()
+            #     output = model(train_x)
+            #     loss = -mll(output, train_y)
+            #     return loss
 
-            loss = closure()
-            loss.backward()
+            # loss = closure()
+            # loss.backward()
             with tqdm.trange(n_training_iter) as pbar:
                 for i in pbar:
-                    options = {'closure': closure, 'current_loss': loss, 'max_ls': 10}
+                    # options = {'closure': closure, 'current_loss': loss, 'max_ls': 10}
                     # loss, _, _, _, _, _, _, fail = optimizer.step(options)
-                    loss = optimizer.step(closure)
-
+                    optimizer.zero_grad()
+                    output = model(train_x)
+                    loss = - mll(output, train_x)
+                    loss.backward()
+    
                     if wandb_logger:
                         wandb.log({"nll_loss": loss.item(), "epoch": i})
                         
@@ -203,6 +206,7 @@ def main(args):
                     # if fail:
                     #     logger.info('Convergence reached!')
                     #     break
+                    optimizer.step()
 
         print(f"Finished training on {args.n_train} data points using {n_devices} GPUs.")
         return model, likelihood
