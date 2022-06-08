@@ -195,7 +195,7 @@ def main(args):
                     # loss, _, _, _, _, _, _, fail = optimizer.step(options)
                     optimizer.zero_grad()
                     output = model(train_x)
-                    loss = - mll(output, train_x)
+                    loss = - mll(output, train_y)
                     loss.backward()
     
                     if wandb_logger:
