@@ -242,14 +242,14 @@ def main(args):
                 # handle CUDA OOM error
                 gc.collect()
                 torch.cuda.empty_cache()
-                return model, likelihood
             
-        return None
+        return model, likelihood
     
     
     # Set a large enough preconditioner size to reduce the number of CG iterations run
     logger.info("Training with the best GPU settings!")
     preconditioner_size = 100
+    
     model, likelihood = find_best_gpu_setting(
         train_x=xtrain_tensor, 
         train_y=ytrain_tensor,
@@ -272,6 +272,7 @@ def main(args):
     #     wandb_logger=True
     # )
     # objects
+    logger.info("Saving Model...")
     path_scaler = "scaler.pickle"
     path_model = "model.pickle"
     path_likelihood = "likelihood.pickle"
@@ -289,7 +290,7 @@ def main(args):
     # =================
     # POST PROCESSING
     # =================
-
+    logger.info("Doing Predictions...")
     df_grid = generate_eval_data(args)
 
     df_pred = feature_transform(df_grid.copy(), args, scaler=scaler)
