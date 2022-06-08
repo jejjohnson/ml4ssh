@@ -196,7 +196,7 @@ def main(args):
                     if wandb_logger:
                         wandb.log({"nll_loss": loss.item(), "epoch": i})
                         
-                    pbar.set_description(f"nll_loss: {loss.item()}")
+                    pbar.set_description(f"nll_loss: {loss.item():.5f}")
 
                     if fail:
                         logger.info('Convergence reached!')
@@ -247,7 +247,9 @@ def main(args):
         output_device=output_device,
         preconditioner_size=preconditioner_size,
     )
+    
     logger.info("Done with finding best GPU settings!")
+    logger.info(f"Kernel Partition Size: {checkpoint_size}")
     logger.info("Starting real training...")
     model, likelihood = train(
         xtrain_tensor,
