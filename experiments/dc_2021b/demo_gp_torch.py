@@ -256,7 +256,7 @@ def main(args):
         output_device,
         checkpoint_size,
         preconditioner_size,
-        n_training_iter,
+        args.n_epochs,
         wandb_logger=True
     )
     # objects
