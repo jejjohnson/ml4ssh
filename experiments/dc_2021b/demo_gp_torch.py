@@ -172,7 +172,8 @@ def main(args):
         model.train()
         likelihood.train()
 
-        optimizer = FullBatchLBFGS(model.parameters(), lr=args.learning_rate)
+        # optimizer = FullBatchLBFGS(model.parameters(), lr=args.learning_rate)
+        optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate)
         # "Loss" for GPs - the marginal log likelihood
         mll = gpytorch.mlls.ExactMarginalLogLikelihood(likelihood, model)
 
@@ -191,7 +192,8 @@ def main(args):
             with tqdm.trange(n_training_iter) as pbar:
                 for i in pbar:
                     options = {'closure': closure, 'current_loss': loss, 'max_ls': 10}
-                    loss, _, _, _, _, _, _, fail = optimizer.step(options)
+                    # loss, _, _, _, _, _, _, fail = optimizer.step(options)
+                    loss = closure()
 
                     if wandb_logger:
                         wandb.log({"nll_loss": loss.item(), "epoch": i})
