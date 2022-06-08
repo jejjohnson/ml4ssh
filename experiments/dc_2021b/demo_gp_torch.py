@@ -193,16 +193,16 @@ def main(args):
                 for i in pbar:
                     options = {'closure': closure, 'current_loss': loss, 'max_ls': 10}
                     # loss, _, _, _, _, _, _, fail = optimizer.step(options)
-                    loss = closure()
+                    loss = optimizer.step(closure)
 
                     if wandb_logger:
                         wandb.log({"nll_loss": loss.item(), "epoch": i})
                         
                     pbar.set_description(f"nll_loss: {loss.item():.5f}")
 
-                    if fail:
-                        logger.info('Convergence reached!')
-                        break
+                    # if fail:
+                    #     logger.info('Convergence reached!')
+                    #     break
 
         print(f"Finished training on {args.n_train} data points using {n_devices} GPUs.")
         return model, likelihood
