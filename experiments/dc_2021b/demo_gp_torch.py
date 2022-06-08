@@ -188,7 +188,7 @@ def main(args):
 
             loss = closure()
             loss.backward()
-            with tqdm.tqdm(n_training_iter) as pbar:
+            with tqdm.trange(n_training_iter) as pbar:
                 for i in pbar:
                     options = {'closure': closure, 'current_loss': loss, 'max_ls': 10}
                     loss, _, _, _, _, _, _, fail = optimizer.step(options)
