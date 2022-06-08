@@ -242,7 +242,9 @@ def main(args):
                 # handle CUDA OOM error
                 gc.collect()
                 torch.cuda.empty_cache()
-        return model, likelihood
+                return model, likelihood
+            
+        return None
     
     
     # Set a large enough preconditioner size to reduce the number of CG iterations run
