@@ -290,7 +290,7 @@ def main(args):
     # =================
     # POST PROCESSING
     # =================
-    logger.info("Doing Predictions...")
+    logger.info("Setting Up Predictions...")
     df_grid = generate_eval_data(args)
 
     df_pred = feature_transform(df_grid.copy(), args, scaler=scaler)
@@ -317,8 +317,21 @@ def main(args):
     means = torch.tensor([])
     variances = torch.tensor([])
     
+    logger.info("Doing Caching...")
     t0 = time.time()
-
+    with torch.no_grad(), gpytorch.settings.fast_pred_var(), gpytorch.beta_features.checkpoint_kernel(checkpoint_size):
+        preds = model(xtest[:2])
+        del preds
+    t1 = time.time() - t0
+    
+    wandb.log(
+        {
+            "time_predict_caching": t1,
+        }
+    )
+    
+    logger.info("Doing Predictions...")
+    t0 = time.time()
     with torch.no_grad(), gpytorch.settings.fast_pred_var(), gpytorch.beta_features.checkpoint_kernel(checkpoint_size):
         for x_batch in tqdm.tqdm(dl_test):
             preds = model(x_batch[0])
