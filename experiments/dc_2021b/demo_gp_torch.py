@@ -145,7 +145,7 @@ def main(args):
         def __init__(self, train_x, train_y, likelihood, n_devices):
             super(ExactGPModel, self).__init__(train_x, train_y, likelihood)
             self.mean_module = gpytorch.means.ConstantMean()
-            base_covar_module = gpytorch.kernels.ScaleKernel(gpytorch.kernels.RBFKernel())
+            base_covar_module = gpytorch.kernels.ScaleKernel(gpytorch.kernels.RBFKernel(ard_num_dims=args.in_dim))
 
             self.covar_module = gpytorch.kernels.MultiDeviceKernel(
                 base_covar_module, device_ids=range(n_devices),
@@ -171,7 +171,7 @@ def main(args):
         model.train()
         likelihood.train()
 
-        optimizer = FullBatchLBFGS(model.parameters(), lr=0.1)
+        optimizer = FullBatchLBFGS(model.parameters(), lr=args.learning_rate)
         # "Loss" for GPs - the marginal log likelihood
         mll = gpytorch.mlls.ExactMarginalLogLikelihood(likelihood, model)
 
@@ -192,17 +192,13 @@ def main(args):
                 options = {'closure': closure, 'current_loss': loss, 'max_ls': 10}
                 loss, _, _, _, _, _, _, fail = optimizer.step(options)
 
-                logger.info('Iter %d/%d - Loss: %.3f   lengthscale: %.3f   noise: %.3f' % (
-                    i + 1, n_training_iter, loss.item(),
-                    model.covar_module.module.base_kernel.lengthscale.item(),
-                    model.likelihood.noise.item()
-                ))
+                logger.info(f'Iter {i + 1}/{n_training_iter} - Loss: {loss.item():.3f}   lengthscale: {model.covar_module.module.base_kernel.lengthscale.item()}   noise: {model.likelihood.noise.item():.3f}')
 
                 if fail:
                     logger.info('Convergence reached!')
                     break
 
-        print(f"Finished training on {train_x.size(0)} data points using {n_devices} GPUs.")
+        print(f"Finished training on {args.n_train} data points using {n_devices} GPUs.")
         return model, likelihood
         
     def find_best_gpu_setting(train_x,
@@ -248,55 +244,6 @@ def main(args):
         preconditioner_size=preconditioner_size
     )
 
-#     logger.info("Initializing dataset...")
-#     ds_train = TensorDataset(xtrain_tensor, ytrain_tensor)
-    
-#     # initialize dataloader
-#     logger.info("Initializing dataloaders...")
-#     dl_train = DataLoader(
-#         ds_train, 
-#         batch_size=args.batch_size, 
-#         shuffle=True, 
-#         pin_memory=False,
-#         num_workers=args.num_workers
-#     )
-    
-#     # ==============
-#     # MODEL
-#     # ==============
-#     logger.info("Initializing siren model...")
-#     class SVGPModel(gpytorch.models.ApproximateGP):
-#         def __init__(self, kernel, inducing_points, variational_dist):
-#             variational_strategy = gpytorch.variational.VariationalStrategy(
-#                 self, inducing_points, variational_dist, learn_inducing_locations=args.learn_inducing
-#             )
-#             super().__init__(variational_strategy)
-#             self.mean_module = gpytorch.means.ConstantMean()
-#             self.covar_module = kernel
-
-#         def forward(self, x):
-#             mean_x = self.mean_module(x)
-#             covar_x = self.covar_module(x)
-#             return gpytorch.distributions.MultivariateNormal(mean_x, covar_x)
-   
-#     # get inducing points
-#     inducing_points = get_inducing_points(xtrain, args)
-
-#     # get kernel
-#     kernel = get_kernel(args)
-
-#     # get variational dist
-#     variational_dist = get_variational_dist(torch.Tensor(inducing_points), args)
-
-#     # initialize model
-#     model = SVGPModel(
-#         kernel=kernel,
-#         variational_dist=variational_dist,
-#         inducing_points=torch.Tensor(inducing_points)
-#     )
-
-#     # initialize likelihood
-#     likelihood = get_likelihood(args)
     
 #     # ==============
 #     # TRAINER
