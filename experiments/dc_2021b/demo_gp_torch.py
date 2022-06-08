@@ -224,7 +224,7 @@ def main(args):
                 _, _ = train(train_x, train_y,
                              n_devices=n_devices, output_device=output_device,
                              checkpoint_size=checkpoint_size,
-                             preconditioner_size=preconditioner_size, n_training_iter=1)
+                             preconditioner_size=preconditioner_size, n_training_iter=1, wandb_logger=False)
 
                 # when successful, break out of for-loop and jump to finally block
                 break
@@ -246,8 +246,9 @@ def main(args):
         n_devices=n_devices,
         output_device=output_device,
         preconditioner_size=preconditioner_size,
-        wandb_logger=None
     )
+    logger.info("Done with finding best GPU settings!")
+    logger.info("Starting real training...")
     model, likelihood = train(
         xtrain_tensor,
         ytrain_tensor,
