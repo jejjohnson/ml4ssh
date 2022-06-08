@@ -221,10 +221,10 @@ def main(args):
             logger.info('Number of devices: {} -- Kernel partition size: {}'.format(n_devices, checkpoint_size))
             try:
                 # Try a full forward and backward pass with this setting to check memory usage
-                _, _ = train(train_x, train_y,
+                model, likelihood = train(train_x, train_y,
                              n_devices=n_devices, output_device=output_device,
                              checkpoint_size=checkpoint_size,
-                             preconditioner_size=preconditioner_size, n_training_iter=1, wandb_logger=False)
+                             preconditioner_size=preconditioner_size, n_training_iter=args.n_epochs, wandb_logger=True)
 
                 # when successful, break out of for-loop and jump to finally block
                 break
@@ -236,31 +236,33 @@ def main(args):
                 # handle CUDA OOM error
                 gc.collect()
                 torch.cuda.empty_cache()
-        return checkpoint_size
+        return model, likelihood
     
     
     # Set a large enough preconditioner size to reduce the number of CG iterations run
+    logger.info("Training with the best GPU settings!")
     preconditioner_size = 100
-    checkpoint_size = find_best_gpu_setting(
-        xtrain_tensor, ytrain_tensor,
+    model, likelihood = find_best_gpu_setting(
+        train_x=xtrain_tensor, 
+        train_y=ytrain_tensor,
         n_devices=n_devices,
         output_device=output_device,
         preconditioner_size=preconditioner_size,
     )
     
-    logger.info("Done with finding best GPU settings!")
-    logger.info(f"Kernel Partition Size: {checkpoint_size}")
-    logger.info("Starting real training...")
-    model, likelihood = train(
-        xtrain_tensor,
-        ytrain_tensor,
-        n_devices,
-        output_device,
-        checkpoint_size,
-        preconditioner_size,
-        args.n_epochs,
-        wandb_logger=True
-    )
+    # logger.info("Done with finding best GPU settings!")
+    # logger.info(f"Kernel Partition Size: {checkpoint_size}")
+    # logger.info("Starting real training...")
+    # model, likelihood = train(
+    #     xtrain_tensor,
+    #     ytrain_tensor,
+    #     n_devices,
+    #     output_device,
+    #     checkpoint_size,
+    #     preconditioner_size,
+    #     args.n_epochs,
+    #     wandb_logger=True
+    # )
     # objects
     path_scaler = "scaler.pickle"
     path_model = "model.pickle"
