@@ -1,3 +1,6 @@
+"""
+Taken from: https://github.com/didriknielsen/survae_flows/tree/master/survae/nn/layers
+"""
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
