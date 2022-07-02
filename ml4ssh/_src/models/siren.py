@@ -8,6 +8,7 @@ from torch import nn
 import torch.nn.functional as F
 from einops import rearrange
 from .activations import Sine
+from .operators import mod_additive, mod_multiplicative
 from typing import Callable, Optional
 
 # helpers
@@ -77,6 +78,8 @@ class Siren(nn.Module):
             out = 0.5 * ( x + out )
         return out
 
+
+
 class SirenNet(nn.Module):
     def __init__(self, dim_in, dim_hidden, dim_out, num_layers, w0 = 1., w0_initial = 30., c = 6.0, use_bias = True, final_activation = None, resnet = False):
         super().__init__()
@@ -105,7 +108,7 @@ class SirenNet(nn.Module):
         final_activation = nn.Identity() if not exists(final_activation) else final_activation
         self.last_layer = Siren(dim_in = dim_hidden, dim_out = dim_out, w0 = w0, use_bias = use_bias, activation = final_activation)
 
-    def forward(self, x, mods = None):
+    def forward(self, x: torch.Tensor, mods: Optional[torch.Tensor] = None):
         mods = cast_tuple(mods, self.num_layers)
 
         for layer, mod in zip(self.layers, mods):
@@ -116,6 +119,7 @@ class SirenNet(nn.Module):
                 x *= rearrange(mod, 'd -> () d')
 
         return self.last_layer(x)
+
 
 # modulatory feed forward
 
@@ -182,8 +186,7 @@ class ModulatedSirenNet(nn.Module):
             ))
             if res_first:
                 res_first = False
-                
-            self.latent = nn.Parameter(torch.zeros(latent_dim).normal_(0, 1e-2))
+
                 
             self.modulator = Modulator(
                 dim_in=latent_dim,
@@ -202,9 +205,9 @@ class ModulatedSirenNet(nn.Module):
         final_activation = nn.Identity() if not exists(final_activation) else final_activation
         self.last_layer = Siren(dim_in = dim_hidden, dim_out = dim_out, w0 = w0, use_bias = use_bias, activation = final_activation)
 
-    def forward(self, x):
+    def forward(self, x, latent):
         
-        mods = self.modulator(self.latent)
+        mods = self.modulator(latent)
         
         mods = cast_tuple(mods, self.num_layers)
         
@@ -254,6 +257,3 @@ class SirenWrapper(nn.Module):
         return out
 
 
-def mod_additive(x, mod): return x + mod
-
-def mod_multiplicative(x, mod): return x * mod
