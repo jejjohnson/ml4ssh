@@ -8,10 +8,11 @@ from einops import rearrange
 
 
 class Image(pl.LightningDataModule):
-    def __init__(self, batch_size: int=32, split_style: str="regular"):
+    def __init__(self, batch_size: int=32, shuffle: bool=False, split_style: str="regular"):
         super().__init__()
         self.batch_size = batch_size
         self.split_style = split_style
+        self.shuffle = shuffle
 
     def setup(self, stage=None):
         img = self.load_image()
@@ -21,6 +22,10 @@ class Image(pl.LightningDataModule):
         coords_train, pixels_train = coords[::2], pixel_vals[::2]
 
         self.ds_train = TensorDataset(coords_train, pixels_train)
+
+        coords_valid, pixels_valid = coords[1::2], pixel_vals[1::2]
+
+        self.ds_valid = TensorDataset(coords_valid, pixels_valid)
 
         self.ds_test = TensorDataset(coords, pixel_vals)
 
@@ -36,8 +41,10 @@ class Image(pl.LightningDataModule):
         return get_image_coordinates(image)
 
     def train_dataloader(self):
-        return DataLoader(self.ds_train, batch_size=self.batch_size)
+        return DataLoader(self.ds_train, batch_size=self.batch_size, shuffle=self.shuffle)
 
+    def val_dataloader(self):
+        return DataLoader(self.ds_valid, batch_size=self.batch_size)
 
     def test_dataloader(self):
         return DataLoader(self.ds_test, batch_size=self.batch_size)

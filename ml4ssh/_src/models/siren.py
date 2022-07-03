@@ -8,16 +8,14 @@ from torch import nn
 import torch.nn.functional as F
 from einops import rearrange
 from .activations import Sine
+from .utils import exists, cast_tuple
+
 from .operators import mod_additive, mod_multiplicative
 from typing import Callable, Optional
 
 # helpers
 
-def exists(val):
-    return val is not None
 
-def cast_tuple(val, repeat = 1):
-    return val if isinstance(val, tuple) else ((val,) * repeat)
 
 # class Siren(nn.Module):
 #     def __init__(self, dim_in, dim_out, w0 = 1., c = 6., is_first = False, use_bias = True, activation = None):

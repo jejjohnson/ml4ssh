@@ -135,14 +135,14 @@ def cartesian_to_spherical_3d(x, y, z):
     return lon, lat, radius
 
 
-def get_image_coordinates(image: torch.Tensor):
+def get_image_coordinates(image: torch.Tensor, min_val: int=-1, max_val: int=1):
     # get image size
     image_height, image_width, _ = image.shape
 
     # get all coordinates
     coordinates = [
-        torch.linspace(-1, 1, steps=image_height),
-        torch.linspace(-1, 1, steps=image_width)
+        torch.linspace(min_val, max_val, steps=image_height),
+        torch.linspace(min_val, max_val, steps=image_width)
     ]
 
     # create meshgrid of pairwise coordinates
