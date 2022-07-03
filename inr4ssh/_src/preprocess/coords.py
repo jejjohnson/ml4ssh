@@ -1,5 +1,5 @@
 import numpy as np
-import pyinterp
+
 import xarray as xr
 
 
@@ -25,6 +25,7 @@ def extract_gridded_coords(
         time_max='2100-01-01',
         variable="ssh",
         is_circle=True):
+    import pyinterp
     ds = ds.sel(time=slice(time_min, time_max), drop=True)
     ds = ds.where((ds["longitude"] % 360. >= lon_min) & (ds["longitude"] % 360. <= lon_max), drop=True)
     ds = ds.where((ds["latitude"] >= lat_min) & (ds["latitude"] <= lat_max), drop=True)

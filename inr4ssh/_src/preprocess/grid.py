@@ -1,4 +1,4 @@
-import pyinterp
+
 import xarray as xr
 import numpy as np
 from .coords import create_spatiotemporal_coords
@@ -32,6 +32,7 @@ def create_spatiotemporal_grid(
 
 
 def create_grids(ds: xr.DataArray, variable: str, is_circle=True):
+    import pyinterp
     x_axis = pyinterp.Axis(ds["longitude"][:] % 360., is_circle=is_circle)
     y_axis = pyinterp.Axis(ds["latitude"][:])
     z_axis = pyinterp.TemporalAxis(ds["time"][:].values)

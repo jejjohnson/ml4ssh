@@ -26,10 +26,10 @@ sns.reset_defaults()
 sns.set_context(context="talk", font_scale=0.7)
 
 import numpy as np
-from ml4ssh._src.io import load_object, save_object
-from ml4ssh._src.models.siren import SirenNet
-from ml4ssh._src.viz import create_movie, plot_psd_spectrum, plot_psd_score
-from ml4ssh._src.utils import get_meshgrid, calculate_gradient, calculate_laplacian
+from inr4ssh._src.io import load_object, save_object
+from inr4ssh._src.models.siren import SirenNet
+from inr4ssh._src.viz import create_movie, plot_psd_spectrum, plot_psd_score
+from inr4ssh._src.utils import get_meshgrid, calculate_gradient, calculate_laplacian
 
 
 

@@ -33,9 +33,9 @@ def get_model(config):
         model (str, optional): _description_. Defaults to "siren".
     """
     import jax.random as jrandom
-    from ml4ssh._src.models_jax.siren import SirenNet
-    from ml4ssh._src.models_jax.activations import get_activation
-    from ml4ssh._src.models_jax.mlp import MLPNet
+    from inr4ssh._src.models_jax.siren import SirenNet
+    from inr4ssh._src.models_jax.activations import get_activation
+    from inr4ssh._src.models_jax.mlp import MLPNet
     init_key = jrandom.PRNGKey(config.model_seed)
 
     if config.model == "siren":

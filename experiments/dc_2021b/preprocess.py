@@ -4,7 +4,7 @@ root = here(project_files=[".root"])
 sys.path.append(str(root))
 
 import numpy as np
-from ml4ssh._src.utils import temporal_subset, spatial_subset
+from inr4ssh._src.utils import temporal_subset, spatial_subset
 
 def add_preprocess_args(parser):
     # longitude subset

@@ -2,7 +2,7 @@ import pytorch_lightning as pl
 import torch
 
 from ..data.images import load_fox, load_cameraman
-from ..features import get_image_coordinates
+from ..features.image import get_image_coordinates
 from torch.utils.data import random_split, DataLoader, TensorDataset
 from einops import rearrange
 
@@ -16,8 +16,8 @@ class Image(pl.LightningDataModule):
 
     def setup(self, stage=None):
         img = self.load_image()
-        img = torch.FloatTensor(img)
         coords, pixel_vals = self.image_2_coordinates(img)
+        coords, pixel_vals = torch.FloatTensor(coords), torch.FloatTensor(pixel_vals)
 
         coords_train, pixels_train = coords[::2], pixel_vals[::2]
 

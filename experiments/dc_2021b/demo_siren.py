@@ -28,9 +28,9 @@ import jax
 import jax.random as jrandom
 import jax.numpy as jnp
 import equinox as eqx
-from ml4ssh._src.io import load_object, save_object
-from ml4ssh._src.viz import create_movie, plot_psd_spectrum, plot_psd_score
-from ml4ssh._src.utils import get_meshgrid, calculate_gradient, calculate_laplacian
+from inr4ssh._src.io import load_object, save_object
+from inr4ssh._src.viz import create_movie, plot_psd_spectrum, plot_psd_score
+from inr4ssh._src.utils import get_meshgrid, calculate_gradient, calculate_laplacian
 
 
 
@@ -191,7 +191,7 @@ def main(args):
         return jax.vmap(model)(data)
 
 
-    from ml4ssh._src.models.model_utils import batch_predict
+    from inr4ssh._src.models.model_utils import batch_predict
     from functools import partial
 
 

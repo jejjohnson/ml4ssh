@@ -39,17 +39,25 @@ time_buffer = 7.0
 # FEATURES
 # ======================
 julian_time = True
+abs_time_min = "2005-01-01"
+abs_time_max = "2022-01-01"
 feature_scaler = "minmax"
+spherical_radius = 1.01
 min_scale = -1.0
 max_scale = 1.0
 
 # ======================
 # TRAIN/VAL SPLIT
 # ======================
+train_size = 0.9
 split = "random" # random, temporal, spatial
 seed_split = 666
 seed_shuffle = 321
 split_time_freq = "1_D"
+# dataloader
+train_shuffle = True
+pin_memory = False
+num_workers = 0
 
 # ======================
 # MODEL
@@ -83,7 +91,7 @@ optimizer = "adam"
 learning_rate = 1e-4
 num_epochs = 300
 batch_size = 4096
-num_workers = 0
+
 
 # LR Scheduler
 patience = 100
@@ -91,6 +99,20 @@ patience = 100
 # ======================
 # Evaluation
 # ======================
+eval_lon_min = 295.0
+eval_lon_max = 305.0
+eval_dlon = 0.2
+eval_lat_min = 33.0
+eval_lat_max = 43.0
+eval_dlat = 0.2
+eval_time_min = "2017-01-01"
+eval_time_max = "2017-12-31"
+eval_dtime = "1_D"
+eval_lon_buffer = 2.0
+eval_lat_buffer = 2.0
+eval_time_buffer = 7.0
+
+
 eval_batch_size = 10_000
 
 # binning along track

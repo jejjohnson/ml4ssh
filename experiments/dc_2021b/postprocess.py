@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import xarray as xr
-from ml4ssh._src.utils import temporal_subset, spatial_subset, create_spatiotemporal_grid
+from inr4ssh._src.utils import temporal_subset, spatial_subset, create_spatiotemporal_grid
 
 
 def add_postprocess_args(parser):

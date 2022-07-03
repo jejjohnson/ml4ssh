@@ -31,6 +31,7 @@ def spatial_subset(ds, lon_min, lon_max, lon_buffer, lat_min, lat_max, lat_buffe
     
     return ds
 
+
 def get_meshgrid(res: float, nx: int, ny: int):
     dx = res
     dy = res
@@ -46,6 +47,7 @@ def calculate_gradient(da, x_coord: str="Nx", y_coord: str="Ny", edge_order=2):
     dy = da.differentiate(coord=y_coord, edge_order=2)
 
     return 0.5 * (dx**2 + dy**2)
+
 
 def calculate_laplacian(da, x_coord: str="Nx", y_coord: str="Ny", edge_order=2):
     
@@ -67,6 +69,7 @@ def create_spatiotemporal_coords(
     gtime = np.arange(time_min, time_max + time_dt, time_dt)        # output OI time grid
     
     return glon, glat, gtime
+
 
 def create_spatiotemporal_grid(
     lon_min, lon_max, lon_dx,

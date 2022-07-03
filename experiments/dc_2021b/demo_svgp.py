@@ -32,9 +32,9 @@ from gpflow.utilities import print_summary
 from tqdm.notebook import trange
 # # Ensure TF does not see GPU and grab all GPU memory.
 import tensorflow as tf
-from ml4ssh._src.io import load_object, save_object
-from ml4ssh._src.viz import create_movie, plot_psd_spectrum, plot_psd_score
-from ml4ssh._src.utils import get_meshgrid, calculate_gradient, calculate_laplacian
+from inr4ssh._src.io import load_object, save_object
+from inr4ssh._src.viz import create_movie, plot_psd_spectrum, plot_psd_score
+from inr4ssh._src.utils import get_meshgrid, calculate_gradient, calculate_laplacian
 
 # import parsers
 from data import get_data_args, load_data

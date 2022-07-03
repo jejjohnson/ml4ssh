@@ -7,10 +7,10 @@ from typing import NamedTuple
 from pathlib import Path
 import numpy as np
 import xarray as xr
-from ml4ssh._src.utils import get_gridded_data, create_grids
-from ml4ssh._src.interp import interp_on_alongtrack
-from ml4ssh._src.psd import select_track_segments, find_wavelength_crossing, compute_psd_scores
-from ml4ssh._src.stats import calculate_nrmse, compute_ts_stats
+from inr4ssh._src.utils import get_gridded_data, create_grids
+from inr4ssh._src.interp import interp_on_alongtrack
+from inr4ssh._src.psd import select_track_segments, find_wavelength_crossing, compute_psd_scores
+from inr4ssh._src.stats import calculate_nrmse, compute_ts_stats
 
 def add_eval_args(parser):
     parser.add_argument("--eval-batch-size", type=int, default=10_000)
