@@ -1,9 +1,9 @@
 # ======================
 # LOGGING
 # ======================
-project = "inr4ssh"
-entity = "ige"
-log_dir = "./"
+wandb_project = "inr4ssh"
+wandb_entity = "ige"
+wandb_log_dir = "./"
 wandb_resume = "allow"
 wandb_mode = "offline"
 smoke_test = "store_true"

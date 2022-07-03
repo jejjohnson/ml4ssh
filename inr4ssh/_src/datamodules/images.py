@@ -2,7 +2,7 @@ import pytorch_lightning as pl
 import torch
 
 from ..data.images import load_fox, load_cameraman
-from ..features.image import get_image_coordinates
+from ..features.coords import get_image_coordinates
 from torch.utils.data import random_split, DataLoader, TensorDataset
 from einops import rearrange
 
