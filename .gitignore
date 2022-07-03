@@ -134,6 +134,7 @@ datasets/*
 *.npz
 outputs/*
 \wandb/
+\checkpoints/
 *.gif
 *.mp4
 *.png
