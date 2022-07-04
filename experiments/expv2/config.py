@@ -4,7 +4,7 @@ import argparse
 # ======================
 wandb_project = "inr4ssh"
 wandb_entity = "ige"
-wandb_log_dir = "./"
+wandb_log_dir = "/mnt/meom/workdir/johnsonj/logs"
 wandb_resume = "allow"
 wandb_mode = "offline"
 smoke_test = "store_true"
@@ -197,11 +197,12 @@ def add_loss_args(parser):
 optimizer = "adam" # "adamw" # "adamax"
 learning_rate = 1e-4
 num_epochs = 300
-
+device = "cpu"
 
 # LR Scheduler
 lr_scheduler = "reduce" # "cosine" # "onecyle" #
-patience = 100
+lr_schedule_patience = 10
+lr_schedule_factor = 0.1
 
 def add_optimizer_args(parser):
     # optimizer args
@@ -211,7 +212,10 @@ def add_optimizer_args(parser):
 
     # learning rate scheduler
     parser.add_argument('--lr-scheduler', type=str, default=lr_scheduler)
-    parser.add_argument('--patience', type=int, default=patience)
+    parser.add_argument('--lr-schedule-patience', type=int, default=lr_schedule_patience)
+    parser.add_argument('--lr-schedule-factor', type=float, default=lr_schedule_factor)
+    
+    parser.add_argument('--device', type=str, default=device)
     return parser
 
 # ======================

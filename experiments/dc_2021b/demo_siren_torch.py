@@ -240,7 +240,6 @@ def main(args):
     # save with wandb
     wandb_logger.experiment.save(str(path_scaler))
 
-
     # POST PROCESSING
 
     df_grid = generate_eval_data(args)

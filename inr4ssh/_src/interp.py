@@ -1,7 +1,8 @@
 import xarray as xr
 import numpy as np
 import pyinterp
-from .utils import get_gridded_data
+from .preprocess.coords import extract_gridded_coords
+from .metrics.types import AlongTrackData
 
 def interp_on_alongtrack(gridded_dataset: xr.Dataset, 
                          ds_alongtrack: xr.Dataset,
@@ -14,15 +15,17 @@ def interp_on_alongtrack(gridded_dataset: xr.Dataset,
                          is_circle=True):
     
     # Interpolate maps onto alongtrack dataset
-    x_axis, y_axis, z_axis, grid = get_gridded_data(
-        gridded_dataset,
-                                                       lon_min=lon_min,
-                                                       lon_max=lon_max, 
-                                                       lat_min=lat_min,
-                                                       lat_max=lat_max, 
-                                                       time_min=time_min,
-                                                       time_max=time_max,
-                                                       is_circle=is_circle)
+    x_axis, y_axis, z_axis, grid = \
+        extract_gridded_coords(
+            gridded_dataset,
+            lon_min=lon_min,
+            lon_max=lon_max, 
+            lat_min=lat_min,
+            lat_max=lat_max, 
+            time_min=time_min,
+            time_max=time_max,
+            is_circle=is_circle
+    )
     
     ssh_map_interp = pyinterp.trivariate(grid, 
                                          ds_alongtrack["longitude"].values, 
@@ -50,5 +53,11 @@ def interp_on_alongtrack(gridded_dataset: xr.Dataset,
     indices = np.where((lon_alongtrack >= lon_min+0.25) & (lon_alongtrack <= lon_max-0.25) &
                        (lat_alongtrack >= lat_min+0.25) & (lat_alongtrack <= lat_max-0.25))[0]
     
-    return time_alongtrack[indices], lat_alongtrack[indices], lon_alongtrack[indices], ssh_alongtrack[indices], ssh_map_interp[indices]
+    return AlongTrackData(
+        time=time_alongtrack[indices],
+        lat=lat_alongtrack[indices],
+        lon=lon_alongtrack[indices],
+        ssh_alongtrack=ssh_alongtrack[indices],
+        ssh_map=ssh_map_interp[indices],
+    )
     

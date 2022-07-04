@@ -46,6 +46,7 @@ dependencies:
   # PYTORCH ECOSYSTEM
   - torchtyping
   - torchgeo
+  - skorch
   - einops
   # OTHER
   - plum-dispatch

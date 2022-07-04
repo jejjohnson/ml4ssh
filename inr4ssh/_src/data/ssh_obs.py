@@ -56,6 +56,9 @@ def load_ssh_altimetry_data_test(data_dir: str):
 
     # load dataset
     ds_test = xr.open_dataset(ref_dir)
+    
+    # sort by time
+    ds_test = ds_test.sortby("time")
 
     return ds_test
 

@@ -35,6 +35,8 @@ class SSHAltimetry(pl.LightningDataModule):
         
         logger.info("scaling evaluation data...")
         X = scaler.transform(X)
+
+        self.scaler = scaler
         
         logger.info("Creating dataloaders...")
         self.ds_train = TensorDataset(
@@ -48,8 +50,7 @@ class SSHAltimetry(pl.LightningDataModule):
         self.ds_predict = TensorDataset(
             torch.FloatTensor(X)
         )
-        
-        return self
+
     
     @staticmethod
     def get_train_data(config):
