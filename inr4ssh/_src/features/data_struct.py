@@ -9,3 +9,8 @@ def array_2_da(coords, data, name="full_pred"):
 
 def create_mask(coords, name="train", factor=1):
     return array_2_da(coords, factor * np.ones((coords.shape[0], 1)), name=name)
+
+def df_2_xr(coords: pd.DataFrame):
+    
+    return coords.reset_index().set_index(["latitude", "longitude", "time"]).to_xarray()
+    

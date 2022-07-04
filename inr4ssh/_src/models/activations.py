@@ -5,6 +5,33 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+def get_activation(activation: str, **kwargs):
+    
+    
+    if activation == "sine":
+        return Sine(**kwargs)
+    elif activation == "elu":
+        return nn.ELU(**kwarg)
+    elif activation == "gelu":
+        return GELU()
+    elif activation == "swish":
+        return Swish()
+    elif activation == "identity":
+        return nn.Identity()
+    elif activation == "concatrelu":
+        return ConcatReLU()
+    elif activation == "concatelu":
+        return ConcatELU()
+    elif activation == "gatedtanh":
+        return GatedTanhUnit(**kwargs)
+    elif activation == "sigmoid":
+        return nn.Sigmoid()
+    elif activation == "sigmoid":
+        return nn.Sigmoid()
+    elif activation == "leakyrelu":
+        return nn.LeakyReLU(**kwargs)
+    else:
+        raise ValueError(f"Unrecognized activation: {activation}")
 
 class Sine(nn.Module):
     def __init__(self, w0 = 1.):

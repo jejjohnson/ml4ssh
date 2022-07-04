@@ -31,6 +31,8 @@ class SSHAltimetry(pl.LightningDataModule):
         logger.info("Getting evalulation data...")
         X = self.get_eval_data(self.config)
         
+        self.X_pred_index = X[["latitude", "longitude", "time"]]
+        
         logger.info("scaling evaluation data...")
         X = scaler.transform(X)
         
@@ -80,7 +82,7 @@ class SSHAltimetry(pl.LightningDataModule):
         xtrain, xvalid, ytrain, yvalid = train_test_split(
             X, y, 
             train_size=config.train_size, 
-            random_state=config.seed_split
+            random_state=config.train_seed_split
         )
         
         return xtrain, ytrain, xvalid, yvalid
@@ -91,25 +93,25 @@ class SSHAltimetry(pl.LightningDataModule):
         return DataLoader(
             self.ds_train, 
             batch_size=self.config.batch_size, 
-            shuffle=self.config.train_shuffle,
-            num_workers=self.config.num_workers,
-            pin_memory=self.config.pin_memory
+            shuffle=self.config.dl_train_shuffle,
+            num_workers=self.config.dl_num_workers,
+            pin_memory=self.config.dl_pin_memory
         )
     def val_dataloader(self):
         return DataLoader(
             self.ds_valid, 
             batch_size=self.config.batch_size, 
             shuffle=False,
-            num_workers=self.config.num_workers,
-            pin_memory=self.config.pin_memory
+            num_workers=self.config.dl_num_workers,
+            pin_memory=self.config.dl_pin_memory
         )
     def predict_dataloader(self):
         return DataLoader(
             self.ds_predict, 
-            batch_size=self.config.batch_size, 
+            batch_size=self.config.batch_size_eval, 
             shuffle=False,
-            num_workers=self.config.num_workers,
-            pin_memory=False
+            num_workers=self.config.dl_num_workers,
+            pin_memory=self.config.dl_pin_memory
         )
     
     
