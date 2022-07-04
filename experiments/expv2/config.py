@@ -11,9 +11,9 @@ smoke_test = "store_true"
 wandb_id = None
 
 def add_logging_args(parser):
-    parser.add_argument('--project', type=str, default=wandb_project)
-    parser.add_argument('--entity', type=str, default=wandb_entity)
-    parser.add_argument('--log-dir', type=str, default=wandb_log_dir)
+    parser.add_argument('--wandb-project', type=str, default=wandb_project)
+    parser.add_argument('--wandb-entity', type=str, default=wandb_entity)
+    parser.add_argument('--wandb-log-dir', type=str, default=wandb_log_dir)
     parser.add_argument('--wandb-resume', type=str, default=wandb_resume)
     parser.add_argument('--wandb-mode', type=str, default=wandb_mode)
     parser.add_argument('--smoke-test', action="store_true")

@@ -1,121 +1,158 @@
-import config
+import sys, os
+from pyprojroot import here
 
+# spyder up to find the root
+root = here(project_files=[".root"])
+
+# append to path
+sys.path.append(str(root))
+
+import config
+import argparse
+import time
+from loguru import logger
+
+import torch
+from torch.optim.lr_scheduler import CosineAnnealingLR
+
+from skorch import NeuralNetRegressor
+from skorch.dataset import ValidSplit
+from skorch.callbacks import EarlyStopping, LRScheduler
+
+from inr4ssh._src.data.ssh_obs import load_ssh_correction
+from inr4ssh._src.datamodules.ssh_obs import SSHAltimetry
+from inr4ssh._src.features.data_struct import df_2_xr
+from inr4ssh._src.models.activations import get_activation
+from inr4ssh._src.models.siren import SirenNet
+from inr4ssh._src.models.utils import get_torch_device
+from inr4ssh._src.postprocess.ssh_obs import postprocess
+
+
+
+
+def main(args):
+
+    # modify args
+    args.train_data_dir = "/Users/eman/.CMVolumes/cal1_workdir/data/dc_2021/raw/train"
+    args.ref_data_dir = "/Users/eman/.CMVolumes/cal1_workdir/data/dc_2021/raw/ref"
+    args.test_data_dir = "/Users/eman/.CMVolumes/cal1_workdir/data/dc_2021/raw/test"
+    #
+    args.time_min = "2017-01-01"
+    args.time_max = "2017-02-01"
+    args.eval_time_min = "2017-01-01"
+    args.eval_time_max = "2017-02-01"
+    args.eval_dtime = "12_h"
+
+    dm = SSHAltimetry(args)
+
+    dm = dm.setup()
+
+    x_train, y_train = dm.ds_train[:]
+    x_valid, y_valid = dm.ds_valid[:]
+    X_test, = dm.ds_predict[:]
+    x_train = torch.cat([x_train, x_valid])
+    y_train = torch.cat([y_train, y_valid])
+
+    logger.info("Creating neural network...")
+    dim_in = x_train.shape[1]
+    dim_hidden = args.hidden_dim
+    dim_out = y_train.shape[1]
+    num_layers = args.n_hidden
+    w0 = args.siren_w0
+    w0_initial = args.siren_w0_initial
+    c = args.siren_c
+    final_activation = get_activation(args.final_activation)
+
+    siren_net = SirenNet(
+        dim_in=dim_in,
+        dim_hidden=dim_hidden,
+        dim_out=dim_out,
+        num_layers=num_layers,
+        w0=w0,
+        w0_initial=w0_initial,
+        final_activation=final_activation
+    )
+
+    device = get_torch_device()
+    logger.info(f"Setting Device: {device}")
+    logger.info("Setting callbacks...")
+    lr_scheduler = LRScheduler(
+        policy=CosineAnnealingLR,
+        T_max=args.num_epochs
+    )
+
+    # early stopping
+    estop_callback = EarlyStopping(
+        monitor="valid_loss",
+        patience=30,
+    )
+
+    callbacks = [
+        ("earlystopping", estop_callback),
+        ("lrscheduler", lr_scheduler),
+    ]
+
+    # train split percentage
+    train_split = ValidSplit(1.0 - args.train_size, stratified=False)
+
+    skorch_net = NeuralNetRegressor(
+        module=siren_net,
+        max_epochs=args.num_epochs,
+        lr=args.learning_rate,
+        batch_size=args.batch_size,
+        device=device,
+        optimizer=torch.optim.Adam,
+        train_split=train_split,
+        callbacks=callbacks
+
+    )
+    logger.info("Training...")
+    skorch_net.fit(x_train, y_train)
+
+    # TESTING
+    logger.info("Making predictions...")
+    t0 = time.time()
+    predictions = skorch_net.predict(X_test)
+    t1 = time.time() - t0
+
+    print(f"Time Taken for {X_test.shape[0]} points: {t1:.4f} secs")
+
+    # POSTPROCESS
+    # convert to da
+    logger.info("Convert data to xarray ds...")
+    ds_oi = dm.X_pred_index
+    ds_oi["ssh"] = predictions
+    ds_oi = df_2_xr(ds_oi)
+
+    # open correction dataset
+    logger.info("Loading SSH corrections...")
+    ds_correct = load_ssh_correction(args.ref_data_dir)
+
+    # correct predictions
+    logger.info("Correcting SSH predictions...")
+    ds_oi = postprocess(ds_oi, ds_correct)
+
+    return None
 
 if __name__ == '__main__':
+    # initialize argparse
     parser = argparse.ArgumentParser()
-    
-    # LOGGING
-    parser.add_argument('--project', type=str, default=config.wandb_project)
-    parser.add_argument('--entity', type=str, default=config.wandb_entity)
-    parser.add_argument('--log-dir', type=str, default=config.wandb_log_dir)
-    parser.add_argument('--wandb-resume', type=str, default=config.wandb_resume)
-    parser.add_argument('--wandb-mode', type=str, default=config.wandb_mode)
-    parser.add_argument('--smoke-test', action="store_true")
-    parser.add_argument('--wandb-id', type=str, default=config.wandb_id)
-    # DATA DIRECTORY
-    parser.add_argument('--train-data-dir', type=str, default="/home/johnsonj/data/dc_2021/raw/train")
-    parser.add_argument('--ref-data-dir', type=str, default="/home/johnsonj/data/dc_2021/raw/ref/")
-    parser.add_argument('--test-data-dir', type=str, default="/home/johnsonj/data/dc_2021/raw/test/")
-    # DATA PREPROCESS
-    # longitude subset
-    parser.add_argument('--lon-min', type=float, default=285.0)
-    parser.add_argument('--lon-max', type=float, default=315.0)
-    parser.add_argument('--dlon', type=float, default=0.2)
-    
-    # latitude subset
-    parser.add_argument('--lat-min', type=float, default=23.0)
-    parser.add_argument('--lat-max', type=float, default=53.0)
-    parser.add_argument('--dlat', type=float, default=0.2)
-    
-    # temporal subset
-    parser.add_argument('--time-min', type=str, default="2016-12-01")
-    parser.add_argument('--time-max', type=str, default="2018-01-31")
-    parser.add_argument('--dtime', type=str, default="1_D")
-    
-    # Buffer Params
-    parser.add_argument('--lon-buffer', type=float, default=1.0)
-    parser.add_argument('--lat-buffer', type=float, default=1.0)
-    parser.add_argument('--time-buffer', type=float, default=7.0)
-    # =====================
-    # FEATURES
-    parser.add_argument("--julian-time", type=bool, default=True)
-    parser.add_argument("--feature-scaler", type=str, default="minmax")
-    # TRAIN/TEST SPLIT
-    parser.add_argument("--train-size", type=float, default=0.90)
-    parser.add_argument("--split-seed", type=int, default=666)
-    parser.add_argument("--shuffle-seed", type=int, default=1234)
-    # MODEL
-    parser.add_argument('--model', type=str, default="siren")
 
-    # NEURAL NETWORK SPECIFIC
-    parser.add_argument('--out-dim', type=int, default=1)
-    parser.add_argument('--hidden-dim', type=int, default=512)
-    parser.add_argument('--n-hidden', type=int, default=6)
-    parser.add_argument('--model-seed', type=str, default=42)
-    parser.add_argument('--activation', type=str, default="relu")
+    # add all experiment arguments
+    parser = config.add_logging_args(parser)
+    parser = config.add_data_dir_args(parser)
+    parser = config.add_data_preprocess_args(parser)
+    parser = config.add_feature_transform_args(parser)
+    parser = config.add_train_split_args(parser)
+    parser = config.add_dataloader_args(parser)
+    parser = config.add_model_args(parser)
+    parser = config.add_loss_args(parser)
+    parser = config.add_optimizer_args(parser)
+    parser = config.add_eval_data_args(parser)
+    parser = config.add_eval_metrics_args(parser)
+    parser = config.add_viz_data_args(parser)
 
-    # SIREN SPECIFIC
-    parser.add_argument('--w0-initial', type=float, default=30.0)
-    parser.add_argument('--w0', type=float, default=1.0)
-    parser.add_argument('--final-scale', type=float, default=1.0)
-    
-    # LOSSES
-    # =======
-    parser.add_argument("--loss", type=str, default="mse")
-    # OPTIMIZER
-    # =========
-    parser.add_argument('--optimizer', type=str, default="adam")
-    parser.add_argument("--learning-rate", type=float, default=1e-4)
-    parser.add_argument("--n-epochs", type=int, default=300)
-    parser.add_argument("--batch-size", type=int, default=4096)
-    parser.add_argument("--prefetch-buffer", type=int, default=5)
-    parser.add_argument("--num-workers", type=int, default=0)
-    parser.add_argument("--patience", type=int, default=100)
-    # DATA POSTPROCESS
-    # ====================
-    # longitude subset
-    parser.add_argument('--eval-lon-min', type=float, default=295.0)
-    parser.add_argument('--eval-lon-max', type=float, default=305.0)
-    parser.add_argument('--eval-dlon', type=float, default=0.2)
-    
-    # latitude subset
-    parser.add_argument('--eval-lat-min', type=float, default=33.0)
-    parser.add_argument('--eval-lat-max', type=float, default=43.0)
-    parser.add_argument('--eval-dlat', type=float, default=0.2)
-    
-    # temporal subset
-    parser.add_argument('--eval-time-min', type=str, default="2017-01-01")
-    parser.add_argument('--eval-time-max', type=str, default="2017-12-31")
-    parser.add_argument('--eval-dtime', type=str, default="1_D")
-    
-    # OI params
-    parser.add_argument('--eval-lon-buffer', type=float, default=2.0)
-    parser.add_argument('--eval-lat-buffer', type=float, default=2.0)
-    parser.add_argument('--eval-time-buffer', type=float, default=7.0)
-    # data
-
-    # VIZ
-    # =====
-    # longitude subset
-    parser.add_argument('--viz-lon-min', type=float, default=295.0)
-    parser.add_argument('--viz-lon-max', type=float, default=305.0)
-    parser.add_argument('--viz-dlon', type=float, default=0.1)
-    
-    # latitude subset
-    parser.add_argument('--viz-lat-min', type=float, default=33.0)
-    parser.add_argument('--viz-lat-max', type=float, default=43.0)
-    parser.add_argument('--viz-dlat', type=float, default=0.1)
-    
-    # temporal subset
-    parser.add_argument('--viz-time-min', type=str, default="2017-01-01")
-    parser.add_argument('--viz-time-max', type=str, default="2017-12-31")
-    parser.add_argument('--viz-dtime', type=str, default="1_D")
-    
-    # OI params
-    parser.add_argument('--viz-lon-buffer', type=float, default=1.0)
-    parser.add_argument('--viz-lat-buffer', type=float, default=1.0)
-    parser.add_argument('--viz-time-buffer', type=float, default=7.0)
-
+    # parse args
     args = parser.parse_args()
 
     main(args)
