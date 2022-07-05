@@ -3,6 +3,30 @@ import numpy as np
 import xarray as xr
 
 
+def correct_longitude_domain(ds):
+    if ds['longitude'].min() < 0:
+        ds['longitude'] = xr.where(
+            ds['longitude'] >= 180.,
+            ds['longitude'] - 360.,
+            ds['longitude']
+        )
+    return ds
+
+
+def correct_coordinate_labels(ds):
+    try:
+        ds = ds.rename({"lat": "latitude"})
+    except ValueError:
+        pass
+    
+    try:
+        ds = ds.rename({"lon": "longitude"})
+    except ValueError:
+        pass
+    
+    return ds
+
+
 def create_spatiotemporal_coords(
         lon_min, lon_max, lon_dx,
         lat_min, lat_max, lat_dy,

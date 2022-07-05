@@ -12,13 +12,6 @@ def temporal_subset(ds, time_min, time_max, time_buffer: int = 7.0, time_buffer_
 
 
 def spatial_subset(ds, lon_min, lon_max, lon_buffer, lat_min, lat_max, lat_buffer):
-    # correct lon if domain is between [-180:180]
-    if lon_min < 0:
-        ds['longitude'] = xr.where(
-            ds['longitude'] >= 180.,
-            ds['longitude'] - 360.,
-            ds['longitude']
-        )
 
     ds = ds.where(
         (ds['longitude'] >= lon_min - lon_buffer) &

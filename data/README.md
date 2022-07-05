@@ -2,8 +2,11 @@
 
 ## Datasets
 
-* 1.5 Layer QG Simulations (TODO)
-* SSH Data Challenge 2021a
+* 1.5 Layer QG Simulations
+  * `94MB`
+* SSH Data Challenge 2021a 
+  * Train/Test Data - `116MB`
+  * Results: BASELINE - ~`15MB`; DUACS - ~`4.5MB`
 * SSH Data Challenge 2020b (TODO)
 * SSH 5 Year Altimetry Tracks (TODO)
 

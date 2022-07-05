@@ -21,7 +21,7 @@ dependencies:
 - pyviz::geoviews                 # holoviews for geo data
 - conda-forge::cartopy            # EO plotting
 - pyviz::hvplot                   # interactive plots
-- datashader                      # scale plots
+- pyviz::datashader                      # scale plots
 - conda-forge::xmovie             # xarray movies/gifs
 # Scale
 - dask                            # Out-of-Core processing

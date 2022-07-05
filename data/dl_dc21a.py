@@ -18,23 +18,41 @@ def main(args):
     save_dir = Path(args.save_dir)
     assert save_dir.is_dir()
 
-    logger.info(f"Checking bash script exists...")
-    bash_script = Path("dl_dc21a.sh")
-    cwd = Path.cwd()
-    bash_script = cwd.joinpath(bash_script)
-    assert bash_script.is_file()
-    command = f"{bash_script} {username} {password} {save_dir}"
 
-    logger.info(f"Executing commands...")
-    rc = subprocess.call(
-        f"{command} {username} {password} {save_dir}",
-        shell=True
-    )
+    bash_script_traintest = Path("dl_dc21a.sh")
+    bash_script_results = Path("dl_dc21a_results.sh")
+    cwd = Path.cwd()
+    bash_script_traintest = cwd.joinpath(bash_script_traintest)
+    bash_script_results = cwd.joinpath(bash_script_results)
+
+    logger.info(f"Checking bash script exists...")
+    assert bash_script_traintest.is_file()
+    assert bash_script_results.is_file()
+    bash_script_args = f"{username} {password} {save_dir}"
+
+
+    if args.traintest:
+        logger.info(f"Executing traintest download...")
+        rc = subprocess.call(
+            f"{bash_script_traintest} {bash_script_args}",
+            shell=True
+        )
+        logger.info(f"Done download...!")
+    #
+    if args.results:
+        logger.info(f"Executing traintest download...")
+        rc = subprocess.call(
+            f"{bash_script_results} {bash_script_args}",
+            shell=True
+        )
+        logger.info(f"Done download...!")
     return None
 
 if __name__ == '__main__':
     args = argparse.ArgumentParser()
     args.add_argument("--credentials-file", type=str)
     args.add_argument("--save-dir", type=str, default="./")
+    args.add_argument("--traintest", action="store_true")
+    args.add_argument("--results", action="store_true")
     args = args.parse_args()
     main(args)
