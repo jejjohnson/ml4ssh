@@ -34,13 +34,15 @@ source activate torch_py39
 srun python experiments/expv2/train.py \
     --wandb-mode offline \
     --wandb-log-dir /gpfsscratch/rech/cli/uvo53rl/ \
-    --num-epochs 1000 \
+    --num-epochs 3000 \
     --device cuda \
     --dl-num-workers 10 \
     --learning-rate 1e-4 \
     --train-data-dir /gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/train \
     --ref-data-dir /gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/ref \
-    --test-data-dir /gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/test
+    --test-data-dir /gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/test \
+    --abs-time-min 2016-01-01 \
+    --abs-time-max 2019-01-01
 
 
 # # code execution

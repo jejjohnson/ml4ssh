@@ -1,49 +1,6 @@
-# Implicit Neural Representations for Interpolation
+# Data Download
 
-**Author**: J. Emmanuel Johnson
-
-
----
-## Overview
-
-
----
-## Demos
-
-
-
----
-## Installation Instructions
-
-
-### Conda Environment (Preferred)
-
-```bash
-conda env create -f environments/torch_linux.yaml
-```
-
-### Pip Install (TODO)
-
-```bash
-pip install git+https://
-```
-
-
-### Download (TODO)
-
-```bash
-git clone https://
-cd inr4ssh
-pip install .
-```
-
-
-
-
----
-## Data Download
-
-### Datasets
+## Datasets
 
 * 1.5 Layer QG Simulations (TODO)
 * SSH Data Challenge 2021a
@@ -51,7 +8,7 @@ pip install .
 * SSH 5 Year Altimetry Tracks (TODO)
 
 ---
-### Instructions
+## Instructions
 
 **Step 1**: Go into data folder
 
@@ -70,7 +27,7 @@ chmod +x dl_dc21a.sh
 See the detailed steps below.
 
 ---
-#### Option 1: Bash Script
+### Option 1: Bash Script
 
 **Run the bash script directly from the command line**
 
@@ -79,7 +36,7 @@ bash dl_dc21a.sh username password path/to/save/dir
 ```
 
 ---
-#### Option 2: Python script + `credentials.yaml` (Preferred)
+### Option 2: Python script + `credentials.yaml` (Preferred)
 
 **Create a `.yaml` file**. You can even append it to your already lon `.yaml` file.
 
@@ -94,9 +51,3 @@ aviso:
 ```bash
 python dl_dc21a.py --credentials-file credentials.yaml --save-dir path/to/save/dir
 ```
-
-
-
----
-## Acknowledgements
-

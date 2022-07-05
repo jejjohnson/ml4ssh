@@ -36,11 +36,11 @@ import wandb
 
 def main(args):
 
-    # # modify args
-    # args.train_data_dir = "/Users/eman/.CMVolumes/cal1_workdir/data/dc_2021/raw/train"
-    # args.ref_data_dir = "/Users/eman/.CMVolumes/cal1_workdir/data/dc_2021/raw/ref"
-    # args.test_data_dir = "/Users/eman/.CMVolumes/cal1_workdir/data/dc_2021/raw/test"
-    # # #
+    # modify args
+    args.train_data_dir = "/Users/eman/.CMVolumes/cal1_workdir/data/dc_2021/raw/train"
+    args.ref_data_dir = "/Users/eman/.CMVolumes/cal1_workdir/data/dc_2021/raw/ref"
+    args.test_data_dir = "/Users/eman/.CMVolumes/cal1_workdir/data/dc_2021/raw/test"
+    # #
     args.time_min = "2017-01-01"
     args.time_max = "2017-02-01"
     args.eval_time_min = "2017-01-01"
