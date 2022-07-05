@@ -146,4 +146,4 @@ outputs/*
 *.nc
 *.zarr
 *.npy
-credentials.yaml
+*credentials.*
