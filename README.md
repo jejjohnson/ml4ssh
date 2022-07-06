@@ -16,14 +16,25 @@
 ---
 ## Overview
 
----
-#### QG Simulations (TODO)
 
 
----
-#### OSE (Data Challenge 2021a)
+**Baseline Methods**: Optimal Interpolation
 
+$$
+\mathbf{x}^a = \mathbf{x}^b + \mathbf{K}\left(\mathbf{y}_{obs} - \mathbf{x}^b \right)
+$$
 
+**Standard Methods**: Kriging
+
+$$
+\mathbf{y} = \boldsymbol{\mu}(\mathbf{x}_\phi) + \mathbf{K}_\phi \left(\mathbf{y}_{obs} -  \boldsymbol{\mu}(\mathbf{X}_\phi)\right)
+$$
+
+**Modern Methods**: Implicit Neural Representations
+
+$$
+\mathbf{y}_{obs} = \boldsymbol{f}(\mathbf{x}_{\phi};\boldsymbol{\theta})
+$$
 
 ---
 ## Results (Preliminary)
