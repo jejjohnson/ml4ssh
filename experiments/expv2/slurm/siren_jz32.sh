@@ -16,7 +16,7 @@
 # loading of modules
 module purge
 
-module load cuda/11.2
+#module load cuda/11.2
 module load cudnn/9.2-v7.5.1.10
 module load git/2.31.1
 module load github-cli/1.13.1
@@ -30,19 +30,54 @@ export PYTHONPATH=$WORK/projects/inr4ssh:${PYTHONPATH}
 # loading of modules
 source activate torch_py39
 
-# code execution (TEST)
-srun python experiments/expv2/train.py \
-    --wandb-mode offline \
-    --wandb-log-dir /gpfsscratch/rech/cli/uvo53rl/ \
-    --num-epochs 3000 \
-    --device cuda \
-    --dl-num-workers 10 \
-    --learning-rate 1e-4 \
-    --train-data-dir /gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/train \
-    --ref-data-dir /gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/ref \
-    --test-data-dir /gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/test \
-    --abs-time-min 2016-01-01 \
-    --abs-time-max 2019-01-01
+# run script
+python experiments/expv2/train.py \
+    --num_epochs 2000 \
+    --wandb_mode "offline" \
+    --wandb_log_dir "/gpfsscratch/rech/cli/uvo53rl/" \
+    --device "cuda" \
+    --train_data_dir "/gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/train" \
+    --ref_data_dir "/gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/ref" \
+    --test_data_dir "/gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/test" \
+    --num_workers 10 \
+    --learning_rate 1e-4 \
+    --factor 0.25 \
+    --lr_scheduler.patience 10 \
+    --callbacks.patience 20 \
+    --abs_time_min 2016-01-01 \
+    --abs_time_max 2019-01-01
+
+#python train.py \
+#    --num-epochs 100 \
+#    --wandb-mode "offline" \
+#    --device "cuda" \
+#    --train-data-dir "/gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/train" \
+#    --ref-data-dir "/gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/ref" \
+#    --test-data-dir "/gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/test" \
+#    --dl-num-workers 10 \
+#    --learning-rate 1e-3 \
+#    --wandb-log-dir "/gpfsscratch/rech/cli/uvo53rl/" \
+#    --time-min "2017-01-01" \
+#    --time-max "2017-02-01" \
+#    --eval-time-min "2017-01-01" \
+#    --eval-time-max "2017-02-01" \
+#    --eval-dtime "12_h" \
+#    --abs-time-min 2016-01-01 \
+#    --abs-time-max 2019-01-01
+
+## code execution (TEST)
+#srun python experiments/expv2/train.py \
+#    --wandb-mode offline \
+#    --wandb-log-dir /gpfsscratch/rech/cli/uvo53rl/ \
+#    --num-epochs 3000 \
+#    --device cuda \
+#    --dl-num-workers 10 \
+#    --learning-rate 1e-4 \
+#    --train-data-dir /gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/train \
+#    --ref-data-dir /gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/ref \
+#    --test-data-dir /gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/test \
+#    --abs-time-min 2016-01-01 \
+#    --abs-time-max 2019-01-01
 
 
 # # code execution

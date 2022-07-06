@@ -1,7 +1,7 @@
 from scipy.interpolate import interp1d
 from scipy import signal
 import numpy as np
-from typing import List
+from typing import List, Optional
 import warnings
 from .types import PSDStats, ListAlongTrackSegments
 
@@ -34,7 +34,7 @@ def compute_psd_scores(
     ssh_true: List[np.ndarray], 
     ssh_pred: List[np.ndarray],
     delta_x: float,
-    npt: int,
+    npt: Optional[int],
     **kwargs
 ):
     

@@ -67,6 +67,7 @@ dependencies:
   # logging
   - wandb
   - loguru
+  - simple-parsing
   # plotting
   - celluloid
   - corner

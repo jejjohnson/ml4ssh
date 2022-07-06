@@ -1,322 +1,211 @@
-import argparse
+from typing import Optional, List
+from simple_parsing import ArgumentParser
+from simple_parsing.helpers import Serializable
+from dataclasses import dataclass
 # ======================
 # LOGGING
 # ======================
-wandb_project = "inr4ssh"
-wandb_entity = "ige"
-wandb_log_dir = "/mnt/meom/workdir/johnsonj/logs"
-wandb_resume = "allow"
-wandb_mode = "offline"
-smoke_test = "store_true"
-wandb_id = None
-
-def add_logging_args(parser):
-    parser.add_argument('--wandb-project', type=str, default=wandb_project)
-    parser.add_argument('--wandb-entity', type=str, default=wandb_entity)
-    parser.add_argument('--wandb-log-dir', type=str, default=wandb_log_dir)
-    parser.add_argument('--wandb-resume', type=str, default=wandb_resume)
-    parser.add_argument('--wandb-mode', type=str, default=wandb_mode)
-    parser.add_argument('--smoke-test', action="store_true")
-    parser.add_argument('--wandb-id', type=str, default=wandb_id)
-    return parser
+@dataclass
+class Logging(Serializable):
+    wandb_project: str = "inr4ssh"
+    wandb_entity: str = "ige"
+    wandb_log_dir: str = "/mnt/meom/workdir/johnsonj/logs"
+    wandb_resume: str = "allow"
+    wandb_mode: str = "offline"
+    smoke_test: str = "store_true"
+    wandb_id: Optional[str] = None
 
 # ======================
 # Data Directories
 # ======================
-train_data_dir = "/home/johnsonj/data/dc_2021/raw/train"
-ref_data_dir = "/home/johnsonj/data/dc_2021/raw/ref/"
-test_data_dir = "/home/johnsonj/data/dc_2021/raw/test/"
-
-def add_data_dir_args(parser):
-    parser.add_argument('--train-data-dir', type=str, default=train_data_dir)
-    parser.add_argument('--ref-data-dir', type=str, default=ref_data_dir)
-    parser.add_argument('--test-data-dir', type=str, default=test_data_dir)
-    return parser
+@dataclass
+class DataDir(Serializable):
+    train_data_dir: str = "/home/johnsonj/data/dc_2021/raw/train"
+    ref_data_dir: str = "/home/johnsonj/data/dc_2021/raw/ref/"
+    test_data_dir: str = "/home/johnsonj/data/dc_2021/raw/test/"
 
 # ======================
 # DATA PREPROCESS
 # ======================
-# longitude subset
-lon_min = 285.0
-lon_max = 315.0
-dlon = 0.2
-lon_buffer = 1.0
-# latitude subset
-lat_min = 23.0
-lat_max = 53.0
-dlat = 0.2
-lat_buffer = 1.0
-# temporal subset
-time_min = "2016-12-01"
-time_max = "2018-01-31"
-dtime = "1_D"
-time_buffer = 7.0
-
-def add_data_preprocess_args(parser):
+@dataclass
+class PreProcess(Serializable):
     # longitude subset
-    parser.add_argument('--lon-min', type=float, default=lon_min)
-    parser.add_argument('--lon-max', type=float, default=lon_max)
-    parser.add_argument('--dlon', type=float, default=dlon)
-    
+    lon_min: float = 285.0
+    lon_max: float = 315.0
+    dlon: float = 0.2
+    lon_buffer: float = 1.0
     # latitude subset
-    parser.add_argument('--lat-min', type=float, default=lat_min)
-    parser.add_argument('--lat-max', type=float, default=lat_max)
-    parser.add_argument('--dlat', type=float, default=dlat)
-    
+    lat_min: float = 23.0
+    lat_max: float = 53.0
+    dlat: float = 0.2
+    lat_buffer: float = 1.0
     # temporal subset
-    parser.add_argument('--time-min', type=str, default=time_min)
-    parser.add_argument('--time-max', type=str, default=time_max)
-    parser.add_argument('--dtime', type=str, default=dtime)
-    
-    # Buffer Params
-    parser.add_argument('--lon-buffer', type=float, default=lon_buffer)
-    parser.add_argument('--lat-buffer', type=float, default=lat_buffer)
-    parser.add_argument('--time-buffer', type=float, default=time_buffer)
-    return parser
+    time_min: str = "2016-12-01"
+    time_max: str = "2018-01-31"
+    dtime: str = "1_D"
+    time_buffer: float = 7.0
+
 
 # ======================
 # FEATURES
 # ======================
-julian_time = True
-abs_time_min = "2005-01-01"
-abs_time_max = "2022-01-01"
-feature_scaler = "minmax"
-spherical_radius = 1.0
-min_time_scale = -1.0
-max_time_scale = 1.0
-
-def add_feature_transform_args(parser):
-    # temporal coordinates transform
-    parser.add_argument("--julian-time", type=bool, default=julian_time)
-    parser.add_argument("--abs-time-min", type=str, default=abs_time_min)
-    parser.add_argument("--abs-time-max", type=str, default=abs_time_max)
-    parser.add_argument("--feature-scaler", type=str, default=feature_scaler)
-    parser.add_argument("--min-time-scale", type=float, default=min_time_scale)
-    parser.add_argument("--max-time-scale", type=float, default=max_time_scale)
-    # spatial coordinates transform
-    parser.add_argument("--spherical-radius", type=float, default=spherical_radius)
-    return parser
+@dataclass
+class Features(Serializable):
+    julian_time: bool = True
+    abs_time_min: str = "2005-01-01"
+    abs_time_max: str = "2022-01-01"
+    feature_scaler: str = "minmax"
+    spherical_radius: float = 1.0
+    min_time_scale: float = -1.0
+    max_time_scale: float = 1.0
 
 # ======================
 # TRAIN/VAL SPLIT
 # ======================
-train_size = 0.9
-train_split_method = "random" # random, temporal, spatial
-train_seed_split = 666
-train_seed_shuffle = 321
-train_split_time_freq = None # "1_D"
-train_split_spatial = "random" # "regular" # "upper" # "lower" # "altimetry"
-
-
-def add_train_split_args(parser):
-    parser.add_argument("--train-size", type=float, default=train_size)
-    parser.add_argument("--train-seed-split", type=int, default=train_seed_split)
-    parser.add_argument("--train-seed-shuffle", type=int, default=train_seed_shuffle)
-    parser.add_argument("--train-split-method", type=str, default=train_split_method)
-    # temporal split options
-    parser.add_argument("--train-split-time-freq", type=int, default=train_split_time_freq)
-    # temporal split options
-    parser.add_argument("--train-split-spatial", type=str, default=train_split_spatial)
-    return parser
+@dataclass
+class TrainTestSplit(Serializable):
+    train_size: float = 0.9
+    split_method: Optional[str] = "random" # random, temporal, spatial
+    seed_split: int = 666
+    seed_shuffle: int = 321
+    split_time_freq: Optional[str] = None # "1_D"
+    split_spatial: str = "random" # "regular" # "upper" # "lower" # "altimetry"
 
 # ======================
 # DATALOADER
 # ======================
-# dataloader
-dl_train_shuffle = True
-dl_pin_memory = False
-dl_num_workers = 0
-batch_size = 4096
-batch_size_eval = 10_000
+@dataclass
+class DataLoader(Serializable):
+    # dataloader
+    train_shuffle: bool = True
+    pin_memory: bool = False
+    num_workers: int = 0
+    batch_size: int = 4096
+    batch_size_eval: int = 10_000
 
-def add_dataloader_args(parser):
-    parser.add_argument("--dl-train-shuffle", type=bool, default=dl_train_shuffle)
-    parser.add_argument("--dl-pin-memory", type=bool, default=dl_pin_memory)
-    parser.add_argument("--dl-num-workers", type=int, default=dl_num_workers)
-    parser.add_argument('--batch-size', type=int, default=batch_size)
-    parser.add_argument('--batch-size-eval', type=int, default=batch_size_eval)
-    return parser
 # ======================
 # MODEL
 # ======================
-model = "siren"
+@dataclass
+class Model(Serializable):
+    model: str = "siren"
+    # encoder specific
+    encoder: Optional[str] = None
 
-# encoder specific
-encoder = None
 
-# model specific
-hidden_dim = 512
-n_hidden = 6
-model_seed = 42
-activation = "swish"
-final_activation = "identity"
+@dataclass
+class Siren(Serializable):
+    # neural net specific
+    num_layers: int = 5
+    hidden_dim: int = 512
+    n_hidden: int = 6
+    model_seed: int = 42
+    activation: str = "swish"
+    final_activation: str = "identity"
+    # siren specific
+    w0_initial: float = 30.0
+    w0: float = 1.0
+    final_scale: float = 1.0
+    c: float = 6.0
 
-# siren specific
-siren_w0_initial = 30.0
-siren_w0 = 1.0
-siren_final_scale = 1.0
-siren_c = 6.0
 
-def add_model_args(parser):
-    parser.add_argument('--model', type=str, default=model)
-    parser.add_argument('--encoder', type=str, default=encoder)
-    # NEURAL NETWORK SPECIFIC
-    parser.add_argument('--hidden-dim', type=int, default=hidden_dim)
-    parser.add_argument('--n-hidden', type=int, default=n_hidden)
-    parser.add_argument('--model-seed', type=str, default=model_seed)
-    parser.add_argument('--activation', type=str, default=activation)
-    parser.add_argument('--final-activation', type=str, default=final_activation)
-
-    # SIREN SPECIFIC
-    parser.add_argument('--siren-w0-initial', type=float, default=siren_w0_initial)
-    parser.add_argument('--siren-w0', type=float, default=siren_w0)
-    parser.add_argument('--siren-c', type=float, default=siren_c)
-    parser.add_argument('--siren-final-scale', type=float, default=siren_final_scale)
-    return parser
 
 # ======================
 # LOSSES
 # ======================
-loss = "mse"
-loss_reduction = "mean"
+@dataclass
+class Losses(Serializable):
+    loss: str = "mse"
+    loss_reduction: str = "mean"
 
-# QG PINN Loss Args
-loss_qg = False
-loss_qg_reg = 0.1
-
-def add_loss_args(parser):
-    parser.add_argument('--loss', type=str, default=loss)
-    parser.add_argument('--loss-reduction', type=str, default=loss_reduction)
-    parser.add_argument('--loss-qg', type=bool, default=loss_qg)
-    parser.add_argument('--loss-qg-reg', type=float, default=loss_qg_reg)
-    return parser
+    # QG PINN Loss Args
+    loss_qg: bool = False
+    loss_qg_reg: str = 0.1
 
 # ======================
 # OPTIMIZER
 # ======================
-optimizer = "adam" # "adamw" # "adamax"
-learning_rate = 1e-4
-num_epochs = 300
-device = "cpu"
+@dataclass
+class Optimizer(Serializable):
+    optimizer: str = "adam" # "adamw" # "adamax"
+    learning_rate: float = 1e-4
+    num_epochs: int = 300
+    device: str = "cpu"
 
-# LR Scheduler
-lr_scheduler = "reduce" # "cosine" # "onecyle" #
-lr_schedule_patience = 10
-lr_schedule_factor = 0.1
+@dataclass
+class LRScheduler(Serializable):
+    # LR Scheduler
+    lr_scheduler: str = "reduce" # "cosine" # "onecyle" #
+    patience: int = 10
+    factor: float = 0.1
 
-def add_optimizer_args(parser):
-    # optimizer args
-    parser.add_argument('--optimizer', type=str, default=optimizer)
-    parser.add_argument('--learning-rate', type=float, default=learning_rate)
-    parser.add_argument('--num-epochs', type=int, default=num_epochs)
+@dataclass
+class Callbacks(Serializable):
+    # wandb logging
+    wandb: bool = True
+    save_model: bool = True
 
-    # learning rate scheduler
-    parser.add_argument('--lr-scheduler', type=str, default=lr_scheduler)
-    parser.add_argument('--lr-schedule-patience', type=int, default=lr_schedule_patience)
-    parser.add_argument('--lr-schedule-factor', type=float, default=lr_schedule_factor)
-    
-    parser.add_argument('--device', type=str, default=device)
-    return parser
+    # early stopping
+    early_stopping: bool = True
+    patience: int = 20
+
+# ======================
+# CALLBACKS
+# ======================
 
 # ======================
 # Evaluation DATA
 # ======================
-eval_lon_min = 295.0
-eval_lon_max = 305.0
-eval_dlon = 0.2
-eval_lat_min = 33.0
-eval_lat_max = 43.0
-eval_dlat = 0.2
-eval_time_min = "2017-01-01"
-eval_time_max = "2017-12-31"
-eval_dtime = "1_D"
-eval_lon_buffer = 2.0
-eval_lat_buffer = 2.0
-eval_time_buffer = 7.0
+@dataclass
+class EvalData(Serializable):
+    lon_min: float = 295.0
+    lon_max: float = 305.0
+    dlon: float = 0.2
+    lat_min: float = 33.0
+    lat_max: float = 43.0
+    dlat: float = 0.2
+    time_min: str = "2017-01-01"
+    time_max: str = "2017-12-31"
+    dtime_freq: int = 1
+    dtime_unit: str = "D"
+    lon_buffer: float = 2.0
+    lat_buffer: float = 2.0
+    time_buffer: float = 7.0
 
-def add_eval_data_args(parser):
-    # longitude subset
-    parser.add_argument('--eval-lon-min', type=float, default=eval_lon_min)
-    parser.add_argument('--eval-lon-max', type=float, default=eval_lon_max)
-    parser.add_argument('--eval-dlon', type=float, default=eval_dlon)
-    
-    # latitude subset
-    parser.add_argument('--eval-lat-min', type=float, default=eval_lat_min)
-    parser.add_argument('--eval-lat-max', type=float, default=eval_lat_max)
-    parser.add_argument('--eval-dlat', type=float, default=eval_dlat)
-    
-    # temporal subset
-    parser.add_argument('--eval-time-min', type=str, default=eval_time_min)
-    parser.add_argument('--eval-time-max', type=str, default=eval_time_max)
-    parser.add_argument('--eval-dtime', type=str, default=eval_dtime)
-    
-    # OI params
-    parser.add_argument('--eval-lon-buffer', type=float, default=eval_lon_buffer)
-    parser.add_argument('--eval-lat-buffer', type=float, default=eval_lat_buffer)
-    parser.add_argument('--eval-time-buffer', type=float, default=eval_time_buffer)
-    
-    return parser
 
 # ======================
 # Evaluation METRICS
 # ======================
-
-# binning along track
-eval_bin_lat_step = 1.0
-eval_bin_lon_step = 1.0
-eval_bin_time_step = "1D"
-eval_min_obs = 10
-
-# power spectrum
-eval_psd_delta_t = 0.9434
-eval_psd_velocity = 6.77
-eval_psd_jitter = 1e-4
-
-def add_eval_metrics_args(parser):
+@dataclass
+class Metrics(Serializable):
     # binning along track
-    parser.add_argument('--eval-bin-lat-step', type=float, default=eval_bin_lat_step)
-    parser.add_argument('--eval-bin-lon-step', type=float, default=eval_bin_lon_step)
-    parser.add_argument('--eval-bin-time-step', type=str, default=eval_bin_time_step)
-    parser.add_argument('--eval-min-obs', type=int, default=eval_min_obs)
-    # power spectrum
-    parser.add_argument('--eval-psd-delta-t', type=float, default=eval_psd_delta_t)
-    parser.add_argument('--eval-psd-velocity', type=float, default=eval_psd_velocity)
-    parser.add_argument('--eval-psd-jitter', type=float, default=eval_psd_jitter)
+    bin_lat_step: float = 1.0
+    bin_lon_step: float = 1.0
+    bin_time_step: str = "1D"
+    min_obs: int = 10
 
-    return parser
+    # power spectrum
+    delta_t: float = 0.9434
+    velocity: float = 6.77
+    jitter: float = 1e-4
 
 # ======================
 # VIZ
 # ======================
-viz_lon_min = 295.0
-viz_lon_max = 305.0
-viz_dlon = 0.1
-viz_lon_buffer = 1.0
-# latitude subset
-viz_lat_min = 33.0
-viz_lat_max = 43.0
-viz_dlat = 0.1
-viz_lat_buffer = 1.0
-# temporal subset
-viz_time_min = "2017-01-01"
-viz_time_max = "2017-12-31"
-viz_dtime = "1_D"
-viz_time_buffer = 7.0
-
-def add_viz_data_args(parser):
-    # binning along track
-    parser.add_argument('--viz-lon-min', type=float, default=viz_lon_min)
-    parser.add_argument('--viz-lon-max', type=float, default=viz_lon_max)
-    parser.add_argument('--viz-dlon', type=float, default=viz_dlon)
-    parser.add_argument('--viz-lon-buffer', type=float, default=viz_lon_buffer)
-    # power spectrum
-    parser.add_argument('--viz-lat-min', type=float, default=viz_lat_min)
-    parser.add_argument('--viz-lat-max', type=float, default=viz_lat_max)
-    parser.add_argument('--viz-dlat', type=float, default=viz_dlat)
-    parser.add_argument('--viz-lat-buffer', type=float, default=viz_lat_buffer)
-
-    parser.add_argument('--viz-time-min', type=str, default=viz_time_min)
-    parser.add_argument('--viz-time-max', type=str, default=viz_time_max)
-    parser.add_argument('--viz-dtime', type=str, default=viz_dtime)
-    parser.add_argument('--viz-time-buffer', type=float, default=viz_time_buffer)
-    return parser
+@dataclass
+class Viz(Serializable):
+    lon_min: float = 295.0
+    lon_max: float = 305.0
+    dlon: float = 0.1
+    lon_buffer: float = 1.0
+    # latitude subset
+    lat_min: float = 33.0
+    lat_max: float = 43.0
+    dlat: float = 0.1
+    lat_buffer: float = 1.0
+    # temporal subset
+    time_min: str = "2017-01-01"
+    time_max: str = "2017-12-31"
+    dtime_freq: int = 1
+    dtime_unit: str = "D"
+    time_buffer: float = 7.0

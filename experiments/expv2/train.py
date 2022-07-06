@@ -1,4 +1,6 @@
 import sys, os
+os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
+
 from pyprojroot import here
 
 # spyder up to find the root
@@ -8,7 +10,7 @@ root = here(project_files=[".root"])
 sys.path.append(str(root))
 
 import config
-import argparse
+from simple_parsing import ArgumentParser
 import time
 from loguru import logger
 
@@ -28,42 +30,44 @@ from inr4ssh._src.models.activations import get_activation
 from inr4ssh._src.models.siren import SirenNet
 from inr4ssh._src.models.utils import get_torch_device
 from inr4ssh._src.postprocess.ssh_obs import postprocess
+from inr4ssh._src.metrics.psd import compute_psd_scores
+
+from utils import get_interpolation_alongtrack_prediction_ds, get_alongtrack_prediction_ds
+from utils import plot_psd_figs, get_grid_stats, postprocess_predictions, get_alongtrack_stats
+
 
 import wandb
-
+from inr4ssh._src.io import simpleargs_2_ndict
 
 def main(args):
-    # # modify args
-    # args.train_data_dir = "/Users/eman/.CMVolumes/cal1_workdir/data/dc_2021/raw/train"
-    # args.ref_data_dir = "/Users/eman/.CMVolumes/cal1_workdir/data/dc_2021/raw/ref"
-    # args.test_data_dir = "/Users/eman/.CMVolumes/cal1_workdir/data/dc_2021/raw/test"
-    # # #
-    # modify args
-    args.train_data_dir = "/gpfswork/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/train"
-    args.ref_data_dir = "/gpfswork/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/ref"
-    args.test_data_dir = "/gpfswork/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/test"
-    args.wandb_log_dir = "/gpfsscratch/rech/cli/uvo53rl/"
-    # #
-    # args.time_min = "2017-01-01"
-    # args.time_max = "2017-02-01"
-    # args.eval_time_min = "2017-01-01"
-    # args.eval_time_max = "2017-02-01"
-    # args.eval_dtime = "12_h"
 
     # INITIALIZE LOGGER
     logger.info("Initializing logger...")
+
+    log_options = args.logging
+
+    # print(wandb_vars)
+    params_dict = simpleargs_2_ndict(args)
     wandb_run = wandb.init(
-        config=args,
-        mode=args.wandb_mode,
-        project=args.wandb_project,
-        entity=args.wandb_entity,
-        dir=args.wandb_log_dir,
-        resume=args.wandb_resume
+        config=params_dict,
+        mode=log_options.wandb_mode,
+        project=log_options.wandb_project,
+        entity=log_options.wandb_entity,
+        dir=log_options.wandb_log_dir,
+        resume=log_options.wandb_resume
     )
+
 
     # DATA MODULE
     logger.info("Initializing data module...")
-    dm = SSHAltimetry(args)
+    dm = SSHAltimetry(
+        data=args.data,
+        preprocess=args.preprocess,
+        traintest=args.traintest,
+        features=args.features,
+        dataloader=args.dataloader,
+        eval=args.eval
+    )
 
     dm.setup()
 
@@ -85,62 +89,77 @@ def main(args):
     x_train = torch.cat([x_train, x_valid])
     y_train = torch.cat([y_train, y_valid])
 
-    logger.info("Creating neural network...")
+    logger.info(f"Creating {args.model.model} neural network...")
+
     dim_in = x_train.shape[1]
-    dim_hidden = args.hidden_dim
     dim_out = y_train.shape[1]
-    num_layers = args.n_hidden
-    w0 = args.siren_w0
-    w0_initial = args.siren_w0_initial
-    c = args.siren_c
-    final_activation = get_activation(args.final_activation)
 
-    siren_net = SirenNet(
+    # update params
+    params_dict["model"].update({
+            "dim_in": dim_in, "dim_out": dim_out
+        })
+    wandb_run.config.update(params_dict, allow_val_change=True)
+
+    from models import model_factory
+
+    net = model_factory(
+        model=args.model.model,
         dim_in=dim_in,
-        dim_hidden=dim_hidden,
         dim_out=dim_out,
-        num_layers=num_layers,
-        w0=w0,
-        w0_initial=w0_initial,
-        c=c,
-        final_activation=final_activation
+        config=args
     )
 
-    logger.info(f"Setting Device: {args.device}")
-    logger.info("Setting callbacks...")
-    lr_scheduler = LRScheduler(
-        policy="ReduceLROnPlateau",
-        monitor="valid_loss",
-        mode="min",
-        factor=getattr(args, "lr_schedule_factor", 0.1),
-        patience=getattr(args, "lr_schedule_patience", 10),
-    )
+    from optimizers import get_optimizer, get_lr_scheduler
+    from callbacks import get_callbacks
 
-    # early stopping
-    estop_callback = EarlyStopping(
-        monitor="valid_loss",
-        patience=getattr(args, "lr_estopping_patience", 20),
-    )
+    logger.info(f"Adding {args.optimizer.optimizer} optimizer...")
+    optimizer = get_optimizer(args.optimizer)
 
-    # wandb logger
-    wandb_callback = WandbLogger(wandb_run, save_model=True)
+    logger.info(f"Adding {args.lr_scheduler.lr_scheduler} optimizer...")
 
-    callbacks = [
-        ("earlystopping", estop_callback),
-        ("lrscheduler", lr_scheduler),
-        ("wandb_logger", wandb_callback),
-    ]
+    callbacks = list()
 
-    # train split percentage
-    train_split = ValidSplit(1.0 - args.train_size, stratified=False)
+    callbacks += [("lr_scheduler", get_lr_scheduler(args.lr_scheduler))]
 
+    callbacks += get_callbacks(args.callbacks, wandb_run)
+
+
+    #
+    # logger.info(f"Setting Device: {args.device}")
+    # logger.info("Setting callbacks...")
+    # lr_scheduler = LRScheduler(
+    #     policy="ReduceLROnPlateau",
+    #     monitor="valid_loss",
+    #     mode="min",
+    #     factor=getattr(args, "lr_schedule_factor", 0.05),
+    #     patience=getattr(args, "lr_schedule_patience", 10),
+    # )
+    #
+    # # early stopping
+    # estop_callback = EarlyStopping(
+    #     monitor="valid_loss",
+    #     patience=getattr(args, "lr_estopping_patience", 20),
+    # )
+    #
+    # # wandb logger
+    # wandb_callback = WandbLogger(wandb_run, save_model=True)
+    #
+    # callbacks = [
+    #     ("earlystopping", estop_callback),
+    #     ("lrscheduler", lr_scheduler),
+    #     ("wandb_logger", wandb_callback),
+    # ]
+    #
+    # # train split percentage
+    train_split = ValidSplit(1.0 - args.traintest.train_size, stratified=False)
+    #
     skorch_net = NeuralNetRegressor(
-        module=siren_net,
-        max_epochs=args.num_epochs,
-        lr=args.learning_rate,
-        batch_size=args.batch_size,
-        device=args.device,
-        optimizer=torch.optim.Adam,
+        module=net,
+        max_epochs=args.optimizer.num_epochs,
+        lr=args.optimizer.learning_rate,
+        batch_size=args.dataloader.batch_size,
+        device=args.optimizer.device,
+        optimizer=optimizer,
         train_split=train_split,
         callbacks=callbacks
 
@@ -148,8 +167,14 @@ def main(args):
     logger.info("Training...")
     skorch_net.fit(x_train, y_train)
 
+    # ==============================
+    # GRID PREDICTIONS
+    # ==============================
+
+    logger.info("GRID STATS...")
+
     # TESTING
-    logger.info("Making predictions...")
+    logger.info("Making predictions (grid)...")
     t0 = time.time()
     predictions = skorch_net.predict(X_test)
     t1 = time.time() - t0
@@ -157,156 +182,104 @@ def main(args):
     logger.info(f"Time Taken for {X_test.shape[0]} points: {t1:.4f} secs")
     wandb_run.log(
         {
-            "time_predict": t1,
-        }
-    )
-    # POSTPROCESS
-    # convert to da
-    logger.info("Convert data to xarray ds...")
-    ds_oi = dm.X_pred_index
-    ds_oi["ssh"] = predictions
-    ds_oi = df_2_xr(ds_oi)
-
-    # open correction dataset
-    logger.info("Loading SSH corrections...")
-    ds_correct = load_ssh_correction(args.ref_data_dir)
-
-    # correct predictions
-    logger.info("Correcting SSH predictions...")
-    ds_oi = postprocess(ds_oi, ds_correct)
-
-    # =========================
-    # METRICS
-    # =========================
-    
-    # open along track dataset
-    logger.info("Loading test dataset...")
-    ds_alongtrack = load_ssh_altimetry_data_test(args.test_data_dir)
-
-    # interpolate along track
-    logger.info("Interpolating alongtrack obs...")
-    alongtracks = interp_on_alongtrack(
-        gridded_dataset=ds_oi, 
-        ds_alongtrack=ds_alongtrack,
-        lon_min=args.eval_lon_min, lon_max=args.eval_lon_max,
-        lat_min=args.eval_lat_min, lat_max=args.eval_lat_max,
-        time_min=args.eval_time_min, time_max=args.eval_time_max
-    )
-    
-    # RMSE
-    logger.info("Getting RMSE Metrics...")
-    from inr4ssh._src.metrics.stats import calculate_nrmse
-
-    rmse_metrics = calculate_nrmse(
-        true=alongtracks.ssh_alongtrack,
-        pred=alongtracks.ssh_map,
-        time_vector=alongtracks.time,
-        dt_freq=args.eval_bin_time_step,
-        min_obs=args.eval_min_obs
-    )
-
-    print(rmse_metrics)
-    wandb_run.log(
-        {
-            "model_rmse_mean": rmse_metrics.rmse_mean,
-            "model_rmse_std": rmse_metrics.rmse_std,
-            "model_nrmse_mean": rmse_metrics.nrmse_mean,
-            "model_nrmse_std": rmse_metrics.nrmse_std,
+            "time_predict_grid": t1,
         }
     )
 
+    ds_oi = postprocess_predictions(predictions, dm, args, logger)
 
-    # PSD
-    from inr4ssh._src.metrics.psd import select_track_segments
+    alongtracks, tracks = get_interpolation_alongtrack_prediction_ds(ds_oi, args, logger)
 
-    logger.info("Selecting track segments...")
-    tracks = select_track_segments(
-        time_alongtrack=alongtracks.time,
-        lat_alongtrack=alongtracks.lat,
-        lon_alongtrack=alongtracks.lon,
-        ssh_alongtrack=alongtracks.ssh_alongtrack,
-        ssh_map_interp=alongtracks.ssh_map,
-    )
-
-    delta_x = args.eval_psd_velocity * args.eval_psd_delta_t
-
-    from inr4ssh._src.metrics.psd import compute_psd_scores
+    logger.info("Getting RMSE Metrics (GRID)...")
+    rmse_metrics = get_grid_stats(alongtracks, args.metrics, logger, wandb_run)
+    logger.info(f"Grid Stats: {rmse_metrics}")
 
     # compute scores
-    logger.info("Computing PSD Scores...")
+    logger.info("Computing PSD Scores (Grid)...")
     psd_metrics = compute_psd_scores(
         ssh_true=tracks.ssh_alongtrack,
         ssh_pred=tracks.ssh_map,
-        delta_x=delta_x,
+        delta_x=args.metrics.velocity * args.metrics.delta_t,
         npt=tracks.npt,
-        scaling="density", 
+        scaling="density",
         noverlap=0
     )
 
-    print(psd_metrics)
+    logger.info(f"Grid PSD: {psd_metrics}")
 
     wandb_run.log(
         {
             "resolved_scale": psd_metrics.resolved_scale,
         }
     )
-
-
-
-    # PLOTTING
-    from inr4ssh._src.viz.psd import plot_psd_score, plot_psd_spectrum
-
-    # logger.info("Plotting PSD Spectrum...")
-    # fig, ax = plot_psd_score(
-    #     psd_diff=psd_metrics.psd_diff,
-    #     psd_ref=psd_metrics.psd_ref,
-    #     wavenumber=psd_metrics.wavenumber,
-    #     resolved_scale=psd_metrics.resolved_scale
-    # )
     #
-    # wandb_run.log(
-    #     {
-    #         "model_psd_spectrum": wandb.Image(fig),
-    #     }
-    # )
+    logger.info(f"Plotting PSD Score and Spectrum (Grid)...")
+    plot_psd_figs(psd_metrics, logger, wandb_run, method="grid")
+    logger.info("Finished GRID Script...!")
 
-    logger.info("Plotting PSD Score...")
-    fig, ax = plot_psd_score(
-        psd_diff=psd_metrics.psd_diff,
-        psd_ref=psd_metrics.psd_ref,
-        wavenumber=psd_metrics.wavenumber,
-        resolved_scale=psd_metrics.resolved_scale
-    )
+    # ==============================
+    # ALONGTRACK PREDICTIONS
+    # ==============================
+
+    logger.info("ALONGTRACK STATS...")
+
+    X_test, y_test = get_alongtrack_prediction_ds(dm, args, logger)
+
+    logger.info(f"Predicting alongtrack data...")
+    t0 = time.time()
+    predictions = skorch_net.predict(torch.Tensor(X_test))
+    t1 = time.time() - t0
 
     wandb_run.log(
         {
-            "model_psd_score": wandb.Image(fig),
+            "time_predict_alongtrack": t1,
         }
     )
 
-    logger.info("Finished Script...!")
+    logger.info("Calculating stats (alongtrack)...")
+    get_alongtrack_stats(y_test, predictions, logger, wandb_run)
 
-    return None
+    # PSD
+    logger.info(f"Getting PSD Scores (alongtrack)...")
+    psd_metrics = compute_psd_scores(
+        ssh_true=y_test.squeeze(),
+        ssh_pred=predictions.squeeze(),
+        delta_x=args.metrics.velocity * args.metrics.delta_t,
+        npt=None,
+        scaling="density",
+        noverlap=0,
+    )
+
+    logger.info(f"Plotting PSD Score and Spectrum (AlongTrack)...")
+    plot_psd_figs(psd_metrics, logger, wandb_run, method="alongtrack")
+
+    wandb_run.finish()
+
 
 if __name__ == '__main__':
     # initialize argparse
-    parser = argparse.ArgumentParser()
+    parser = ArgumentParser()
 
     # add all experiment arguments
-    parser = config.add_logging_args(parser)
-    parser = config.add_data_dir_args(parser)
-    parser = config.add_data_preprocess_args(parser)
-    parser = config.add_feature_transform_args(parser)
-    parser = config.add_train_split_args(parser)
-    parser = config.add_dataloader_args(parser)
-    parser = config.add_model_args(parser)
-    parser = config.add_loss_args(parser)
-    parser = config.add_optimizer_args(parser)
-    parser = config.add_eval_data_args(parser)
-    parser = config.add_eval_metrics_args(parser)
-    parser = config.add_viz_data_args(parser)
+    parser.add_arguments(config.Logging, dest="logging")
+    parser.add_arguments(config.DataDir, dest="data")
+    parser.add_arguments(config.PreProcess, dest="preprocess")
+    parser.add_arguments(config.Features, dest="features")
+    parser.add_arguments(config.TrainTestSplit, dest="traintest")
+    parser.add_arguments(config.DataLoader, dest="dataloader")
+    parser.add_arguments(config.Model, dest="model")
+    parser.add_arguments(config.Siren, dest="siren")
+    parser.add_arguments(config.Losses, dest="losses")
+    parser.add_arguments(config.Optimizer, dest="optimizer")
+    parser.add_arguments(config.LRScheduler, dest="lr_scheduler")
+    parser.add_arguments(config.Callbacks, dest="callbacks")
+    parser.add_arguments(config.EvalData, dest="eval")
+    parser.add_arguments(config.Metrics, dest="metrics")
+    parser.add_arguments(config.Viz, dest="viz")
 
     # parse args
     args = parser.parse_args()
+
+
 
     main(args)

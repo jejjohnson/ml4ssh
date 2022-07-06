@@ -18,6 +18,8 @@ import numpy as np
 import pytorch_lightning as pl
 import torch
 import wandb
+
+from inr4ssh._src.io import save_object
 from inr4ssh._src.data.ssh_obs import (
     load_ssh_altimetry_data_test,
     load_ssh_altimetry_data_train,
@@ -93,6 +95,17 @@ def main(args):
     logger.info("Initializing data module...")
     dm = SSHAltimetry(args)
     dm.setup()
+
+    # objects
+    logger.info("saving scaler transform...")
+    path_scaler = "./scaler.pickle"
+
+    # models to save
+    save_object(dm.scaler, path_scaler)
+
+    # save with wandb
+    logger.info("logging scaler transform...")
+    wandb_run.save(str(path_scaler))
 
     x_train, y_train = dm.ds_train[:]
     x_valid, y_valid = dm.ds_valid[:]
@@ -193,84 +206,22 @@ def main(args):
     # ==================================
     # PREDICTIONS - ALONGTRACK
     # ==================================
-    
-    logger.info(f"Opening alongtrack dataset...")
-    ds_alongtrack = load_ssh_altimetry_data_test(args.test_data_dir)
 
-    logger.info(f"Correcting coordinate labels...")
-    ds_alongtrack = correct_coordinate_labels(ds_alongtrack)
+    from utils import get_alongtrack_prediction_ds
 
-    logger.info(f"correcting longitudal domain...")
-    ds_alongtrack = correct_longitude_domain(ds_alongtrack)
-
-    # temporal subset
-    logger.info(f"Temporal subset...")
-    ds_alongtrack = temporal_subset(
-        ds_alongtrack,
-        time_min=np.datetime64(args.time_min),
-        time_max=np.datetime64(args.time_max),
-        time_buffer=args.time_buffer,
-    )
-
-    logger.info(f"Spatial subset...")
-    ds_alongtrack = spatial_subset(
-        ds_alongtrack,
-        lon_min=args.eval_lon_min,
-        lon_max=args.eval_lon_max,
-        lon_buffer=args.eval_lon_buffer,
-        lat_min=args.eval_lat_min,
-        lat_max=args.eval_lat_max,
-        lat_buffer=args.eval_lat_buffer,
-    )
-
-    logger.info(f"Converting to a dataframe...")
-    ds_alongtrack = ds_alongtrack.to_dataframe().reset_index().dropna()
-
-    logger.info(f"Feature transformation for alongtrack data...")
-    X_test = dm.scaler.transform(ds_alongtrack)
-    y_test = ds_alongtrack["sla_unfiltered"]
+    X_test, y_test = get_alongtrack_prediction_ds(dm, args, logger)
     
     logger.info(f"Predicting alongtrack data...")
     t0 = time.time()
     predictions = skorch_net.predict(torch.Tensor(X_test))
     t1 = time.time() - t0
 
-    wandb_run.log(
-        {
-            "time_predict_alongtrack": t1,
-        }
-    )
-    
-    # STATS
-    logger.info(f"Calculating alongtrack RMSE...")
-    rmse_mean, rmse_std = calculate_rmse_elementwise(y_test, predictions)
 
-    wandb_run.log(
-        {
-            f"rmse_mean_alongtrack": rmse_mean,
-            f"rmse_std_alongtrack": rmse_std,
-        }
-    )
-    
-    logger.info(f"RMSE: {rmse_mean}\nRMSE (stddev): {rmse_std}")
-    
-    # NORMALIZED metrics
-    logger.info(f"Calculating alongtrack NRMSE...")
-    metrics = ["custom", "std", "mean", "minmax", "iqr"]
+    from utils import get_alongtrack_stats
 
-    for imetric in metrics:
+    logger.info("Calculating alongtrack stats...")
+    get_alongtrack_stats(y_test, predictions, logger, wandb_run)
 
-        nrmse_mean, nrmse_std = calculate_nrmse_elementwise(y_test, predictions, imetric)
-
-        logger.info(f"RMSE ({imetric}): mean - {nrmse_mean:.4f}, stddev - {nrmse_std:.4f}")
-
-        wandb_run.log(
-            {
-                f"nrmse_mean_alongtrack_{imetric}": nrmse_mean,
-                f"nrmse_std_alongtrack_{imetric}": nrmse_std,
-            }
-        )
-       
     # PSD
     logger.info(f"Getting PSD Scores...")
     psd_metrics = compute_psd_scores(
@@ -281,61 +232,10 @@ def main(args):
         scaling="density",
         noverlap=0,
     )
-    
-    logger.info(psd_metrics)
-    
-    wandb_run.log(
-        {
-            "resolved_scale_alongtrack": psd_metrics.resolved_scale,
-        }
-    )
-    
-    # PLOTS
-    logger.info(f"Plotting PSD Score...")
-    fig, ax = plot_psd_score(
-        psd_diff=psd_metrics.psd_diff,
-        psd_ref=psd_metrics.psd_ref,
-        wavenumber=psd_metrics.wavenumber,
-        resolved_scale=psd_metrics.resolved_scale,
-    )
 
-    wandb_run.log(
-        {
-            "psd_score_alongtrack": wandb.Image(fig),
-        }
-    )
-    
-    
-    logger.info(f"Plotting PSD Spectrum...")
-    fig, ax = plot_psd_spectrum(
-        psd_study=psd_metrics.psd_study,
-        psd_ref=psd_metrics.psd_ref,
-        wavenumber=psd_metrics.wavenumber,
-    )
+    from utils import plot_psd_figs
 
-    wandb_run.log(
-        {
-            "psd_spectrum_alongtrack": wandb.Image(fig),
-        }
-    )
-    
-
-
-#     #===
-    
-#     # POSTPROCESS
-#     logger.info("Convert data to xarray ds...")
-#     ds_oi = dm.X_pred_index
-#     ds_oi["ssh"] = predictions
-#     ds_oi = df_2_xr(ds_oi)
-
-#     # open correction dataset
-#     logger.info("Loading SSH corrections...")
-#     ds_correct = load_ssh_correction(args.ref_data_dir)
-
-#     # correct predictions
-#     logger.info("Correcting SSH predictions...")
-#     ds_oi = postprocess(ds_oi, ds_correct)
+    plot_psd_figs(psd_metrics, logger, wandb_run, method="grid")
     
     wandb_run.finish()
 

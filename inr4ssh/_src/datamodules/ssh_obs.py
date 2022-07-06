@@ -15,21 +15,33 @@ from inr4ssh._src.data.ssh_obs import load_ssh_altimetry_data_train
 import torch
 
 class SSHAltimetry(pl.LightningDataModule):
-    def __init__(self, config):
+    def __init__(self,
+                 data,
+                 preprocess,
+                 traintest,
+                 features,
+                 dataloader,
+                 eval
+                 ):
         super().__init__()
-        self.config = config
+        self.data = data
+        self.preprocess = preprocess
+        self.traintest = traintest
+        self.features = features
+        self.dataloader = dataloader
+        self.eval = eval
         
     def setup(self, stage=None):
         
         logger.info("Getting training data...")
-        X, y, scaler = self.get_train_data(self.config)
+        X, y, scaler = self.get_train_data(self.data, self.preprocess, self.features)
         
         self.scaler = scaler
         logger.info("Train/Validation Split...")
-        xtrain, ytrain, xvalid, yvalid = self.split_train_data(X, y, self.config)
+        xtrain, ytrain, xvalid, yvalid = self.split_train_data(X, y, self.traintest)
         
         logger.info("Getting evalulation data...")
-        X = self.get_eval_data(self.config)
+        X = self.get_eval_data(self.eval)
         
         self.X_pred_index = X[["latitude", "longitude", "time"]]
         
@@ -53,16 +65,16 @@ class SSHAltimetry(pl.LightningDataModule):
 
     
     @staticmethod
-    def get_train_data(config):
+    def get_train_data(data, preprocess, features):
         # load data from train dir
         logger.info("loading data...")
-        ds = load_ssh_altimetry_data_train(config.train_data_dir)
+        ds = load_ssh_altimetry_data_train(data.train_data_dir)
         
         logger.info("subsetting data...")
-        ds = preprocess_data(ds, config)
+        ds = preprocess_data(ds, preprocess)
         
         logger.info("getting feature scaler...")
-        scaler = get_feature_scaler(config)
+        scaler = get_feature_scaler(features)
         
         logger.info("feature scaling...")
         X = scaler.fit_transform(ds)
@@ -83,7 +95,7 @@ class SSHAltimetry(pl.LightningDataModule):
         xtrain, xvalid, ytrain, yvalid = train_test_split(
             X, y, 
             train_size=config.train_size, 
-            random_state=config.train_seed_split
+            random_state=config.seed_split
         )
         
         return xtrain, ytrain, xvalid, yvalid
@@ -93,26 +105,26 @@ class SSHAltimetry(pl.LightningDataModule):
     def train_dataloader(self):
         return DataLoader(
             self.ds_train, 
-            batch_size=self.config.batch_size, 
-            shuffle=self.config.dl_train_shuffle,
-            num_workers=self.config.dl_num_workers,
-            pin_memory=self.config.dl_pin_memory
+            batch_size=self.dataloader.batch_size,
+            shuffle=self.dataloader.train_shuffle,
+            num_workers=self.dataloader.num_workers,
+            pin_memory=self.dataloader.pin_memory
         )
     def val_dataloader(self):
         return DataLoader(
             self.ds_valid, 
-            batch_size=self.config.batch_size, 
+            batch_size=self.dataloader.batch_size,
             shuffle=False,
-            num_workers=self.config.dl_num_workers,
-            pin_memory=self.config.dl_pin_memory
+            num_workers=self.dataloader.num_workers,
+            pin_memory=self.dataloader.pin_memory
         )
     def predict_dataloader(self):
         return DataLoader(
             self.ds_predict, 
-            batch_size=self.config.batch_size_eval, 
+            batch_size=self.dataloader.batch_size_eval,
             shuffle=False,
-            num_workers=self.config.dl_num_workers,
-            pin_memory=self.config.dl_pin_memory
+            num_workers=self.dataloader.num_workers,
+            pin_memory=self.dataloader.pin_memory
         )
     
     
@@ -149,15 +161,15 @@ def get_evalulation_data(config):
     
     # create spatiotemporal grid
     lon_coords, lat_coords, time_coords = create_spatiotemporal_grid(
-        lon_min=config.eval_lon_min,
-        lon_max=config.eval_lon_max,
-        lon_dx=config.eval_dlon,
-        lat_min=config.eval_lat_min,
-        lat_max=config.eval_lat_max,
-        lat_dy=config.eval_dlat,
-        time_min=np.datetime64(config.eval_time_min),
-        time_max=np.datetime64(config.eval_time_max),
-        time_dt=np.timedelta64(*config.eval_dtime.split("_"))
+        lon_min=config.lon_min,
+        lon_max=config.lon_max,
+        lon_dx=config.dlon,
+        lat_min=config.lat_min,
+        lat_max=config.lat_max,
+        lat_dy=config.dlat,
+        time_min=np.datetime64(config.time_min),
+        time_max=np.datetime64(config.time_max),
+        time_dt=np.timedelta64(config.dtime_freq, config.dtime_unit)
     )
     
     df_grid = pd.DataFrame({
