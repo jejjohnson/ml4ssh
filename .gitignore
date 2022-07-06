@@ -135,7 +135,7 @@ datasets/*
 outputs/*
 \wandb/
 \checkpoints/
-*.gif
+notebooks/*.gif
 *.mp4
 *.png
 *.nc
