@@ -92,3 +92,54 @@ def compute_ts_stats(data: np.ndarray, time_vector: np.ndarray, dt_freq: str="1D
     )
     
     return ds
+
+
+def calculate_rmse_elementwise(y_true, y_pred):
+    
+    # calculate difference
+    diff = y_true.squeeze() - y_pred.squeeze()
+    
+    # calculate mean and variance
+    rmse_pred = np.sqrt(np.square(diff))
+    rmse_mean = rmse_pred.mean()
+    rmse_std = rmse_pred.std()
+    
+    return rmse_mean, rmse_std
+
+def calculate_nrmse_elementwise(y_true, y_pred, normalization: str="custom", mask_invalid: bool=True):
+    
+    # calculate difference
+    diff = y_true.squeeze() - y_pred.squeeze()
+    
+    # calculate prediction rmse
+    rmse_pred = np.sqrt(np.square(diff))
+    rmse_true = rmse_normalization(y_true, normalization=normalization)
+    
+    nrmse_score = 1. - rmse_pred / rmse_true
+    
+    if mask_invalid:
+        nrmse_score = np.ma.masked_invalid(nrmse_score)
+        
+        nrmse_mean = np.ma.mean(nrmse_score)
+        nrmse_std = np.ma.std(nrmse_score)
+        
+    else:
+        nrmse_mean = nrmse_score.mean()
+        nrmse_std = nrmse_score.std()
+    
+    return nrmse_mean, nrmse_std
+
+def rmse_normalization(y_true, normalization: str="custom"):
+    
+    if normalization == "custom":
+        return np.sqrt(np.square(y_true).mean()) 
+    elif normalization == "std":
+        return np.std(y_true)
+    elif normalization == "mean":
+        return np.mean(y_true)
+    elif normalization == "minmax":
+        return np.max(y_true) - np.min(y_true)
+    elif normalization == "iqr":
+        return np.subtract(*np.percentile(y_true, [75, 25]))
+    else:
+        raise ValueError(f"Unrecognized normalization: {normalization}") 

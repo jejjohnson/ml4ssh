@@ -15,6 +15,7 @@ dependencies:
 - conda-forge::pooch              # Data Download
 - conda-forge::cftime             # Xarray compatible time stamps
 - conda-forge::pyinterp           # Interpolation
+- conda-forge::rasterio
 # PLOTTING LIBRARY
 - matplotlib                      # standard plotting library
 - seaborn                         # Stats viz library

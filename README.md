@@ -2,9 +2,86 @@
 
 **Author**: J. Emmanuel Johnson
 
+---
+**Collaborators:**
+* [Redouane Lguensat](https://redouanelg.github.io)
+* [Julien Le Sommer](https://lesommer.github.io)
+* [Ronan Fablet](https://rfablet.github.io)
+* [Jordi Bolibar](https://jordibolibar.wordpress.com)
+* Quentin Favre
+* [Jean-Michel Brankart](https://www.ige-grenoble.fr/-Jean-Michel-Brankart-451-)
+* Pierre Brasseur
+
 
 ---
 ## Overview
+
+---
+#### QG Simulations (TODO)
+
+
+---
+#### OSE (Data Challenge 2021a)
+
+
+
+---
+## Results (Preliminary)
+
+---
+### QG Simulations (TODO)
+
+
+#### Challenge
+
+|      Simulated Altimetry Tracks      |       Simulated SSH Field        | 
+|:------------------------------------:|:--------------------------------:|
+| ![Animation](assets/obs_p_movie.gif) | ![Animation](assets/p_movie.gif) |
+
+
+#### Results
+
+|              SSH Field              |           (Norm) Gradient           |          (Norm) Laplacian          | 
+|:-----------------------------------:|:-----------------------------------:|:----------------------------------:|
+| ![Animation](assets/siren_pred.gif) | ![Animation](assets/siren_grad.gif) | ![Animation](assets/siren_lap.gif) |  
+
+---
+### OSE (Data Challenge 2021a)
+
+#### Challenge
+
+|          Altimetry Tracks           |                   SSH Field                   | 
+|:-----------------------------------:|:---------------------------------------------:|
+| ![Animation](assets/movie_obs.gif)  | ![Animation](assets/movie_field_duacs.gif) |
+
+
+### Figures
+
+|       Algorithm       |                   SSH Field                   |                  (Norm) Gradient                   |                   (Norm) Laplacian                   |
+|:---------------------:|:---------------------------------------------:|:--------------------------------------------------:|:----------------------------------------------------:|
+|     OI (Baseline)     | ![Animation](assets/movie_field_baseline.gif) | ![Animation](assets/movie_field_baseline_grad.gif) |  ![Animation](assets/movie_field_baseline_lap.gif)   |
+| OI (DUACS-Production) |  ![Animation](assets/movie_field_duacs.gif)   |  ![Animation](assets/movie_field_duacs_grad.gif)   |    ![Animation](assets/movie_field_duacs_lap.gif)    |
+|     SIREN (Ours)      |  ![Animation](assets/predictions_siren.gif)   |  ![Animation](assets/predictions_grad_siren.gif)   | ![Animation](assets/predictions_laplacian_siren.gif) |
+
+
+### Statistics
+
+|       Algorithm       | Normalized RMSE (Mean) | Normalized RMSE (Stddev) | Resolved Spatial Resolution (km) |
+|:---------------------:|:----------------------:|:------------------------:|:--------------------------------:|
+|     OI (Baseline)     |          0.85          |           0.09           |               140                |
+| OI (DUACS-Production) |          0.88          |           0.07           |               152                |
+|     SIREN (Ours)      |          0.88          |           0.08           |               146                |
+
+
+#### Speed
+
+
+|       Algorithm       | CPU (10 cores) | GPU (M1 MacOS) | GPU (V100, 32GB) | Multi-GPU (V100, 32GB) |
+|:---------------------:|:--------------:|:--------------:|:----------------:|:----------------------:|
+|     OI (Baseline)     |      1 hr      |      ---       |       ---        |          ---           |
+| OI (DUACS-Production) |      ---       |      ---       |       ---        |          ---           |
+|     SIREN (Ours)      |    30 secs     |    15 secs     |      5 secs      |          ---           |
+
 
 
 ---

@@ -15,6 +15,7 @@ dependencies:
 - conda-forge::pooch              # Data Download
 - conda-forge::cftime             # Xarray compatible time stamps
 - conda-forge::pyinterp           # Interpolation
+- conda-forge::rasterio
 # PLOTTING LIBRARY
 - matplotlib                      # standard plotting library
 - seaborn                         # Stats viz library
@@ -23,6 +24,7 @@ dependencies:
 - pyviz::hvplot                   # interactive plots
 - pyviz::datashader                      # scale plots
 - conda-forge::xmovie             # xarray movies/gifs
+- conda-forge::ffmpeg             # image/gif manipulation
 # Scale
 - dask                            # Out-of-Core processing
 # Storage
