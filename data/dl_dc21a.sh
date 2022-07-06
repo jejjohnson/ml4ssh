@@ -16,8 +16,6 @@ test_dir=$dir/test
 # make results directory
 result_dir=$dir/results
 
-wget --user johnsonj@univ-grenoble-alpes.fr --password w1OgWd https://tds.aviso.altimetry.fr/thredds/fileServer/2021a-SSH-mapping-OSE-grid-data/OSE_ssh_mapping_DUACS.nc
-
 # GULFSTREAM (SARAL/Altika obs)
 wget --user $username --password $password --directory-prefix=$train_dir 'https://tds.aviso.altimetry.fr/thredds/fileServer/2021a-SSH-mapping-OSE-along-track-data/dt_gulfstream_alg_phy_l3_20161201-20180131_285-315_23-53.nc'
 
