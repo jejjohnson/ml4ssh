@@ -3,6 +3,7 @@ import pickle
 import tqdm
 import xarray as xr
 from dataclasses import asdict
+import wandb
 
 
 def load_multiple_nc_files(files: List[str]) -> List:
@@ -55,3 +56,27 @@ def simpleargs_2_ndict(args):
     for i in vars(args):
         params_dict[i] = asdict(getattr(args, i))
     return params_dict
+
+
+def get_wandb_config(run_path):
+    # init API
+    api = wandb.Api()
+    
+    # init run
+    run = api.run(run_path)
+    
+    # return config
+    return run.config
+
+
+def get_wandb_model(run_path, checkpoint_path):
+    
+    # initialize api
+    api = wandb.Api()
+    
+    run = api.run(run_path)
+    
+    
+    
+    
+    return run.file(checkpoint_path)

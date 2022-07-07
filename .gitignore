@@ -147,3 +147,4 @@ notebooks/*.gif
 *.zarr
 *.npy
 *credentials.*
+*.pth

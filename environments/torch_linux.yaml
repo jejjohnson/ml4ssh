@@ -71,6 +71,7 @@ dependencies:
   - wandb
   - loguru
   - simple-parsing
+  - ml_collections
   # plotting
   - celluloid
   - corner

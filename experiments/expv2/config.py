@@ -116,11 +116,11 @@ class Siren(Serializable):
 @dataclass
 class Losses(Serializable):
     loss: str = "mse"
-    loss_reduction: str = "mean"
+    reduction: str = "mean"
 
     # QG PINN Loss Args
-    loss_qg: bool = False
-    loss_qg_reg: str = 0.1
+    qg: bool = False
+    qg_reg: str = 0.1
 
 # ======================
 # OPTIMIZER
@@ -130,7 +130,9 @@ class Optimizer(Serializable):
     optimizer: str = "adam" # "adamw" # "adamax"
     learning_rate: float = 1e-4
     num_epochs: int = 300
+    min_epochs: int = 1
     device: str = "cpu"
+    gpus: int = 0 # the number of GPUS (pytorch-lightning)
 
 @dataclass
 class LRScheduler(Serializable):

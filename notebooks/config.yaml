@@ -1,0 +1,400 @@
+wandb_version: 1
+
+_wandb:
+  desc: null
+  value:
+    cli_version: 0.12.21
+    framework: lightning
+    is_jupyter_run: false
+    is_kaggle_kernel: false
+    m:
+    - 1: trainer/global_step
+      6:
+      - 3
+    - 1: train_loss
+      5: 1
+      6:
+      - 1
+    - 1: epoch
+      5: 1
+      6:
+      - 1
+    - 1: valid_loss
+      5: 1
+      6:
+      - 1
+    - 1: time_predict_grid
+      5: 1
+      6:
+      - 1
+    - 1: rmse_mean_grid
+      5: 1
+      6:
+      - 1
+    - 1: rmse_std_grid
+      5: 1
+      6:
+      - 1
+    - 1: nrmse_mean_grid
+      5: 1
+      6:
+      - 1
+    - 1: nrmse_std_grid
+      5: 1
+      6:
+      - 1
+    - 1: resolved_scale_grid
+      5: 1
+      6:
+      - 1
+    - 1: resolved_scale_alongtrack
+      5: 1
+      6:
+      - 1
+    - 1: psd_score_grid._type
+      5: 1
+      6:
+      - 1
+    - 1: psd_score_grid.sha256
+      5: 1
+      6:
+      - 1
+    - 1: psd_score_grid.size
+      5: 1
+      6:
+      - 1
+    - 1: psd_score_grid.path
+      5: 1
+      6:
+      - 1
+    - 1: psd_score_grid.format
+      5: 1
+      6:
+      - 1
+    - 1: psd_score_grid.width
+      5: 1
+      6:
+      - 1
+    - 1: psd_score_grid.height
+      5: 1
+      6:
+      - 1
+    - 1: psd_spectrum_grid._type
+      5: 1
+      6:
+      - 1
+    - 1: psd_spectrum_grid.sha256
+      5: 1
+      6:
+      - 1
+    - 1: psd_spectrum_grid.size
+      5: 1
+      6:
+      - 1
+    - 1: psd_spectrum_grid.path
+      5: 1
+      6:
+      - 1
+    - 1: psd_spectrum_grid.format
+      5: 1
+      6:
+      - 1
+    - 1: psd_spectrum_grid.width
+      5: 1
+      6:
+      - 1
+    - 1: psd_spectrum_grid.height
+      5: 1
+      6:
+      - 1
+    - 1: time_predict_alongtrack
+      5: 1
+      6:
+      - 1
+    - 1: rmse_mean_alongtrack
+      5: 1
+      6:
+      - 1
+    - 1: rmse_std_alongtrack
+      5: 1
+      6:
+      - 1
+    - 1: nrmse_mean_alongtrack_custom
+      5: 1
+      6:
+      - 1
+    - 1: nrmse_std_alongtrack_custom
+      5: 1
+      6:
+      - 1
+    - 1: nrmse_mean_alongtrack_std
+      5: 1
+      6:
+      - 1
+    - 1: nrmse_std_alongtrack_std
+      5: 1
+      6:
+      - 1
+    - 1: nrmse_mean_alongtrack_mean
+      5: 1
+      6:
+      - 1
+    - 1: nrmse_std_alongtrack_mean
+      5: 1
+      6:
+      - 1
+    - 1: nrmse_mean_alongtrack_minmax
+      5: 1
+      6:
+      - 1
+    - 1: nrmse_std_alongtrack_minmax
+      5: 1
+      6:
+      - 1
+    - 1: nrmse_mean_alongtrack_iqr
+      5: 1
+      6:
+      - 1
+    - 1: nrmse_std_alongtrack_iqr
+      5: 1
+      6:
+      - 1
+    - 1: psd_score_alongtrack._type
+      5: 1
+      6:
+      - 1
+    - 1: psd_score_alongtrack.sha256
+      5: 1
+      6:
+      - 1
+    - 1: psd_score_alongtrack.size
+      5: 1
+      6:
+      - 1
+    - 1: psd_score_alongtrack.path
+      5: 1
+      6:
+      - 1
+    - 1: psd_score_alongtrack.format
+      5: 1
+      6:
+      - 1
+    - 1: psd_score_alongtrack.width
+      5: 1
+      6:
+      - 1
+    - 1: psd_score_alongtrack.height
+      5: 1
+      6:
+      - 1
+    - 1: psd_spectrum_alongtrack._type
+      5: 1
+      6:
+      - 1
+    - 1: psd_spectrum_alongtrack.sha256
+      5: 1
+      6:
+      - 1
+    - 1: psd_spectrum_alongtrack.size
+      5: 1
+      6:
+      - 1
+    - 1: psd_spectrum_alongtrack.path
+      5: 1
+      6:
+      - 1
+    - 1: psd_spectrum_alongtrack.format
+      5: 1
+      6:
+      - 1
+    - 1: psd_spectrum_alongtrack.width
+      5: 1
+      6:
+      - 1
+    - 1: psd_spectrum_alongtrack.height
+      5: 1
+      6:
+      - 1
+    python_version: 3.9.13
+    start_time: 1657212822
+    t:
+      1:
+      - 1
+      - 5
+      - 9
+      - 32
+      - 41
+      - 50
+      - 53
+      - 54
+      - 55
+      2:
+      - 1
+      - 5
+      - 9
+      - 32
+      - 41
+      - 50
+      - 53
+      - 54
+      - 55
+      3:
+      - 2
+      - 3
+      - 7
+      - 16
+      - 23
+      4: 3.9.13
+      5: 0.12.21
+      8:
+      - 4
+      - 5
+callbacks:
+  desc: null
+  value:
+    early_stopping: true
+    patience: 20
+    save_model: true
+    wandb: true
+data:
+  desc: null
+  value:
+    ref_data_dir: /Users/eman/.CMVolumes/cal1_workdir/data/dc_2021/raw/ref
+    test_data_dir: /Users/eman/.CMVolumes/cal1_workdir/data/dc_2021/raw/test
+    train_data_dir: /Users/eman/.CMVolumes/cal1_workdir/data/dc_2021/raw/train
+dataloader:
+  desc: null
+  value:
+    batch_size: 4096
+    batch_size_eval: 10000
+    num_workers: 0
+    pin_memory: false
+    train_shuffle: true
+eval:
+  desc: null
+  value:
+    dlat: 0.2
+    dlon: 0.2
+    dtime_freq: 12
+    dtime_unit: h
+    lat_buffer: 2.0
+    lat_max: 43.0
+    lat_min: 33.0
+    lon_buffer: 2.0
+    lon_max: 305.0
+    lon_min: 295.0
+    time_buffer: 7.0
+    time_max: '2017-02-01'
+    time_min: '2017-01-01'
+features:
+  desc: null
+  value:
+    abs_time_max: '2022-01-01'
+    abs_time_min: '2005-01-01'
+    feature_scaler: minmax
+    julian_time: true
+    max_time_scale: 1.0
+    min_time_scale: -1.0
+    spherical_radius: 1.0
+logging:
+  desc: null
+  value:
+    smoke_test: store_true
+    wandb_entity: ige
+    wandb_id: null
+    wandb_log_dir: /Users/eman/code_projects/logs
+    wandb_mode: online
+    wandb_project: inr4ssh
+    wandb_resume: allow
+losses:
+  desc: null
+  value:
+    loss: mse
+    qg: false
+    qg_reg: 0.1
+    reduction: mean
+lr_scheduler:
+  desc: null
+  value:
+    factor: 0.1
+    lr_scheduler: reduce
+    patience: 10
+metrics:
+  desc: null
+  value:
+    bin_lat_step: 1.0
+    bin_lon_step: 1.0
+    bin_time_step: 1D
+    delta_t: 0.9434
+    jitter: 0.0001
+    min_obs: 10
+    velocity: 6.77
+model:
+  desc: null
+  value:
+    dim_in: 4
+    dim_out: 1
+    encoder: null
+    model: siren
+optimizer:
+  desc: null
+  value:
+    device: mps
+    gpus: 0
+    learning_rate: 0.0001
+    min_epochs: 1
+    num_epochs: 2
+    optimizer: adam
+preprocess:
+  desc: null
+  value:
+    dlat: 0.2
+    dlon: 0.2
+    dtime: 1_D
+    lat_buffer: 1.0
+    lat_max: 53.0
+    lat_min: 23.0
+    lon_buffer: 1.0
+    lon_max: 315.0
+    lon_min: 285.0
+    time_buffer: 7.0
+    time_max: '2017-02-01'
+    time_min: '2017-01-01'
+siren:
+  desc: null
+  value:
+    activation: swish
+    c: 6.0
+    final_activation: identity
+    final_scale: 1.0
+    hidden_dim: 512
+    model_seed: 42
+    n_hidden: 6
+    num_layers: 5
+    w0: 1.0
+    w0_initial: 30.0
+traintest:
+  desc: null
+  value:
+    seed_shuffle: 321
+    seed_split: 666
+    split_method: random
+    split_spatial: random
+    split_time_freq: null
+    train_size: 0.9
+viz:
+  desc: null
+  value:
+    dlat: 0.1
+    dlon: 0.1
+    dtime_freq: 1
+    dtime_unit: D
+    lat_buffer: 1.0
+    lat_max: 43.0
+    lat_min: 33.0
+    lon_buffer: 1.0
+    lon_max: 305.0
+    lon_min: 295.0
+    time_buffer: 7.0
+    time_max: '2017-12-31'
+    time_min: '2017-01-01'

@@ -100,7 +100,7 @@ def get_interpolation_alongtrack_prediction_ds(ds_oi, config, logger):
 
     return alongtracks, tracks
 
-def get_grid_stats(alongtracks, args, logger, wandb_run):
+def get_grid_stats(alongtracks, args, logger, wandb_fn=None):
 
 
     rmse_metrics = calculate_nrmse(
@@ -110,16 +110,16 @@ def get_grid_stats(alongtracks, args, logger, wandb_run):
         dt_freq=args.bin_time_step,
         min_obs=args.min_obs
     )
-
-
-    wandb_run.log(
-        {
-            "model_rmse_mean": rmse_metrics.rmse_mean,
-            "model_rmse_std": rmse_metrics.rmse_std,
-            "model_nrmse_mean": rmse_metrics.nrmse_mean,
-            "model_nrmse_std": rmse_metrics.nrmse_std,
-        }
-    )
+    
+    if wandb_fn is not None:
+        wandb_fn(
+            {
+                "rmse_mean_grid": rmse_metrics.rmse_mean,
+                "rmse_std_grid": rmse_metrics.rmse_std,
+                "nrmse_mean_grid": rmse_metrics.nrmse_mean,
+                "nrmse_std_grid": rmse_metrics.nrmse_std,
+            }
+        )
 
 
     return rmse_metrics
@@ -166,18 +166,19 @@ def get_alongtrack_prediction_ds(dm, config, logger):
     y_test = ds_alongtrack["sla_unfiltered"]
     return X_test, y_test
 
-def get_alongtrack_stats(y_test, predictions, logger, wandb_run):
+def get_alongtrack_stats(y_test, predictions, logger, wandb_fn=None):
 
     # STATS
     logger.info(f"Calculating alongtrack RMSE...")
     rmse_mean, rmse_std = calculate_rmse_elementwise(y_test, predictions)
-
-    wandb_run.log(
-        {
-            f"rmse_mean_alongtrack": rmse_mean,
-            f"rmse_std_alongtrack": rmse_std,
-        }
-    )
+    
+    if wandb_fn is not None:
+        wandb_fn(
+            {
+                f"rmse_mean_alongtrack": rmse_mean,
+                f"rmse_std_alongtrack": rmse_std,
+            }
+        )
 
     logger.info(f"RMSE: {rmse_mean}\nRMSE (stddev): {rmse_std}")
 
@@ -189,22 +190,24 @@ def get_alongtrack_stats(y_test, predictions, logger, wandb_run):
         nrmse_mean, nrmse_std = calculate_nrmse_elementwise(y_test, predictions, imetric)
 
         logger.info(f"RMSE ({imetric}): mean - {nrmse_mean:.4f}, stddev - {nrmse_std:.4f}")
-
-        wandb_run.log(
-            {
-                f"nrmse_mean_alongtrack_{imetric}": nrmse_mean,
-                f"nrmse_std_alongtrack_{imetric}": nrmse_std,
-            }
-        )
+        
+        if wandb_fn is not None:
+            wandb_fn(
+                {
+                    f"nrmse_mean_alongtrack_{imetric}": nrmse_mean,
+                    f"nrmse_std_alongtrack_{imetric}": nrmse_std,
+                }
+            )
     return None
 
-def plot_psd_figs(psd_metrics, logger, wandb_run, method: str="alongtrack"):
-
-    wandb_run.log(
-        {
-            "resolved_scale_alongtrack": psd_metrics.resolved_scale,
-        }
-    )
+def plot_psd_figs(psd_metrics, logger, wandb_fn=None, method: str="alongtrack"):
+    
+    if wandb_fn is not None:
+        wandb_fn(
+            {
+                "resolved_scale_alongtrack": psd_metrics.resolved_scale,
+            }
+        )
 
     # PLOTS
 
@@ -214,23 +217,25 @@ def plot_psd_figs(psd_metrics, logger, wandb_run, method: str="alongtrack"):
         wavenumber=psd_metrics.wavenumber,
         resolved_scale=psd_metrics.resolved_scale,
     )
-
-    wandb_run.log(
-        {
-            f"psd_score_{method}": wandb.Image(fig),
-        }
-    )
+    
+    if wandb_fn is not None:
+        wandb_fn(
+            {
+                f"psd_score_{method}": wandb.Image(fig),
+            }
+        )
 
     fig, ax = plot_psd_spectrum(
         psd_study=psd_metrics.psd_study,
         psd_ref=psd_metrics.psd_ref,
         wavenumber=psd_metrics.wavenumber,
     )
-
-    wandb_run.log(
-        {
-            f"psd_spectrum_{method}": wandb.Image(fig),
-        }
-    )
+    
+    if wandb_fn is not None:
+        wandb_fn(
+            {
+                f"psd_spectrum_{method}": wandb.Image(fig),
+            }
+        )
     return None
 

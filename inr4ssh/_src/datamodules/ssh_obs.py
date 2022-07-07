@@ -62,6 +62,8 @@ class SSHAltimetry(pl.LightningDataModule):
         self.ds_predict = TensorDataset(
             torch.FloatTensor(X)
         )
+        self.dim_in = xtrain.shape[-1]
+        self.dim_out = ytrain.shape[-1]
 
     
     @staticmethod
