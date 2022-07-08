@@ -27,4 +27,6 @@ python experiments/expv2/train_pl.py \
   --minmax_spatial True \
   --minmax_temporal True \
   --abs_time_min 2016-11-01 \
-  --abs_time_max 2018-02-01
+  --abs_time_max 2018-02-01 \
+  --model "fouriernet" \
+  --latent_dim 512

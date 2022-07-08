@@ -300,6 +300,7 @@ def main(args):
 
     logger.info(f"Grid PSD: {psd_metrics}")
 
+    logger.info(f"Resolved scale (grid): {psd_metrics.resolved_scale:.2f}")
     wandb_logger.log_metrics(
         {
             "resolved_scale_grid": psd_metrics.resolved_scale,
@@ -360,6 +361,7 @@ def main(args):
         noverlap=0,
     )
 
+    logger.info(f"Resolved scale (alongtrack): {psd_metrics.resolved_scale:.2}")
     wandb_logger.log_metrics(
         {
             "resolved_scale_alongtrack": psd_metrics.resolved_scale,
@@ -385,6 +387,8 @@ if __name__ == '__main__':
     parser.add_arguments(config.DataLoader, dest="dataloader")
     parser.add_arguments(config.Model, dest="model")
     parser.add_arguments(config.Siren, dest="siren")
+    parser.add_arguments(config.ModulatedSiren, dest="modsiren")
+    parser.add_arguments(config.MFN, dest="mfn")
     parser.add_arguments(config.Losses, dest="losses")
     parser.add_arguments(config.Optimizer, dest="optimizer")
     parser.add_arguments(config.LRScheduler, dest="lr_scheduler")

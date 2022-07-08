@@ -42,14 +42,15 @@ python experiments/expv2/train_pl.py \
     --test_data_dir "/gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/test" \
     --num_workers 10 \
     --learning_rate 1e-4 \
-    --factor 0.1 \
+    --factor 0.025 \
     --lr_scheduler.patience 20 \
-    --callbacks.patience 50 \
+    --callbacks.patience 100 \
     --cartesian True \
     --minmax_spatial False \
     --minmax_temporal True \
     --abs_time_min 2016-11-01 \
-    --abs_time_max 2018-02-01
+    --abs_time_max 2018-02-01 \
+    --model "siren"
 
 #python train.py \
 #    --num-epochs 100 \

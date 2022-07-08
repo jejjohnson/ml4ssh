@@ -102,19 +102,32 @@ class Model(Serializable):
 
 @dataclass
 class Siren(Serializable):
-    # neural net specific
     num_layers: int = 5
     hidden_dim: int = 512
-    n_hidden: int = 6
     model_seed: int = 42
-    activation: str = "swish"
+    use_bias: bool = True
     final_activation: str = "identity"
-    # siren specific
     w0_initial: float = 30.0
     w0: float = 1.0
     final_scale: float = 1.0
     c: float = 6.0
 
+@dataclass
+class ModulatedSiren(Siren):
+    latent_dim: int = 256
+    num_layers_latent: int = 3
+    operation: str = "sum"
+
+@dataclass
+class MFN(Serializable):
+    num_layers: int = 5
+    hidden_dim: int = 512
+    use_bias: bool = True
+    input_scale: float = 256.0
+    weight_scale: float = 1.0
+    alpha: float = 6.0
+    beta: float = 1.0
+    final_activation: str = "identity"
 
 
 # ======================

@@ -79,7 +79,18 @@ class Siren(nn.Module):
 
 
 class SirenNet(nn.Module):
-    def __init__(self, dim_in, dim_hidden, dim_out, num_layers, w0 = 1., w0_initial = 30., c = 6.0, use_bias = True, final_activation = None, resnet = False):
+    def __init__(self,
+                 dim_in,
+                 dim_hidden,
+                 dim_out,
+                 num_layers: int=5,
+                 w0: float = 1.,
+                 w0_initial: float = 30.,
+                 c: float = 6.0,
+                 use_bias: bool = True,
+                 final_activation: Optional[nn.Module] = None,
+                 resnet: bool = False
+                 ):
         super().__init__()
         self.num_layers = num_layers
         self.dim_hidden = dim_hidden
@@ -152,7 +163,7 @@ class ModulatedSirenNet(nn.Module):
                  dim_hidden, 
                  dim_out, 
                  num_layers: int=5, 
-                 latent_dim: int=512,
+                 latent_dim: int=256,
                  num_layers_latent: int=3,
                  operation: str="multiply",
                  w0: float = 1.,
@@ -193,19 +204,20 @@ class ModulatedSirenNet(nn.Module):
             )
         if operation in ["mult", "multiply", "multiplicative"]:
             operation = lambda x, z: x * z
-        elif operation in ["add", "addition", "additive"]:
+        elif operation in ["add", "addition", "additive", "sum"]:
             operation = lambda x, z: x + z
         else:
             raise ValueError(f"Unrecognized operation: {operation}")
 
+        self.latent = nn.Parameter(torch.zeros(latent_dim).normal_(0, 1e-2))
         self.operation = operation
 
         final_activation = nn.Identity() if not exists(final_activation) else final_activation
         self.last_layer = Siren(dim_in = dim_hidden, dim_out = dim_out, w0 = w0, use_bias = use_bias, activation = final_activation)
 
-    def forward(self, x, latent):
+    def forward(self, x, latent=None):
         
-        mods = self.modulator(latent)
+        mods = self.modulator(self.latent)
         
         mods = cast_tuple(mods, self.num_layers)
         
