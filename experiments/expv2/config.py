@@ -51,10 +51,17 @@ class PreProcess(Serializable):
 # ======================
 @dataclass
 class Features(Serializable):
+    # spatial
     julian_time: bool = True
+    abs_time: bool = True
     abs_time_min: str = "2005-01-01"
     abs_time_max: str = "2022-01-01"
     feature_scaler: str = "minmax"
+
+    # temporal
+    cartesian: bool = True
+    minmax_spatial: bool = True
+    minmax_temporal: bool = True
     spherical_radius: float = 1.0
     min_time_scale: float = -1.0
     max_time_scale: float = 1.0

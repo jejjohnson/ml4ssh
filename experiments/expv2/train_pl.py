@@ -360,6 +360,12 @@ def main(args):
         noverlap=0,
     )
 
+    wandb_logger.log_metrics(
+        {
+            "resolved_scale_alongtrack": psd_metrics.resolved_scale,
+        }
+    )
+
     logger.info(f"Plotting PSD Score and Spectrum (AlongTrack)...")
     plot_psd_figs(psd_metrics, logger, wandb_logger.experiment.log, method="alongtrack")
 

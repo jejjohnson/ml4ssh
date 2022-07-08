@@ -10,7 +10,7 @@ source activate torch_py39
 # run script
 python experiments/expv2/train_pl.py \
   --num_epochs 2 \
-  --wandb_mode online \
+  --wandb_mode disabled \
   --wandb_log_dir "/Users/eman/code_projects/logs" \
   --device mps \
   --gpus 0 \
@@ -22,4 +22,9 @@ python experiments/expv2/train_pl.py \
   --eval.time_min "2017-01-01" \
   --eval.time_max "2017-02-01" \
   --eval.dtime_freq 12 \
-  --eval.dtime_unit "h"
+  --eval.dtime_unit "h" \
+  --cartesian True \
+  --minmax_spatial True \
+  --minmax_temporal True \
+  --abs_time_min 2016-11-01 \
+  --abs_time_max 2018-02-01

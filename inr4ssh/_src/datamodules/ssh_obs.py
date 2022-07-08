@@ -1,5 +1,6 @@
 import pytorch_lightning as pl
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
 from loguru import logger
 from torch.utils.data import TensorDataset, DataLoader
 from inr4ssh._src.features.spatial import Spherical2Cartesian3D
@@ -186,20 +187,48 @@ def get_feature_scaler(config):
     
     spatial_features = ["longitude", "latitude"]
     temporal_features = ["time"]
-    
+
+    # SPATIAL TRANFORMATIONS
     # spatial transform
-    spatial_transform = Pipeline([
-        ("cartesian3d", Spherical2Cartesian3D(radius=config.spherical_radius))
-    ])
-
     spatial_features = ["longitude", "latitude"]
+    spatial_transforms = []
 
+    if config.cartesian:
+        spatial_transforms.append(
+            ("cartesian3d", Spherical2Cartesian3D(radius=config.spherical_radius))
+        )
+
+    if config.minmax_spatial:
+        spatial_transforms.append(
+            ("minmax", MinMaxScaler(feature_range=(-1, 1)))
+        )
+
+    spatial_transform = Pipeline(spatial_transforms)
+
+
+
+    # TEMPORAL TRANSFORMATIONS
     # temporal transform
-    temporal_transform = Pipeline([
-        ("timestd", TimeMinMaxScaler(julian_date=config.julian_time)),
-    ])
-
     temporal_features = ["time"]
+    temporal_transforms = []
+
+    if config.abs_time:
+        temporal_transforms.append(
+            ("timestd", TimeMinMaxScaler(
+                julian_date=config.julian_time,
+                time_min=config.abs_time_min,
+                time_max=config.abs_time_max)
+             )
+        )
+
+    if config.minmax_temporal:
+        temporal_transforms.append(
+            ("minmax", MinMaxScaler(feature_range=(-1, 1)))
+        )
+
+    temporal_transform = Pipeline(temporal_transforms)
+
+
     
     scaler = ColumnTransformer(
         transformers=[
