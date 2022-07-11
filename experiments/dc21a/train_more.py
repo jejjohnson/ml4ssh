@@ -205,6 +205,7 @@ def main(args):
             optimizer = optimizer_factory(self.params)(params=self.model.parameters())
 
             scheduler = lr_scheduler_factory(self.params)(optimizer=optimizer)
+
             return {
                 "optimizer": optimizer,
                 "lr_scheduler": scheduler,

@@ -202,7 +202,7 @@ class ModulatedSirenNet(nn.Module):
                 dim_hidden=dim_hidden,
                 num_layers=num_layers_latent,
             )
-        if operation in ["mult", "multiply", "multiplicative"]:
+        if operation in ["mult", "multiply", "multiplicative", "prod"]:
             operation = lambda x, z: x * z
         elif operation in ["add", "addition", "additive", "sum"]:
             operation = lambda x, z: x + z

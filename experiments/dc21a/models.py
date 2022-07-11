@@ -1,8 +1,8 @@
 from inr4ssh._src.models.activations import get_activation
 from inr4ssh._src.models.siren import SirenNet, ModulatedSirenNet
 from inr4ssh._src.models.mfn import FourierNet, GaborNet
-from .optimizers import optimizer_factory, lr_scheduler_factory
-from .losses import loss_factory
+from optimizers import optimizer_factory, lr_scheduler_factory
+from losses import loss_factory
 import pytorch_lightning as pl
 import torch.nn as nn
 

@@ -33,8 +33,8 @@ source activate torch_py39
 # run script
 python experiments/dc21a/train.py \
     --num_epochs 20000 \
-    --wandb_mode "offline" \
-    --wandb_log_dir "/gpfsscratch/rech/cli/uvo53rl/" \
+    --mode "offline" \
+    --log_dir "/gpfsscratch/rech/cli/uvo53rl/" \
     --device "cuda" \
     --gpus 1 \
     --train_data_dir "/gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/train" \
@@ -42,7 +42,7 @@ python experiments/dc21a/train.py \
     --test_data_dir "/gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/test" \
     --num_workers 10 \
     --learning_rate 1e-3 \
-    --factor 0.1 \
+    --factor 0.01 \
     --lr_scheduler.patience 100 \
     --callbacks.patience 200 \
     --cartesian True \
@@ -50,8 +50,7 @@ python experiments/dc21a/train.py \
     --minmax_temporal True \
     --abs_time_min 2016-11-01 \
     --abs_time_max 2018-02-01 \
-    --model "gabornet" \
-    --mfn.num_layers 10
+    --model "siren"
 
 #python train.old.py \
 #    --num-epochs 100 \

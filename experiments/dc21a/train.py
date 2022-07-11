@@ -10,6 +10,7 @@ root = here(project_files=[".root"])
 sys.path.append(str(root))
 
 import config
+from pathlib import Path
 from simple_parsing import ArgumentParser
 import time
 from loguru import logger
@@ -74,7 +75,7 @@ def main(args):
 
     # objects
     logger.info("saving scaler transform...")
-    path_scaler = "./scaler.pickle"
+    path_scaler = Path(wandb_logger.experiment.dir).joinpath(f"scaler.pickle")
 
     # models to save
     save_object(dm.scaler, path_scaler)
