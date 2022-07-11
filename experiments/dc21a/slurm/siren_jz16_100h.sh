@@ -4,11 +4,11 @@
 #SBATCH --account=cli@v100                   # for statistics
 #SBATCH --nodes=1                            # we ALWAYS request one node
 #SBATCH --ntasks-per-node=1                  # number of tasks per node
-#SBATCH --cpus-per-task=40                   # number of cpus per task
+#SBATCH --cpus-per-task=10                   # number of cpus per task
 #SBATCH -C v100-16g                          # V100 GPU + 16 GBs RAM
-#SBATCH --qos=qos_gpu-t3                     # GPU partition (max 20� hrs)
-#SBATCH --gres=gpu:4                         # number of GPUs (1/4 of GPUs)
-#SBATCH --time=20:00:00                      # maximum execution time requested (HH:MM:SS)
+#SBATCH --qos=qos_gpu-t4                     # GPU partition (max 20� hrs)
+#SBATCH --gres=gpu:1                         # number of GPUs (1/4 of GPUs)
+#SBATCH --time=60:00:00                      # maximum execution time requested (HH:MM:SS)
 #SBATCH --output=/gpfsscratch/rech/cli/uvo53rl/logs/inr4ssh_dc_2021b_%j.log      # name of output file
 #SBATCH --error=/gpfsscratch/rech/cli/uvo53rl/errs/inr4ssh_dc_2021b_%j.err       # name of error file
 #SBATCH --export=ALL
@@ -31,46 +31,48 @@ export PYTHONPATH=$WORK/projects/inr4ssh:${PYTHONPATH}
 source activate torch_py39
 
 # run script
-python experiments/expv2/train_pl.py \
+python experiments/dc21a/train.py \
     --num_epochs 20000 \
     --wandb_mode "offline" \
     --wandb_log_dir "/gpfsscratch/rech/cli/uvo53rl/" \
     --device "cuda" \
-    --gpus 4 \
+    --gpus 1 \
     --train_data_dir "/gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/train" \
     --ref_data_dir "/gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/ref" \
     --test_data_dir "/gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/test" \
     --num_workers 10 \
-    --learning_rate 1e-4 \
+    --learning_rate 1e-3 \
     --factor 0.1 \
-    --lr_scheduler.patience 20 \
-    --callbacks.patience 50 \
+    --lr_scheduler.patience 100 \
+    --callbacks.patience 200 \
     --cartesian True \
     --minmax_spatial False \
     --minmax_temporal True \
     --abs_time_min 2016-11-01 \
-    --abs_time_max 2018-02-01
+    --abs_time_max 2018-02-01 \
+    --model "gabornet" \
+    --mfn.num_layers 10
 
-## run script
-#python experiments/expv2/train_pl.py \
-#    --num_epochs 10 \
-#    --wandb_mode "disabled" \
-#    --wandb_log_dir "/gpfsscratch/rech/cli/uvo53rl/" \
+#python train.old.py \
+#    --num-epochs 100 \
+#    --wandb-mode "offline" \
 #    --device "cuda" \
-#    --gpus 1 \
-#    --train_data_dir "/gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/train" \
-#    --ref_data_dir "/gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/ref" \
-#    --test_data_dir "/gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/test" \
-#    --num_workers 10 \
-#    --learning_rate 1e-4 \
-#    --factor 0.25 \
-#    --lr_scheduler.patience 10 \
-#    --callbacks.patience 20 \
-#    --abs_time_min 2016-12-01 \
-#    --abs_time_max 2018-02-01
+#    --train-data-dir "/gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/train" \
+#    --ref-data-dir "/gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/ref" \
+#    --test-data-dir "/gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/test" \
+#    --dl-num-workers 10 \
+#    --learning-rate 1e-3 \
+#    --wandb-log-dir "/gpfsscratch/rech/cli/uvo53rl/" \
+#    --time-min "2017-01-01" \
+#    --time-max "2017-02-01" \
+#    --eval-time-min "2017-01-01" \
+#    --eval-time-max "2017-02-01" \
+#    --eval-dtime "12_h" \
+#    --abs-time-min 2016-01-01 \
+#    --abs-time-max 2019-01-01
 
 ## code execution (TEST)
-#srun python experiments/expv2/train.py \
+#srun python experiments/dc21a/train.old.py \
 #    --wandb-mode offline \
 #    --wandb-log-dir /gpfsscratch/rech/cli/uvo53rl/ \
 #    --num-epochs 3000 \

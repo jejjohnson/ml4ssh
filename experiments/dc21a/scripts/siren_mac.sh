@@ -7,16 +7,20 @@ export PYTHONPATH=$WORK/code_projects/inr4ssh:${PYTHONPATH}
 # loading of modules
 source activate torch_py39
 
+# "/Users/eman/.CMVolumes/cal1_workdir/data/dc_2021/raw/train" \
+# "/Users/eman/.CMVolumes/cal1_workdir/data/dc_2021/raw/ref"
+# "/Users/eman/.CMVolumes/cal1_workdir/data/dc_2021/raw/test"
+
 # run script
-python experiments/expv2/train_pl.py \
+python experiments/dc21a/train.py \
   --num_epochs 2 \
-  --wandb_mode disabled \
-  --wandb_log_dir "/Users/eman/code_projects/logs" \
+  --mode offline \
+  --log_dir "/Users/eman/code_projects/logs" \
   --device mps \
   --gpus 0 \
-  --train_data_dir "/Users/eman/.CMVolumes/cal1_workdir/data/dc_2021/raw/train" \
-  --ref_data_dir "/Users/eman/.CMVolumes/cal1_workdir/data/dc_2021/raw/ref" \
-  --test_data_dir "/Users/eman/.CMVolumes/cal1_workdir/data/dc_2021/raw/test" \
+  --train_data_dir "/Volumes/EMANS_HDD/data/dc21b/train" \
+  --ref_data_dir "/Volumes/EMANS_HDD/data/dc21b/ref" \
+  --test_data_dir "/Volumes/EMANS_HDD/data/dc21b/test" \
   --preprocess.time_min "2017-01-01" \
   --preprocess.time_max "2017-02-01" \
   --eval.time_min "2017-01-01" \

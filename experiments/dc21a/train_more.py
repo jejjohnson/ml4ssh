@@ -15,7 +15,9 @@ import time
 from loguru import logger
 
 import torch
+from ml_collections import config_dict
 
+from inr4ssh._src.io import get_wandb_config, get_wandb_model
 from inr4ssh._src.io import save_object
 from inr4ssh._src.datamodules.ssh_obs import SSHAltimetry
 from inr4ssh._src.metrics.psd import compute_psd_scores
@@ -25,6 +27,13 @@ from pytorch_lightning.callbacks.model_checkpoint import ModelCheckpoint
 from pytorch_lightning.loggers import WandbLogger
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import TensorDataset, DataLoader
+
+import torch.nn as nn
+import pytorch_lightning as pl
+
+from models import model_factory
+from optimizers import optimizer_factory, lr_scheduler_factory
+from losses import loss_factory, regularization_factory
 
 from utils import get_interpolation_alongtrack_prediction_ds, get_alongtrack_prediction_ds
 from utils import plot_psd_figs, get_grid_stats, postprocess_predictions, get_alongtrack_stats
@@ -37,34 +46,48 @@ seed_everything(123)
 
 def main(args):
 
+
     # INITIALIZE LOGGER
     logger.info("Initializing logger...")
 
     log_options = args.logging
 
-    # print(wandb_vars)
+    # if log_options.wandb_mode in ["offline", "disabled"]:
+    #     # TODO: download all files
+    #
+    # elif log_options.wandb_mode == "online":
+    #     # TODO: download only the model and data
+    #
+    # else:
+    #     raise ValueError(f"Unrecognized wandb_mode: {log_options.wandb_mode}")
+
+    # load old wandb config
+    logger.info(f"Loading old wandb config...")
+    old_config = get_wandb_config(log_options.run_path)
+    old_args = config_dict.ConfigDict(old_config)
+
+    logger.info(f"Converting args to dict...")
     params_dict = simpleargs_2_ndict(args)
 
+    logger.info(f"Initializing wandb logger...")
     wandb_logger = WandbLogger(
         config=params_dict,
-        mode=log_options.wandb_mode,
-        project=log_options.wandb_project,
-        entity=log_options.wandb_entity,
-        dir=log_options.wandb_log_dir,
-        resume=log_options.wandb_resume
+        mode=log_options.mode,
+        project=log_options.project,
+        entity=log_options.entity,
+        dir=log_options.log_dir,
+        resume=False
     )
-
-
 
     # DATA MODULE
     logger.info("Initializing data module...")
     dm = SSHAltimetry(
         data=args.data,
-        preprocess=args.preprocess,
-        traintest=args.traintest,
-        features=args.features,
-        dataloader=args.dataloader,
-        eval=args.eval
+        preprocess=old_args.preprocess,
+        traintest=old_args.traintest,
+        features=old_args.features,
+        dataloader=old_args.dataloader,
+        eval=old_args.eval
     )
 
     dm.setup()
@@ -84,7 +107,7 @@ def main(args):
     x_train, y_train = dm.ds_train[:]
 
 
-    logger.info(f"Creating {args.model.model} neural network...")
+    logger.info(f"Creating {old_args.model.model} neural network...")
 
     dim_in = x_train.shape[1]
     dim_out = y_train.shape[1]
@@ -95,17 +118,14 @@ def main(args):
         })
     wandb_logger.experiment.config.update(params_dict, allow_val_change=True)
 
-    from models import model_factory
 
     net = model_factory(
-        model=args.model.model,
+        model=old_args.model.model,
         dim_in=dim_in,
         dim_out=dim_out,
-        config=args
+        config=old_args
     )
 
-    from optimizers import get_optimizer, get_lr_scheduler
-    from callbacks import get_callbacks
 
     # logger.info(f"Adding {args.optimizer.optimizer} optimizer...")
     # # optimizer = get_optimizer(args.optimizer)
@@ -125,6 +145,11 @@ def main(args):
         EarlyStopping(monitor="valid_loss", mode="min", patience=args.callbacks.patience),
 
     ]
+
+    # update params
+    params_dict["callbacks"].update({
+            "patience": args.callbacks.patience
+        })
     # callbacks = list()
     #
     # callbacks += [("lr_scheduler", get_lr_scheduler(args.lr_scheduler))]
@@ -134,15 +159,14 @@ def main(args):
     # ============================
     # PYTORCH LIGHTNING CLASS
     # ============================
-    import torch.nn as nn
-    import pytorch_lightning as pl
 
     logger.info("Initializing trainer class...")
     class CoordinatesLearner(pl.LightningModule):
-        def __init__(self, model:nn.Module):
+        def __init__(self, model: nn.Module, params):
             super().__init__()
             self.model = model
-            self.loss = nn.MSELoss(reduction=args.losses.reduction)
+            self.loss = loss_factory(params)
+            self.params = params
 
         def forward(self, x):
             return self.model(x)
@@ -178,66 +202,25 @@ def main(args):
 
         def configure_optimizers(self):
 
+            optimizer = optimizer_factory(self.params)(params=self.model.parameters())
 
-            optimizer = torch.optim.Adam(
-                self.model.parameters(),
-                lr=args.optimizer.learning_rate
-            )
-            scheduler = ReduceLROnPlateau(
-                optimizer,
-                patience=args.lr_scheduler.patience,
-                factor=args.lr_scheduler.factor,
-                mode="min"
-            )
+            scheduler = lr_scheduler_factory(self.params)(optimizer=optimizer)
             return {
                 "optimizer": optimizer,
                 "lr_scheduler": scheduler,
                 "monitor": "valid_loss"
             }
 
-    learn = CoordinatesLearner(net)
-    #
-    # logger.info(f"Setting Device: {args.device}")
-    # logger.info("Setting callbacks...")
-    # lr_scheduler = LRScheduler(
-    #     policy="ReduceLROnPlateau",
-    #     monitor="valid_loss",
-    #     mode="min",
-    #     factor=getattr(args, "lr_schedule_factor", 0.05),
-    #     patience=getattr(args, "lr_schedule_patience", 10),
-    # )
-    #
-    # # early stopping
-    # estop_callback = EarlyStopping(
-    #     monitor="valid_loss",
-    #     patience=getattr(args, "lr_estopping_patience", 20),
-    # )
-    #
-    # # wandb logger
-    # wandb_callback = WandbLogger(wandb_run, save_model=True)
-    #
-    # callbacks = [
-    #     ("earlystopping", estop_callback),
-    #     ("lrscheduler", lr_scheduler),
-    #     ("wandb_logger", wandb_callback),
-    # ]
-    #
-    # # # train split percentage
-    # train_split = ValidSplit(1.0 - args.traintest.train_size, stratified=False)
-    # #
-    # skorch_net = NeuralNetRegressor(
-    #     module=net,
-    #     max_epochs=args.optimizer.num_epochs,
-    #     lr=args.optimizer.learning_rate,
-    #     batch_size=args.dataloader.batch_size,
-    #     device=args.optimizer.device,
-    #     optimizer=optimizer,
-    #     train_split=train_split,
-    #     callbacks=callbacks
-    #
-    # )
-    # logger.info("Training...")
-    # skorch_net.fit(x_train, y_train)
+    # load previous model
+    logger.info(f"Loading previous wandb model...")
+    best_model = get_wandb_model(log_options.run_path, log_options.model_path)
+    best_model.download(replace=True)
+
+    learn = CoordinatesLearner.load_from_checkpoint(
+        checkpoint_path=best_model.name,
+        model=net,
+        params=args
+    )
 
     # start trainer
     logger.info("Initializing trainer...")

@@ -1,6 +1,10 @@
 from inr4ssh._src.models.activations import get_activation
 from inr4ssh._src.models.siren import SirenNet, ModulatedSirenNet
 from inr4ssh._src.models.mfn import FourierNet, GaborNet
+from .optimizers import optimizer_factory, lr_scheduler_factory
+from .losses import loss_factory
+import pytorch_lightning as pl
+import torch.nn as nn
 
 def model_factory(model, dim_in, dim_out, config):
 
@@ -61,3 +65,56 @@ def model_factory(model, dim_in, dim_out, config):
         )
     else:
         raise ValueError(f"Unrecognized model: {model}")
+
+class CoordinatesLearner(pl.LightningModule):
+    def __init__(self, model: nn.Module, params):
+        super().__init__()
+        self.model = model
+        self.loss = loss_factory(params)
+        self.params = params
+
+    def forward(self, x):
+        return self.model(x)
+
+    def predict_step(self, batch, batch_idx, dataloader_idx=0):
+
+
+        x, = batch
+
+        pred = self.forward(x)
+
+        return pred
+
+    def training_step(self, batch, batch_idx):
+        x, y = batch
+        # loss function
+        pred = self.forward(x)
+        loss = self.loss(pred, y)
+
+        self.log("train_loss", loss)
+
+        return loss
+
+    def validation_step(self, batch, batch_idx):
+        x, y = batch
+        # loss function
+        pred = self.forward(x)
+        loss = self.loss(pred, y)
+
+        self.log("valid_loss", loss)
+
+        return loss
+
+    def configure_optimizers(self):
+
+
+
+        optimizer = optimizer_factory(self.params)(params=self.model.parameters())
+
+
+        scheduler = lr_scheduler_factory(self.params)(optimizer=optimizer)
+        return {
+            "optimizer": optimizer,
+            "lr_scheduler": scheduler,
+            "monitor": "valid_loss"
+        }

@@ -7,13 +7,15 @@ from dataclasses import dataclass
 # ======================
 @dataclass
 class Logging(Serializable):
-    wandb_project: str = "inr4ssh"
-    wandb_entity: str = "ige"
-    wandb_log_dir: str = "/mnt/meom/workdir/johnsonj/logs"
-    wandb_resume: str = "allow"
-    wandb_mode: str = "offline"
+    project: str = "inr4ssh"
+    entity: str = "ige"
+    log_dir: str = "/mnt/meom/workdir/johnsonj/logs"
+    resume: str = "allow"
+    mode: str = "offline"
     smoke_test: str = "store_true"
-    wandb_id: Optional[str] = None
+    id: Optional[str] = None
+    run_path: Optional[str] = None
+    model_path: Optional[str] = None
 
 # ======================
 # Data Directories
@@ -135,7 +137,7 @@ class MFN(Serializable):
 # ======================
 @dataclass
 class Losses(Serializable):
-    loss: str = "mse"
+    loss: str = "mse" # Options: "mse", "nll", "kld"
     reduction: str = "mean"
 
     # QG PINN Loss Args
