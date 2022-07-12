@@ -16,7 +16,7 @@ python experiments/dc21a/train.py \
   --num_epochs 2 \
   --mode offline \
   --log_dir "/Users/eman/code_projects/logs" \
-  --device mps \
+  --device "mps" \
   --gpus 0 \
   --train_data_dir "/Volumes/EMANS_HDD/data/dc21b/train" \
   --ref_data_dir "/Volumes/EMANS_HDD/data/dc21b/ref" \
@@ -33,4 +33,5 @@ python experiments/dc21a/train.py \
   --abs_time_min 2016-11-01 \
   --abs_time_max 2018-02-01 \
   --model "fouriernet" \
-  --latent_dim 512
+  --latent_dim 512 \
+  --lr_scheduler "cosine"

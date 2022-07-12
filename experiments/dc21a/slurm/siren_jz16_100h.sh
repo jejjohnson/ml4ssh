@@ -50,7 +50,8 @@ python experiments/dc21a/train.py \
     --minmax_temporal True \
     --abs_time_min 2016-11-01 \
     --abs_time_max 2018-02-01 \
-    --model "siren"
+    --model "siren" \
+    --lr_scheduler "multistep"
 
 #python train.old.py \
 #    --num-epochs 100 \

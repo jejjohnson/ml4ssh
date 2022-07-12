@@ -108,16 +108,20 @@ def main(args):
 
     logger.info("Initializing callbacks...")
 
-    callbacks = [
-        ModelCheckpoint(
-        dirpath = f"{wandb_logger.experiment.dir}/checkpoints",
-        monitor="valid_loss",
-        mode="min",
-        save_top_k=2,
-        ),
-        EarlyStopping(monitor="valid_loss", mode="min", patience=args.callbacks.patience),
+    from callbacks import get_callbacks
 
-    ]
+    callbacks = get_callbacks(args, wandb_logger)
+
+    # callbacks = [
+    #     ModelCheckpoint(
+    #     dirpath = f"{wandb_logger.experiment.dir}/checkpoints",
+    #     monitor="valid_loss",
+    #     mode="min",
+    #     save_top_k=2,
+    #     ),
+    #     EarlyStopping(monitor="valid_loss", mode="min", patience=args.callbacks.patience),
+    #
+    # ]
 
     # ============================
     # PYTORCH LIGHTNING CLASS

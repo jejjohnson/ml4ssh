@@ -1,7 +1,8 @@
 from typing import Optional, List
 from simple_parsing import ArgumentParser
 from simple_parsing.helpers import Serializable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from simple_parsing.helpers import list_field
 # ======================
 # LOGGING
 # ======================
@@ -159,15 +160,19 @@ class Optimizer(Serializable):
 @dataclass
 class LRScheduler(Serializable):
     # LR Scheduler
-    lr_scheduler: str = "reduce" # "cosine" # "onecyle" #
+    lr_scheduler: str = "reduce" # Options: "cosine", "onecyle", "step", "multistep"
     patience: int = 10
     factor: float = 0.1
+    steps: int = 250
+    gamma: float = 0.1
+    min_learning_rate: float = 1e-5
+    milestones: List[int] = list_field(500, 1000, 1500, 2000, 2500)
 
 @dataclass
 class Callbacks(Serializable):
     # wandb logging
     wandb: bool = True
-    save_model: bool = True
+    model_checkpoint: bool = True
 
     # early stopping
     early_stopping: bool = True
