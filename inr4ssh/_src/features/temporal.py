@@ -2,6 +2,24 @@ from sklearn.base import BaseEstimator, TransformerMixin
 import pandas as pd
 import numpy as np
 
+
+class MinMaxFixedScaler(BaseEstimator, TransformerMixin):
+    def __init__(self, min_val: np.ndarray, max_val: np.ndarray):
+        self.min_val = np.asarray(min_val)
+        self.max_val = np.asarray(max_val)
+        
+    def fit(self, X, y=None):
+        return self
+    
+    def transform(self, X, y=None):
+        
+        return (X - self.min_val) / (self.max_val - self.min_val)
+    
+    def inverse_transform(self, X, y=None):
+        
+        return X * (self.max_val - self.min_val) + self.min_val
+    
+
 class JulianDateTransform(BaseEstimator, TransformerMixin):
     def __init__(self):
         self.fmt ='%Y-%m-%d'

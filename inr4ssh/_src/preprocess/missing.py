@@ -13,6 +13,9 @@ def generate_random_missing_data(
     # get total dims of data
     dims = data.shape
     total_dims = reduce(mul, dims)
+    
+    if float(missing_data_rate) == 0.0:
+        return data
 
     # subset data
     size_subset = int(missing_data_rate * total_dims)
