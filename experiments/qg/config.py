@@ -33,16 +33,17 @@ class DataDir(Serializable):
 # ======================
 @dataclass
 class Features(Serializable):
+    variable: str = "p"
     # spatial subset
     minmax_spatial: bool = True
     minmax_fixed_spatial: bool = True
-    min_spatial: float = 1
-    max_spatial: float = 1
+    min_spatial: float = -3.14
+    max_spatial: float = 3.14
     # temporal subset
     minmax_temporal: bool = True
     minmax_fixed_temporal: bool = True
-    min_temporal: float = 1
-    max_temporal: float = 1
+    min_temporal: float = 0
+    max_temporal: float = 124
 
 # ======================
 # TRAIN/VAL SPLIT

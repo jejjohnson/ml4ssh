@@ -38,14 +38,14 @@ class QGSimulation(pl.LightningModule):
         data = self.get_train_data(ds["p"].values, self.preprocess)
 
         logger.info("converting to dataframe...")
-        ds["obs"] = (ds["p"].dims, data)
+        ds["obs"] = (ds[self.features.variable].dims, data)
         df = ds["obs"].to_dataframe()
 
         logger.info("getting feature scaler...")
         scaler = get_feature_scaler(self.features)
 
         X_test = df[["time", "Nx", "Ny"]]
-        y_test = df[["p"]]
+        y_test = df[[self.features.variable]]
 
         df = df.dropna()
 
@@ -56,7 +56,6 @@ class QGSimulation(pl.LightningModule):
             train_size=self.traintest.train_size,
             random_state=self.traintest.seed_split
         )
-
 
         logger.info("Creating dataloaders...")
         self.ds_train = TensorDataset(
