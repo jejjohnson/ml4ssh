@@ -130,7 +130,7 @@ dmypy.json
 
 # exclude data from source control by default
 datasets/*
-!datasets/.gitkeep 
+!datasets/.gitkeep
 *.npz
 outputs/*
 \wandb/
@@ -148,3 +148,5 @@ notebooks/*.gif
 *.npy
 *credentials.*
 *.pth
+\.idea/
+.DS_Store
