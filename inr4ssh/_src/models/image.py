@@ -27,9 +27,8 @@ class ImageModel(pl.LightningModule):
         # loss function
         loss = self.loss(pred, y)
 
-        loss /= x.size(0)
-
         self.log("train_loss", loss)
+        self.log("psnr", -10 * torch.log10(2.0 * loss))
 
         return loss
 
@@ -69,18 +68,12 @@ class ImageModel(pl.LightningModule):
 
     def configure_optimizers(self):
 
-        optimizer = Adam(
-            self.model.parameters(),
-            lr=self.hyperparams.get("lr", 1e-4)
-        )
+        optimizer = Adam(self.model.parameters(), lr=self.hyperparams.get("lr", 1e-4))
         scheduler = ReduceLROnPlateau(
-            optimizer,
-            patience=self.hyperparams.get(
-                "lr_schedule_patience", 100
-            )
+            optimizer, patience=self.hyperparams.get("lr_schedule_patience", 100)
         )
         return {
             "optimizer": optimizer,
             "lr_scheduler": scheduler,
-            "monitor": "val_loss"
+            "monitor": "val_loss",
         }
