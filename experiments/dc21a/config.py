@@ -3,6 +3,7 @@ from simple_parsing import ArgumentParser
 from simple_parsing.helpers import Serializable
 from dataclasses import dataclass, field
 from simple_parsing.helpers import list_field
+
 # ======================
 # LOGGING
 # ======================
@@ -18,14 +19,14 @@ class Logging(Serializable):
     run_path: Optional[str] = None
     model_path: Optional[str] = None
 
+
 # ======================
 # Data Directories
 # ======================
 @dataclass
 class DataDir(Serializable):
-    train_data_dir: str = "/home/johnsonj/data/dc_2021/raw/train"
-    ref_data_dir: str = "/home/johnsonj/data/dc_2021/raw/ref/"
-    test_data_dir: str = "/home/johnsonj/data/dc_2021/raw/test/"
+    data_dir: str = "/home/johnsonj/data/dc_2021/raw/train"
+
 
 # ======================
 # DATA PREPROCESS
@@ -69,17 +70,19 @@ class Features(Serializable):
     min_time_scale: float = -1.0
     max_time_scale: float = 1.0
 
+
 # ======================
 # TRAIN/VAL SPLIT
 # ======================
 @dataclass
 class TrainTestSplit(Serializable):
     train_size: float = 0.9
-    split_method: Optional[str] = "random" # random, temporal, spatial
+    split_method: Optional[str] = "random"  # random, temporal, spatial
     seed_split: int = 666
     seed_shuffle: int = 321
-    split_time_freq: Optional[str] = None # "1_D"
-    split_spatial: str = "random" # "regular" # "upper" # "lower" # "altimetry"
+    split_time_freq: Optional[str] = None  # "1_D"
+    split_spatial: str = "random"  # "regular" # "upper" # "lower" # "altimetry"
+
 
 # ======================
 # DATALOADER
@@ -92,6 +95,7 @@ class DataLoader(Serializable):
     num_workers: int = 0
     batch_size: int = 4096
     batch_size_eval: int = 10_000
+
 
 # ======================
 # MODEL
@@ -115,11 +119,13 @@ class Siren(Serializable):
     final_scale: float = 1.0
     c: float = 6.0
 
+
 @dataclass
 class ModulatedSiren(Siren):
     latent_dim: int = 256
     num_layers_latent: int = 3
     operation: str = "sum"
+
 
 @dataclass
 class MFN(Serializable):
@@ -138,35 +144,38 @@ class MFN(Serializable):
 # ======================
 @dataclass
 class Losses(Serializable):
-    loss: str = "mse" # Options: "mse", "nll", "kld"
+    loss: str = "mse"  # Options: "mse", "nll", "kld"
     reduction: str = "mean"
 
     # QG PINN Loss Args
     qg: bool = False
     qg_reg: str = 0.1
 
+
 # ======================
 # OPTIMIZER
 # ======================
 @dataclass
 class Optimizer(Serializable):
-    optimizer: str = "adam" # "adamw" # "adamax"
+    optimizer: str = "adam"  # "adamw" # "adamax"
     learning_rate: float = 1e-4
     num_epochs: int = 300
     min_epochs: int = 1
     device: str = "cpu"
-    gpus: int = 0 # the number of GPUS (pytorch-lightning)
+    gpus: int = 0  # the number of GPUS (pytorch-lightning)
+
 
 @dataclass
 class LRScheduler(Serializable):
     # LR Scheduler
-    lr_scheduler: str = "reduce" # Options: "cosine", "onecyle", "step", "multistep"
+    lr_scheduler: str = "reduce"  # Options: "cosine", "onecyle", "step", "multistep"
     patience: int = 10
     factor: float = 0.1
     steps: int = 250
     gamma: float = 0.1
     min_learning_rate: float = 1e-5
     milestones: List[int] = list_field(500, 1000, 1500, 2000, 2500)
+
 
 @dataclass
 class Callbacks(Serializable):
@@ -177,6 +186,7 @@ class Callbacks(Serializable):
     # early stopping
     early_stopping: bool = True
     patience: int = 20
+
 
 # ======================
 # CALLBACKS
@@ -217,6 +227,7 @@ class Metrics(Serializable):
     delta_t: float = 0.9434
     velocity: float = 6.77
     jitter: float = 1e-4
+
 
 # ======================
 # VIZ

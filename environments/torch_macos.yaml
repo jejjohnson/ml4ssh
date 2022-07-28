@@ -44,6 +44,7 @@ dependencies:
 - pip:
   # PYTORCH ECOSYSTEM
   - torchtyping
+  - lightning-bolts
   - torchgeo
   - skorch
   - einops
@@ -72,6 +73,7 @@ dependencies:
   # plotting
   - celluloid
   - corner
+  - git+https://github.com/uncertainty-toolbox/uncertainty-toolbox
   # experiment
   - hydra-core
   - hydra-colorlog

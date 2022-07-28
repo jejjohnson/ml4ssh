@@ -37,67 +37,54 @@ $$
 $$
 
 ---
-## Results (Preliminary)
+## Experiments
 
 ---
-### QG Simulations (TODO)
+### [QG Simulations](experiments/qg/README.md)
 
 
 #### Challenge
 
-|      Simulated Altimetry Tracks      |       Simulated SSH Field        | 
+|      Simulated Altimetry Tracks      |       Simulated SSH Field        |
 |:------------------------------------:|:--------------------------------:|
-| ![Animation](assets/obs_p_movie.gif) | ![Animation](assets/p_movie.gif) |
+| ![Animation](experiments/qg/assets/obs_p_movie.gif) | ![Animation](experiments/qg/assets/p_movie.gif) |
 
+For more information, see the [experiment page](experiments/qg/README.md).
 
-#### Results
-
-|              SSH Field              |           (Norm) Gradient           |          (Norm) Laplacian          | 
-|:-----------------------------------:|:-----------------------------------:|:----------------------------------:|
-| ![Animation](assets/siren_pred.gif) | ![Animation](assets/siren_grad.gif) | ![Animation](assets/siren_lap.gif) |  
 
 ---
-### OSE (Data Challenge 2021a)
+### [OSE (Data Challenge 2021a)](experiments/dc21a/README.md)
 
 #### Challenge
 
-|          Altimetry Tracks           |                   SSH Field                   | 
+|          Altimetry Tracks           |                   SSH Field                   |
 |:-----------------------------------:|:---------------------------------------------:|
-| ![Animation](assets/movie_obs.gif)  | ![Animation](assets/movie_field_duacs.gif) |
+| ![Animation](experiments/dc21a/assets/movie_obs.gif)  | ![Animation](experiments/dc21a/assets/movie_field_duacs.gif) |
 
-
-### Figures
-
-|       Algorithm       |                   SSH Field                   |                  (Norm) Gradient                   |                   (Norm) Laplacian                   |
-|:---------------------:|:---------------------------------------------:|:--------------------------------------------------:|:----------------------------------------------------:|
-|     OI (Baseline)     | ![Animation](assets/movie_field_baseline.gif) | ![Animation](assets/movie_field_baseline_grad.gif) |  ![Animation](assets/movie_field_baseline_lap.gif)   |
-| OI (DUACS-Production) |  ![Animation](assets/movie_field_duacs.gif)   |  ![Animation](assets/movie_field_duacs_grad.gif)   |    ![Animation](assets/movie_field_duacs_lap.gif)    |
-|     SIREN (Ours)      |  ![Animation](assets/predictions_siren.gif)   |  ![Animation](assets/predictions_grad_siren.gif)   | ![Animation](assets/predictions_laplacian_siren.gif) |
-
-
-### Statistics
-
-|       Algorithm       | Normalized RMSE (Mean) | Normalized RMSE (Stddev) | Resolved Spatial Resolution (km) |
-|:---------------------:|:----------------------:|:------------------------:|:--------------------------------:|
-|     OI (Baseline)     |          0.85          |           0.09           |               140                |
-| OI (DUACS-Production) |          0.88          |           0.07           |               152                |
-|     SIREN (Ours)      |          0.88          |           0.08           |               136                |
-
-
-#### Speed
-
-
-|       Algorithm       | CPU (10 cores) | GPU (M1 MacOS) | GPU (V100, 16GB) | Multi-GPU (x4, V100, 16GB) |
-|:---------------------:|:--------------:|:--------------:|:----------------:|:----------------------:|
-|     OI (Baseline)     |      1 hr      |      ---       |       ---        |          ---           |
-| OI (DUACS-Production) |      ---       |      ---       |       ---        |          ---           |
-|     SIREN (Ours)      |    30 secs     |    15 secs     |      5 secs      |          ---           |
-
-
+For more information, see the [experiment page](experiments/dc21a/README.md).
 
 ---
 ## Demos
 
+
+**Image Regression** (Jupyter Notebook)
+
+> A standard image regression problem on a fox image. This is the [same experiment](https://bmild.github.io/fourfeat/) as the demo in [Tancik et al (2020)](https://bmild.github.io/fourfeat/)
+
+**Image Regression + Physics Loss** (Jupyter Notebook) (**TODO**)
+
+> The standard image regression problem with the physics informed loss function, i.e. the Poisson constraint (gradient, laplacian).
+> This is the [same experiment]() as the Siren paper [Sitzmann et al (2020)](https://www.vincentsitzmann.com/siren/)
+
+**QG Simulation** (Jupyter Notebook)
+
+> This uses a **subset** of the QG simulations to demonstrate how each of the networks perform. This application is
+> useful for training INR as potential mesh-free surrogates.
+
+**QG Simulation + Physics Loss** (Jupyter Notebook)
+
+> This uses a **subset** of the QG simulations to demonstrate how each of the networks perform along with the
+> physics-informed QG loss function.
 
 
 ---
@@ -135,7 +122,7 @@ pip install .
 
 * 1.5 Layer QG Simulations
   * `94MB`
-* SSH Data Challenge 2021a 
+* SSH Data Challenge 2021a
   * Train/Test Data - `116MB`
   * Results: BASELINE - ~`15MB`; DUACS - ~`4.5MB`
 * SSH Data Challenge 2020b (TODO)
@@ -187,9 +174,9 @@ python dl_dc21a.py --credentials-file credentials.yaml --save-dir path/to/save/d
 ```
 
 ---
-### Bonus: M1 MacOS Compatible 
+### Bonus: M1 MacOS Compatible
 
-I have included some environment files for the new M1 MacOS. This is because I personally use an M1 Macbook and I wanted to test out the new [PyTorch M1 compatability](https://pytorch.org/blog/pytorch-1.12-released/#prototype-introducing-accelerated-pytorch-training-on-mac) which makes use of the M1 GPU. I personally found that the training and inference time for using PyTorch are much faster. This coincides with other users experiences (e.g. [here](https://sebastianraschka.com/blog/2022/pytorch-m1-gpu.html)) In addition, Anaconda claims that other packages potentially get a [20 % speedup](https://www.anaconda.com/blog/apple-silicon-transition). To install, use the requirement file: 
+I have included some environment files for the new M1 MacOS. This is because I personally use an M1 Macbook and I wanted to test out the new [PyTorch M1 compatability](https://pytorch.org/blog/pytorch-1.12-released/#prototype-introducing-accelerated-pytorch-training-on-mac) which makes use of the M1 GPU. I personally found that the training and inference time for using PyTorch are much faster. This coincides with other users experiences (e.g. [here](https://sebastianraschka.com/blog/2022/pytorch-m1-gpu.html)) In addition, Anaconda claims that other packages potentially get a [20 % speedup](https://www.anaconda.com/blog/apple-silicon-transition). To install, use the requirement file:
 
 ```bash
 mamba env create -f environments/torch_macos.yaml
@@ -214,3 +201,10 @@ mamba install anaconda=2022.05
 ---
 ## Acknowledgements
 
+
+**Code**
+
+* [lucidrains/siren-pytorch](https://github.com/lucidrains/siren-pytorch) - Siren PyTorch Model
+* [kklemon/gon-pytorch](https://github.com/kklemon/gon-pytorch/blob/master/gon_pytorch/modules.py) - Fourier Features Network Model
+* [didriknielsen/survae_flows](https://github.com/didriknielsen/survae_flows/tree/master/survae/nn/layers) - Activation Functions & Conditional Distributions
+* [boschresearch/multiplicative-filter-networks](https://github.com/boschresearch/multiplicative-filter-networks) - Multiplicative Filter Networks (Fourier, Gabor) Models

@@ -4,7 +4,10 @@ from loguru import logger
 from ..data.qg import load_qg_data
 from ..features.temporal import MinMaxFixedScaler
 from ..preprocess.obs import add_noise
-from ..preprocess.missing import generate_random_missing_data, generate_skipped_missing_data
+from ..preprocess.missing import (
+    generate_random_missing_data,
+    generate_skipped_missing_data,
+)
 from sklearn.model_selection import train_test_split
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
@@ -15,94 +18,207 @@ from torch.utils.data import TensorDataset, DataLoader
 
 
 class QGSimulation(pl.LightningModule):
-    def __init__(self,
-                 data, preprocess,
-                 traintest,
-                 features,
-                 dataloader,
-                 eval):
+    def __init__(
+        self,
+        data,
+        preprocess,
+        traintest,
+        features,
+        dataloader,
+        # eval
+    ):
         super().__init__()
         self.data = data
         self.preprocess = preprocess
         self.traintest = traintest
         self.features = features
         self.dataloader = dataloader
-        self.eval = eval
+        # self.eval = eval
+        self.cols_coords = ["time", "Nx", "Ny"]
+        self.cols_features = [self.features.variable]
+        self.cols_obs = ["obs"]
 
     def setup(self, stage=None):
         logger.info("Getting data...")
 
         logger.info("loading data...")
-        ds = load_qg_data(self.data.train_data_dir)
+        ds = load_qg_data(self.data.data_dir)
 
-        data = self.get_train_data(ds["p"].values, self.preprocess)
+        ds = self.preprocess_data(ds, self.preprocess)
+
+        data_obs = self.get_obs_data(ds["p"].values.copy(), self.traintest)
 
         logger.info("converting to dataframe...")
-        ds["obs"] = (ds[self.features.variable].dims, data)
-        df = ds["obs"].to_dataframe()
+        ds["obs"] = (ds[self.cols_features].dims, data_obs)
+        # print(ds[self.cols_features])
+
+        df = ds[self.cols_obs + self.cols_features].to_dataframe().reset_index()
 
         logger.info("getting feature scaler...")
         scaler = get_feature_scaler(self.features)
 
-        X_test = df[["time", "Nx", "Ny"]]
-        y_test = df[[self.features.variable]]
+        scaler.fit(df[self.cols_coords])
 
-        df = df.dropna()
+        # PREDICTION COLUMNS
+        # all datapoints in the dataset
+        X_predict = df[self.cols_coords]
+        y_predict = df[self.cols_features]
+        assert np.sum(np.isnan(y_predict.values)) == 0
+        self.X_predict_coords = X_predict[self.cols_coords]
 
-        xtrain, ytrain = df[["time", "Nx", "Ny"]], df[["p"]]
+        X_predict = scaler.transform(X_predict)
+
+        # TRAINING COLUMNS
+        # all datapoints that are observed
+        df_obs = df.dropna()
+
+        xtrain, ytrain = df_obs[self.cols_coords], df_obs[self.cols_obs]
 
         xtrain, xvalid, ytrain, yvalid = train_test_split(
-            xtrain, ytrain,
+            xtrain,
+            ytrain,
             train_size=self.traintest.train_size,
-            random_state=self.traintest.seed_split
+            random_state=self.traintest.seed_split,
         )
+
+        self.X_train_coords = xtrain[self.cols_coords]
+        self.X_valid_coords = xvalid[self.cols_coords]
+
+        xtrain = scaler.transform(xtrain)
+        xvalid = scaler.transform(xvalid)
+
+        assert np.sum(np.isnan(yvalid.values)) == 0
+        assert np.sum(np.isnan(ytrain.values)) == 0
+
+        # TESTING DATA
+        # all data points that are not observed
+        df_unobs = df.drop(df_obs.index)
+        X_test = df_unobs[self.cols_coords]
+        y_test = df_unobs[self.cols_features]
+        assert np.sum(np.isnan(y_test.values)) == 0
+
+        self.X_test_coords = X_test[self.cols_coords]
+        X_test = scaler.transform(X_test)
 
         logger.info("Creating dataloaders...")
         self.ds_train = TensorDataset(
-            torch.FloatTensor(xtrain),
-            torch.FloatTensor(ytrain)
+            torch.FloatTensor(xtrain), torch.FloatTensor(ytrain.values)
         )
         self.ds_valid = TensorDataset(
-            torch.FloatTensor(xvalid),
-            torch.FloatTensor(yvalid)
+            torch.FloatTensor(xvalid), torch.FloatTensor(yvalid.values)
         )
         self.ds_test = TensorDataset(
-            torch.FloatTensor(X_test),
-            torch.FloatTensor(y_test)
+            torch.FloatTensor(X_test), torch.FloatTensor(y_test.values)
+        )
+        self.ds_predict = TensorDataset(
+            torch.FloatTensor(X_predict), torch.FloatTensor(y_predict.values)
         )
 
         self.dim_in = xtrain.shape[-1]
         self.dim_out = ytrain.shape[-1]
+        self.scaler = scaler
 
+    @staticmethod
+    def preprocess_data(data, preprocess):
+
+        logger.info("preprocessing data...")
+
+        # rename the dimensions
+        try:
+            data = data.rename({"steps": "time"})
+        except ValueError:
+            pass
+
+        # reshape data
+        data = data.transpose("time", "Nx", "Ny")
+
+        # Coarsen X direction
+
+        if preprocess.coarsen_Nx:
+            logger.info("coarsening data (Nx)...")
+            data = data.coarsen(
+                dim={"Nx": preprocess.coarsen_Nx},
+                boundary=preprocess.boundary_spatial,
+            ).mean()
+        if preprocess.coarsen_Ny:
+            logger.info("coarsening data (Ny)...")
+            data = data.coarsen(
+                dim={"Ny": preprocess.coarsen_Ny},
+                boundary=preprocess.boundary_spatial,
+            ).mean()
+        if preprocess.coarsen_time:
+            logger.info("coarsening data (time)...")
+            data = data.coarsen(
+                dim={"time": preprocess.coarsen_time},
+                boundary=preprocess.boundary_time,
+            ).mean()
+
+        return data
 
     @staticmethod
     def get_obs_data(data, traintest):
 
         logger.info("sampling spatiotemporal res...")
-        data = generate_skipped_missing_data(
-            data,
-            step=traintest.coarsen_Nx, dim=1
-        )
-        data = generate_skipped_missing_data(
-            data,
-            step=traintest.coarsen_Ny, dim=2
-        )
-        data = generate_skipped_missing_data(
-            data,
-            step=traintest.coarsen_time, dim=0
-        )
+        data = generate_skipped_missing_data(data, step=traintest.step_Nx, dim=1)
+        data = generate_skipped_missing_data(data, step=traintest.step_Ny, dim=2)
+        data = generate_skipped_missing_data(data, step=traintest.step_time, dim=0)
 
         logger.info("random subset...")
         data = generate_random_missing_data(
             data,
             missing_data_rate=traintest.missing_data,
             return_mask=False,
-            seed=traintest.seed_missing_data
+            seed=traintest.seed_missing_data,
         )
 
         logger.info("adding noise...")
-        data = add_noise(data, noise=traintest.noise, seed=traintest.seed_noise)
+        if traintest.noise is not None:
+            data = add_noise(data, noise=traintest.noise, seed=traintest.seed_noise)
 
+        return data
+
+    def create_xr_dataset(self, split: str = "train"):
+        if split == "train":
+            data = np.concatenate(
+                [self.X_train_coords, self.ds_train[:][1].numpy()], axis=1
+            )
+        elif split == "test":
+            data = np.concatenate(
+                [self.X_test_coords, self.ds_test[:][1].numpy()], axis=1
+            )
+        elif split == "valid":
+            data = np.concatenate(
+                [self.X_valid_coords, self.ds_valid[:][1].numpy()], axis=1
+            )
+        elif split == "predict":
+            data = np.concatenate(
+                [self.X_predict_coords, self.ds_predict[:][1].numpy()], axis=1
+            )
+        else:
+            raise ValueError(f"Unrecognized split: {split}")
+        data = (
+            pd.DataFrame(data, columns=self.cols_coords + [split])
+            .set_index(self.cols_coords)
+            .to_xarray()
+        )
+        return data
+
+    def create_predictions_ds(self, predictions):
+
+        data = np.concatenate(
+            [
+                self.X_predict_coords,
+                self.ds_predict[:][-1].numpy(),
+                predictions.numpy(),
+            ],
+            axis=1,
+        )
+
+        data = (
+            pd.DataFrame(data, columns=self.cols_coords + ["true"] + ["pred"])
+            .set_index(self.cols_coords)
+            .to_xarray()
+        )
         return data
 
     def train_dataloader(self):
@@ -111,7 +227,7 @@ class QGSimulation(pl.LightningModule):
             batch_size=self.dataloader.batch_size,
             shuffle=self.dataloader.train_shuffle,
             num_workers=self.dataloader.num_workers,
-            pin_memory=self.dataloader.pin_memory
+            pin_memory=self.dataloader.pin_memory,
         )
 
     def val_dataloader(self):
@@ -120,17 +236,27 @@ class QGSimulation(pl.LightningModule):
             batch_size=self.dataloader.batch_size,
             shuffle=False,
             num_workers=self.dataloader.num_workers,
-            pin_memory=self.dataloader.pin_memory
+            pin_memory=self.dataloader.pin_memory,
         )
 
-    def val_dataloader(self):
+    def test_dataloader(self):
         return DataLoader(
             self.ds_test,
+            batch_size=self.dataloader.batch_size,
+            shuffle=False,
+            num_workers=self.dataloader.num_workers,
+            pin_memory=self.dataloader.pin_memory,
+        )
+
+    def predict_dataloader(self):
+        return DataLoader(
+            self.ds_predict,
             batch_size=self.dataloader.batch_size_eval,
             shuffle=False,
             num_workers=self.dataloader.num_workers,
-            pin_memory=self.dataloader.pin_memory
+            pin_memory=self.dataloader.pin_memory,
         )
+
 
 def get_feature_scaler(config):
 
@@ -141,18 +267,18 @@ def get_feature_scaler(config):
     # spatial transform
     spatial_transforms = []
 
-    if config.minmaxfixed_spatial:
+    if config.minmax_fixed_spatial:
         spatial_transforms.append(
-            ("minmaxfixed", MinMaxFixedScaler(
-                np.asarray(config.min_spatial),
-                np.asarray(config.max_spatial))
-             )
+            (
+                "minmaxfixed",
+                MinMaxFixedScaler(
+                    np.asarray(config.min_spatial), np.asarray(config.max_spatial)
+                ),
+            )
         )
 
     if config.minmax_spatial:
-        spatial_transforms.append(
-            ("minmax", MinMaxScaler(feature_range=(-1, 1)))
-        )
+        spatial_transforms.append(("minmax", MinMaxScaler(feature_range=(-1, 1))))
 
     spatial_transform = Pipeline(spatial_transforms)
 
@@ -160,18 +286,18 @@ def get_feature_scaler(config):
     # temporal transform
     temporal_transforms = []
 
-    if config.minmaxfixed_temporal:
+    if config.minmax_fixed_temporal:
         temporal_transforms.append(
-            ("minmaxfixed", MinMaxFixedScaler(
-                np.asarray(config.min_temporal),
-                np.asarray(config.max_temporal))
-             )
+            (
+                "minmaxfixed",
+                MinMaxFixedScaler(
+                    np.asarray(config.min_temporal), np.asarray(config.max_temporal)
+                ),
+            )
         )
 
     if config.minmax_temporal:
-        temporal_transforms.append(
-            ("minmax", MinMaxScaler(feature_range=(-1, 1)))
-        )
+        temporal_transforms.append(("minmax", MinMaxScaler(feature_range=(-1, 1))))
 
     temporal_transform = Pipeline(temporal_transforms)
 
@@ -184,5 +310,3 @@ def get_feature_scaler(config):
     )
 
     return scaler
-
-

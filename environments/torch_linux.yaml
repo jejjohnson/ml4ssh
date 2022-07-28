@@ -47,6 +47,7 @@ dependencies:
 - pip:
   # PYTORCH ECOSYSTEM
   - torchtyping
+  - lightning-bolts
   - torchgeo
   - skorch
   - einops

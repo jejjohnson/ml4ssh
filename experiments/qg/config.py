@@ -19,6 +19,7 @@ class Logging(Serializable):
     run_path: Optional[str] = None
     model_path: Optional[str] = None
 
+
 # ======================
 # Data Directories
 # ======================
@@ -27,6 +28,21 @@ class DataDir(Serializable):
     train_data_dir: str = "/home/johnsonj/data/dc_2021/raw/train"
     ref_data_dir: str = "/home/johnsonj/data/dc_2021/raw/ref/"
     test_data_dir: str = "/home/johnsonj/data/dc_2021/raw/test/"
+
+
+# ======================
+# PREPROCESS
+# ======================
+@dataclass
+class PreProcess(Serializable):
+    # spatial subset
+    coarsen_Nx: int = 2
+    coarsen_Ny: int = 2
+    boundary_spatial: str = "trim"
+    # temporal subset
+    coarsen_time: int = 4
+    boundary_time: str = "trim"
+
 
 # ======================
 # DATA FEATURES
@@ -37,13 +53,14 @@ class Features(Serializable):
     # spatial subset
     minmax_spatial: bool = True
     minmax_fixed_spatial: bool = True
-    min_spatial: float = -3.14
-    max_spatial: float = 3.14
+    min_spatial: float = -3.5
+    max_spatial: float = 3.5
     # temporal subset
     minmax_temporal: bool = True
     minmax_fixed_temporal: bool = True
-    min_temporal: float = 0
-    max_temporal: float = 124
+    min_temporal: float = -10
+    max_temporal: float = 145
+
 
 # ======================
 # TRAIN/VAL SPLIT
@@ -51,12 +68,12 @@ class Features(Serializable):
 @dataclass
 class TrainTestSplit(Serializable):
     # spatial subset
-    coarsen_Nx: int = 2
-    coarsen_Ny: int = 2
+    step_Nx: int = 2
+    step_Ny: int = 2
     # temporal subset
-    coarsen_time: int = 4
+    step_time: int = 4
     # noise
-    noise: str = "gauss"
+    noise: Optional[str] = "gauss"
     sigma: float = 0.01
     seed_noise: float = 666
     # LABELs GENERATION
@@ -65,7 +82,8 @@ class TrainTestSplit(Serializable):
     seed_missing_data: int = 777
     # train val split
     train_size: float = 0.9
-    seed_split : int = 999
+    seed_split: int = 999
+
 
 # ======================
 # DATALOADER
@@ -79,6 +97,7 @@ class DataLoader(Serializable):
     batch_size: int = 4096
     batch_size_eval: int = 10_000
 
+
 # ======================
 # MODEL
 # ======================
@@ -87,6 +106,30 @@ class Model(Serializable):
     model: str = "siren"
     # encoder specific
     encoder: Optional[str] = None
+
+
+@dataclass
+class MLP(Serializable):
+    num_layers: int = 5
+    hidden_dim: int = 512
+    model_seed: int = 42
+    use_bias: bool = True
+    activation: str = "swish"
+    final_activation: str = "identity"
+
+
+@dataclass
+class FFN(Serializable):
+    encoder: str = "fourier"
+    sigma: float = 10.0
+    n: int = 10
+    mapping_size: int = 256
+    num_layers: int = 5
+    hidden_dim: int = 512
+    model_seed: int = 42
+    use_bias: bool = True
+    activation: str = "swish"
+    final_activation: str = "identity"
 
 
 @dataclass
@@ -108,6 +151,7 @@ class ModulatedSiren(Siren):
     num_layers_latent: int = 3
     operation: str = "sum"
 
+
 @dataclass
 class MFN(Serializable):
     num_layers: int = 5
@@ -119,40 +163,44 @@ class MFN(Serializable):
     beta: float = 1.0
     final_activation: str = "identity"
 
+
 # ======================
 # LOSSES
 # ======================
 @dataclass
 class Losses(Serializable):
-    loss: str = "mse" # Options: "mse", "nll", "kld"
+    loss: str = "mse"  # Options: "mse", "nll", "kld"
     reduction: str = "mean"
 
     # QG PINN Loss Args
     qg: bool = False
     qg_reg: str = 0.1
 
+
 # ======================
 # OPTIMIZER
 # ======================
 @dataclass
 class Optimizer(Serializable):
-    optimizer: str = "adam" # "adamw" # "adamax"
+    optimizer: str = "adam"  # "adamw" # "adamax"
     learning_rate: float = 1e-4
     num_epochs: int = 300
     min_epochs: int = 1
     device: str = "cpu"
-    gpus: int = 0 # the number of GPUS (pytorch-lightning)
+    gpus: int = 0  # the number of GPUS (pytorch-lightning)
+
 
 @dataclass
 class LRScheduler(Serializable):
     # LR Scheduler
-    lr_scheduler: str = "reduce" # Options: "cosine", "onecyle", "step", "multistep"
+    lr_scheduler: str = "reduce"  # Options: "cosine", "onecyle", "step", "multistep"
     patience: int = 10
     factor: float = 0.1
     steps: int = 250
     gamma: float = 0.1
     min_learning_rate: float = 1e-5
     milestones: List[int] = list_field(500, 1000, 1500, 2000, 2500)
+
 
 @dataclass
 class Callbacks(Serializable):
