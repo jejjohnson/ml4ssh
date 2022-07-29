@@ -7,10 +7,7 @@
 * [Redouane Lguensat](https://redouanelg.github.io)
 * [Julien Le Sommer](https://lesommer.github.io)
 * [Ronan Fablet](https://rfablet.github.io)
-* [Jordi Bolibar](https://jordibolibar.wordpress.com)
-* Quentin Favre
-* [Jean-Michel Brankart](https://www.ige-grenoble.fr/-Jean-Michel-Brankart-451-)
-* Pierre Brasseur
+
 
 
 ---
@@ -99,18 +96,24 @@ conda env create -f environments/torch_linux.yaml
 
 ### Pip Install (TODO)
 
-```bash
-pip install git+https://
-```
+[//]: # (```bash)
+
+[//]: # (pip install git+https://)
+
+[//]: # (```)
 
 
 ### Download (TODO)
 
-```bash
-git clone https://
-cd inr4ssh
-pip install .
-```
+[//]: # (```bash)
+
+[//]: # (git clone https://)
+
+[//]: # (cd inr4ssh)
+
+[//]: # (pip install .)
+
+[//]: # (```)
 
 
 
@@ -201,10 +204,25 @@ mamba install anaconda=2022.05
 ---
 ## Acknowledgements
 
+#### Data
 
-**Code**
+* [ocean-data-challenges/2021a_SSH_mapping_OSE](https://github.com/ocean-data-challenges/2021a_SSH_mapping_OSE) - Altimetry SSH datasets
 
+---
+#### Discussions
+
+* [Jordi Bolibar](https://jordibolibar.wordpress.com)
+* Quentin Favre
+* [Jean-Michel Brankart](https://www.ige-grenoble.fr/-Jean-Michel-Brankart-451-)
+* Pierre Brasseur
+
+---
+#### Code
+
+* [hrkz/torchqg](https://github.com/hrkz/torchqg) - Quasi-geostrophic spectral solver in PyTorch
 * [lucidrains/siren-pytorch](https://github.com/lucidrains/siren-pytorch) - Siren PyTorch Model
 * [kklemon/gon-pytorch](https://github.com/kklemon/gon-pytorch/blob/master/gon_pytorch/modules.py) - Fourier Features Network Model
 * [didriknielsen/survae_flows](https://github.com/didriknielsen/survae_flows/tree/master/survae/nn/layers) - Activation Functions & Conditional Distributions
 * [boschresearch/multiplicative-filter-networks](https://github.com/boschresearch/multiplicative-filter-networks) - Multiplicative Filter Networks (Fourier, Gabor) Models
+* [vsitzmann/siren](https://github.com/vsitzmann/siren) - simple differential operators
+* [boschresearch/torchphysics](https://github.com/boschresearch/torchphysics) - Advanced differential operators
