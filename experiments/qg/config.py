@@ -51,12 +51,12 @@ class PreProcess(Serializable):
 class Features(Serializable):
     variable: str = "p"
     # spatial subset
-    minmax_spatial: bool = True
+    minmax_spatial: bool = False
     minmax_fixed_spatial: bool = True
     min_spatial: float = -3.5
     max_spatial: float = 3.5
     # temporal subset
-    minmax_temporal: bool = True
+    minmax_temporal: bool = False
     minmax_fixed_temporal: bool = True
     min_temporal: float = -10
     max_temporal: float = 145
