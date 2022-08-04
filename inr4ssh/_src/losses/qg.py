@@ -28,7 +28,7 @@ class QGRegularization(nn.Module):
         # calculate term 2
         loss2 = _qg_term2(out_jac, self.f, self.g, self.Lr)
 
-        loss = (loss1 + loss2).sq
+        loss = (loss1 + loss2).square()
 
         if self.reduction == "sum":
             return loss.sum()
@@ -39,7 +39,7 @@ class QGRegularization(nn.Module):
 
 
 def qg_constants(f, g, L_r):
-    c_1 = f / g
+    c_1 = g / f
     c_2 = 1 / L_r**2
     c_3 = c_1 * c_2
     return c_1, c_2, c_3
@@ -59,7 +59,7 @@ def qg_loss(
     # calculate term 2
     loss2 = _qg_term2(ssh_jac, f, g, Lr)
 
-    loss = torch.sqrt((loss1 + loss2) ** 2)
+    loss = (loss1 + loss2).square()
 
     if reduction == "sum":
         return loss.sum()
@@ -136,9 +136,9 @@ def _qg_term2(u_grad, f: float = 1.0, g: float = 1.0, Lr: float = 1.0):
     _, c_2, c_3 = qg_constants(f, g, Lr)
 
     # get partial derivatives | partial x, y, t
-    u_x, u_y, u_t = torch.split(u_grad, [1, 1, 1], dim=1)
+    *_, u_t = torch.split(u_grad, [1, 1, 1], dim=1)
 
     # calculate term 2
-    loss = c_2 * u_t + c_3 * u_x * u_y - c_3 * u_y * u_x
+    loss = c_2 * u_t
 
     return loss
