@@ -50,6 +50,9 @@ class PreProcess(Serializable):
 @dataclass
 class Features(Serializable):
     variable: str = "p"
+    # SSH only
+    f: float = 0.0001
+    g: float = 9.81
     # spatial subset
     minmax_spatial: bool = False
     minmax_fixed_spatial: bool = True
@@ -175,6 +178,9 @@ class Losses(Serializable):
     # QG PINN Loss Args
     qg: bool = False
     qg_reg: str = 0.1
+    f: float = 0.0001
+    g: float = 9.81
+    Lr: float = 1.0
 
 
 # ======================

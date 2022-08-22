@@ -139,6 +139,6 @@ def _qg_term2(u_grad, f: float = 1.0, g: float = 1.0, Lr: float = 1.0):
     *_, u_t = torch.split(u_grad, [1, 1, 1], dim=1)
 
     # calculate term 2
-    loss = c_2 * u_t
+    loss = -c_2 * u_t
 
     return loss

@@ -46,7 +46,14 @@ class QGSimulation(pl.LightningModule):
 
         ds = self.preprocess_data(ds, self.preprocess)
 
-        data_obs = self.get_obs_data(ds["p"].values.copy(), self.traintest)
+        if self.cols_features[0] == "ssh":
+
+            ds_obs = ds["p"].values.copy()
+
+        else:
+            ds_obs = ds[self.cols_features[0]].values.copy()
+
+        data_obs = self.get_obs_data(ds_obs, self.traintest)
 
         logger.info("converting to dataframe...")
         ds["obs"] = (ds[self.cols_features].dims, data_obs)
