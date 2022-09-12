@@ -2,6 +2,7 @@
 from ..operators.differential import grad as gradient
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 
 class QGRegularization(nn.Module):
@@ -27,6 +28,44 @@ class QGRegularization(nn.Module):
         loss1 = _qg_term1(out_jac, x, self.f, self.g, self.Lr)
         # calculate term 2
         loss2 = _qg_term2(out_jac, self.f, self.g, self.Lr)
+
+        loss = (loss1 + loss2).square()
+
+        if self.reduction == "sum":
+            return loss.sum()
+        elif self.reduction == "mean":
+            return loss.mean()
+        else:
+            raise ValueError(f"Unrecognized reduction: {self.reduction}")
+
+
+class QGRegularizationFree(nn.Module):
+    def __init__(
+        self,
+        alpha: float = 1.0,
+        beta: float = 1.0,
+        eps: float = 1e-5,
+        reduction: str = "mean",
+    ):
+        super().__init__()
+
+        self.alpha = nn.Parameter(torch.FloatTensor([alpha]))
+        self.beta = nn.Parameter(torch.FloatTensor([beta]))
+        self.eps = eps
+        self.reduction = reduction
+
+    def forward(self, out, x):
+
+        x = x.requires_grad_(True)
+
+        # gradient, nabla x
+        out_jac = gradient(out, x)
+        assert out_jac.shape == x.shape
+
+        # calculate term 1
+        alpha = F.softplus(self.alpha + 1e-5)
+        beta = F.softplus(self.beta + 1e-5)
+        loss1, loss2 = _qg_loss_free(out_jac, x, alpha, beta)
 
         loss = (loss1 + loss2).square()
 
@@ -116,6 +155,59 @@ def _qg_term1(u_grad, x_var, f: float = 1.0, g: float = 1.0, L_r: float = 1.0):
     assert loss.shape == u_lap_grad_t.shape == u_lap_grad_y.shape == u_lap_grad_x.shape
 
     return loss
+
+
+def _qg_loss_free(u_grad, x_var, alpha, beta):
+    """
+    t1 = 𝑐2 ∂𝑡(𝑢)
+    t2 = α ∂𝑡∇2𝑢 + β (∂𝑥𝑢 ∂𝑦∇2𝑢 − ∂𝑦𝑢 ∂𝑥∇2𝑢)
+    Parameters:
+    ----------
+    u_grad: torch.Tensor, (B, Nx, Ny, T)
+    x_var: torch.Tensor, (B,
+    f: float, (,)
+    g: float, (,)
+    Lr: float, (,)
+
+    Returns:
+    --------
+    loss : torch.Tensor, (B,)
+    """
+
+    x_var = x_var.requires_grad_(True)
+
+    # get partial derivatives | partial x, y, t
+    u_x, u_y, u_t = torch.split(u_grad, [1, 1, 1], dim=1)
+
+    # jacobian^2 x2, ∇2
+    u_grad2 = gradient(u_grad, x_var)
+    assert u_grad2.shape == x_var.shape
+
+    # split jacobian -> partial x, partial y, partial t
+    u_xx, u_yy, u_tt = torch.split(u_grad2, [1, 1, 1], dim=1)
+    assert u_xx.shape == u_yy.shape == u_tt.shape
+
+    # laplacian (spatial), nabla^2
+    u_lap = u_xx + u_yy
+    assert u_lap.shape == u_xx.shape == u_yy.shape
+
+    # gradient of laplacian, ∇ ∇2
+    u_lap_grad = gradient(u_lap, x_var)
+    assert u_lap_grad.shape == x_var.shape
+
+    # split laplacian into partials
+    u_lap_grad_x, u_lap_grad_y, u_lap_grad_t = torch.split(u_lap_grad, [1, 1, 1], dim=1)
+    assert u_lap_grad_x.shape == u_lap_grad_y.shape == u_lap_grad_t.shape
+
+    # term 1
+    loss1 = u_t
+
+    # term 2
+    loss2 = alpha * u_lap_grad_t + beta * (u_x * u_lap_grad_y - u_y * u_lap_grad_x)
+    assert loss2.shape == u_lap_grad_t.shape == u_lap_grad_y.shape == u_lap_grad_x.shape
+    assert loss1.shape == loss2.shape
+
+    return loss1, loss2
 
 
 def _qg_term2(u_grad, f: float = 1.0, g: float = 1.0, Lr: float = 1.0):
