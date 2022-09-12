@@ -139,8 +139,15 @@ class QGSimulation(pl.LightningModule):
         # reshape data
         data = data.transpose("time", "Nx", "Ny")
 
-        # Coarsen X direction
+        # subset data
+        if preprocess.subset_Nx:
+            data = data.isel(Nx=slice(preprocess.Nx_min, preprocess.Nx_max))
+        if preprocess.subset_Ny:
+            data = data.isel(Ny=slice(preprocess.Ny_min, preprocess.Ny_max))
+        if preprocess.subset_time:
+            data = data.isel(time=slice(preprocess.time_min, preprocess.time_max))
 
+        # Coarsen X direction
         if preprocess.coarsen_Nx:
             logger.info("coarsening data (Nx)...")
             data = data.coarsen(

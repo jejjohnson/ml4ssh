@@ -49,25 +49,30 @@ class QGRegularizationFree(nn.Module):
     ):
         super().__init__()
 
-        self.alpha = nn.Parameter(torch.FloatTensor([alpha]))
-        self.beta = nn.Parameter(torch.FloatTensor([beta]))
+        self.alpha = nn.Parameter(torch.Tensor([alpha]), requires_grad=True)
+        self.beta = nn.Parameter(torch.Tensor([beta]), requires_grad=True)
+        # self.alpha = nn.Parameter(torch.randn((1,)))
+        # self.beta = nn.Parameter(torch.randn((1,)))
+        print(self.alpha, self.beta)
         self.eps = eps
         self.reduction = reduction
 
-    def forward(self, out, x):
+    def forward(self, out, x, alpha=None, beta=None):
 
         x = x.requires_grad_(True)
 
         # gradient, nabla x
-        out_jac = gradient(out, x)
-        assert out_jac.shape == x.shape
+        x_grad = gradient(out, x)
+        assert x_grad.shape == x.shape
 
         # calculate term 1
-        alpha = F.softplus(self.alpha + 1e-5)
-        beta = F.softplus(self.beta + 1e-5)
-        loss1, loss2 = _qg_loss_free(out_jac, x, alpha, beta)
+        alpha = self.alpha if alpha is None else alpha
+        beta = self.beta if beta is None else beta
+        alpha = F.softplus(alpha + 1e-5)
+        beta = F.softplus(beta + 1e-5)
+        t1, t2, t3 = _qg_loss_free(x_grad, x)
 
-        loss = (loss1 + loss2).square()
+        loss = (t1 - (alpha * t2 - beta * t3)).square()
 
         if self.reduction == "sum":
             return loss.sum()
@@ -157,10 +162,12 @@ def _qg_term1(u_grad, x_var, f: float = 1.0, g: float = 1.0, L_r: float = 1.0):
     return loss
 
 
-def _qg_loss_free(u_grad, x_var, alpha, beta):
+def _qg_loss_free(u_grad, x_var):
     """
-    t1 = 𝑐2 ∂𝑡(𝑢)
-    t2 = α ∂𝑡∇2𝑢 + β (∂𝑥𝑢 ∂𝑦∇2𝑢 − ∂𝑦𝑢 ∂𝑥∇2𝑢)
+    t1 = ∂𝑡(𝑢)
+    t2 = α ∂𝑡∇2𝑢
+    t3 = β (∂𝑥𝑢 ∂𝑦∇2𝑢 − ∂𝑦𝑢 ∂𝑥∇2𝑢)
+    loss = t1 - (t2 + t3)
     Parameters:
     ----------
     u_grad: torch.Tensor, (B, Nx, Ny, T)
@@ -174,8 +181,7 @@ def _qg_loss_free(u_grad, x_var, alpha, beta):
     loss : torch.Tensor, (B,)
     """
 
-    x_var = x_var.requires_grad_(True)
-
+    # x_var = x_var.requires_grad_(True)
     # get partial derivatives | partial x, y, t
     u_x, u_y, u_t = torch.split(u_grad, [1, 1, 1], dim=1)
 
@@ -200,14 +206,21 @@ def _qg_loss_free(u_grad, x_var, alpha, beta):
     assert u_lap_grad_x.shape == u_lap_grad_y.shape == u_lap_grad_t.shape
 
     # term 1
-    loss1 = u_t
+    t1 = u_t
 
     # term 2
-    loss2 = alpha * u_lap_grad_t + beta * (u_x * u_lap_grad_y - u_y * u_lap_grad_x)
-    assert loss2.shape == u_lap_grad_t.shape == u_lap_grad_y.shape == u_lap_grad_x.shape
-    assert loss1.shape == loss2.shape
+    t2 = u_lap_grad_t
+    t3 = u_x * u_lap_grad_y - u_y * u_lap_grad_x
+    assert (
+        t1.shape
+        == t2.shape
+        == t3.shape
+        == u_lap_grad_t.shape
+        == u_lap_grad_y.shape
+        == u_lap_grad_x.shape
+    )
 
-    return loss1, loss2
+    return t1, t2, t3
 
 
 def _qg_term2(u_grad, f: float = 1.0, g: float = 1.0, Lr: float = 1.0):

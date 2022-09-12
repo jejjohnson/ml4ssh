@@ -35,11 +35,23 @@ class DataDir(Serializable):
 # ======================
 @dataclass
 class PreProcess(Serializable):
+
     # spatial subset
+    subset_Nx: bool = False
+    Nx_min: int = 0
+    Nx_max: int = 128
+    subset_Ny: bool = False
+    Ny_min: int = 0
+    Ny_max: int = 128
+    # spatial coarsen
     coarsen_Nx: int = 2
     coarsen_Ny: int = 2
     boundary_spatial: str = "trim"
     # temporal subset
+    subset_time: bool = False
+    time_min: int = 0
+    time_max: int = 125
+    # temporal coarsen
     coarsen_time: int = 4
     boundary_time: str = "trim"
 
@@ -178,6 +190,10 @@ class Losses(Serializable):
     # QG PINN Loss Args
     qg: bool = False
     qg_reg: str = 0.1
+    # QG FREE Params
+    alpha: float = 1.0
+    beta: float = 98_100
+    # QG Fixed Params
     f: float = 0.0001
     g: float = 9.81
     Lr: float = 1.0
@@ -193,7 +209,11 @@ class Optimizer(Serializable):
     num_epochs: int = 300
     min_epochs: int = 1
     device: str = "cpu"
-    gpus: int = 0  # the number of GPUS (pytorch-lightning)
+    # pytorch-lightning options
+    gpus: int = 0  # the number of GPUS
+    accumulate_grad_batches: int = 5  # gradient accumulation
+    gradient_clip_val = 0  # gradient clipping
+    gradient_clip_algorithm = "value"  # gradient clipping method
 
 
 @dataclass
