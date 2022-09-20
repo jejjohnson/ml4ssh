@@ -34,7 +34,7 @@ dependencies:
 - conda-forge::cudatoolkit=11.6   # CUDA libraries
 # PYTORCH ECOSYSTEM
 - pytorch::pytorch                # pytorch tensor library
-- pytorch::torchvision            # pytorch vision library
+#- pytorch::torchvision            # pytorch vision library
 - pytorch::torchaudio             # pytorch audio library
 - conda-forge::pytorch-lightning  # pytorch training utils/org
 # GUI
@@ -48,7 +48,7 @@ dependencies:
   # PYTORCH ECOSYSTEM
   - torchtyping
   - lightning-bolts
-  - torchgeo
+#  - torchgeo
   - skorch
   - einops
   # OTHER

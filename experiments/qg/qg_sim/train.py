@@ -1,6 +1,6 @@
 import sys, os
 
-import torch
+
 from pyprojroot import here
 
 # spyder up to find the root
@@ -9,7 +9,8 @@ root = here(project_files=[".root"])
 # append to path
 sys.path.append(str(root))
 
-from pytorch_lightning import Trainer
+import torch
+from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning.callbacks import TQDMProgressBar, ModelCheckpoint
 from pathlib import Path
@@ -23,6 +24,9 @@ from inr4ssh._src.models.siren import SirenNet
 import ml_collections
 from figures import plot_maps
 import tqdm
+from loguru import logger
+
+seed_everything(123)
 
 
 def initialize_siren_model(config, x_init, y_init):
@@ -60,6 +64,7 @@ def initialize_callbacks(config, save_dir):
 def train(config: ml_collections.ConfigDict, workdir: str, savedir: str):
 
     # initialize logger
+    logger.info("Initializaing Logger...")
     wandb_logger = WandbLogger(
         config=config.to_dict(),
         mode=config.log.mode,
@@ -70,6 +75,7 @@ def train(config: ml_collections.ConfigDict, workdir: str, savedir: str):
     )
 
     # initialize dataloader
+    logger.info("Initializing data module...")
     dm = QGSimulation(config)
     dm.setup()
 

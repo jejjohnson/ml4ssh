@@ -85,8 +85,8 @@ class INRModel(pl.LightningModule):
 
             loss = loss_data + loss_reg
 
-            self.log("train_reg", loss_reg, prog_bar=True)
-            self.log("train_data", loss_data, prog_bar=True)
+            self.log("val_reg", loss_reg, prog_bar=True)
+            self.log("val_data", loss_data, prog_bar=True)
         else:
             loss = loss_data
 
@@ -108,8 +108,8 @@ class INRModel(pl.LightningModule):
 
                 loss = loss_data + loss_reg
 
-                self.log("train_reg", loss_reg, prog_bar=True)
-                self.log("train_data", loss_data, prog_bar=True)
+                self.log("test_reg", loss_reg, prog_bar=True)
+                self.log("test_data", loss_data, prog_bar=True)
             else:
                 loss = loss_data
 
