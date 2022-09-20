@@ -1,4 +1,5 @@
 from ml_collections import config_dict
+from typing import Optional
 
 
 def get_config():
@@ -18,6 +19,12 @@ def get_config():
         f"/Users/eman/code_projects/torchqg/data/qgsim_simple_128x128.nc"
     )
 
+    # checkpoint args
+    config.pretrained = config_dict.ConfigDict()
+    config.pretrained.checkpoint = False
+    config.pretrained.run_path = "ige/inr4ssh/2z8tsrfn"
+    config.pretrained.model_path = "checkpoints/epoch=836-step=329778.ckpt"
+
     # preprocessing args
     config.pre = config_dict.ConfigDict()
     config.pre.noise = 0.01
@@ -35,7 +42,7 @@ def get_config():
     config.dl.batchsize_train = 2048
     config.dl.batchsize_val = 2048
     config.dl.batchsize_test = 4096
-    config.dl.batchsize_predict = 4096
+    config.dl.batchsize_predict = 64
     config.dl.num_workers = 0
     config.dl.pin_memory = False
 

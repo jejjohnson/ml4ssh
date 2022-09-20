@@ -9,22 +9,29 @@ root = here(project_files=[".root"])
 # append to path
 sys.path.append(str(root))
 
+import ml_collections
+
+import tqdm
+import wandb
 import torch
 from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning.callbacks import TQDMProgressBar, ModelCheckpoint
 from pathlib import Path
-import wandb
+
 import numpy as np
 import pandas as pd
+from loguru import logger
+
+
 from data import QGSimulation
 from losses import RegQG, initialize_data_loss
 from model import INRModel
-from inr4ssh._src.models.siren import SirenNet
-import ml_collections
 from figures import plot_maps
-import tqdm
-from loguru import logger
+
+from inr4ssh._src.io import get_wandb_config, get_wandb_model
+from inr4ssh._src.models.siren import SirenNet
+
 
 seed_everything(123)
 
@@ -43,6 +50,16 @@ def initialize_siren_model(config, x_init, y_init):
     )
 
     return net
+
+
+def load_model_from_cpkt(config):
+
+    # load previous model
+    logger.info(f"Loading previous wandb model...")
+    best_model = get_wandb_model(config.run_path, config.model_path)
+    best_model.download(replace=True)
+
+    return best_model.name
 
 
 def initialize_callbacks(config, save_dir):
@@ -82,25 +99,49 @@ def train(config: ml_collections.ConfigDict, workdir: str, savedir: str):
     x_init, y_init = dm.ds_train[:10]
 
     # initialize model
-    net = initialize_siren_model(config.model, x_init, y_init)
+    if config.pretrained.checkpoint is True:
+        logger.info("Loading model from checkpoint")
+        old_config = get_wandb_config(config.pretrained.run_path)
+        old_config = ml_collections.config_dict.ConfigDict(old_config).model
+        net = initialize_siren_model(old_config.model, x_init, y_init)
+    else:
+        net = initialize_siren_model(config.model, x_init, y_init)
 
     # initialize regularization
+    logger.info("Initializing PDE REG...")
     reg_loss = RegQG(config.loss.alpha)
 
     # initialize dataloss
     data_loss = initialize_data_loss(config.loss)
 
     # initialize learner
-    learn = INRModel(
-        net,
-        reg_pde=reg_loss,
-        loss_data=data_loss,
-        learning_rate=config.optim.learning_rate,
-        warmup=config.optim.warmup,
-        num_epochs=config.optim.num_epochs,
-        alpha=config.loss.alpha,
-        qg=config.loss.qg,
-    )
+    if config.pretrained.checkpoint is True:
+        logger.info("Loading pretrained...")
+        learn = INRModel.load_from_checkpoint(
+            checkpoint_path=load_model_from_cpkt(config.pretrained),
+            model=net,
+            reg_pde=reg_loss,
+            loss_data=data_loss,
+            learning_rate=config.optim.learning_rate,
+            warmup=config.optim.warmup,
+            num_epochs=config.optim.num_epochs,
+            alpha=config.loss.alpha,
+            qg=config.loss.qg,
+        )
+    else:
+        logger.info("Loading new model")
+        learn = INRModel(
+            model=net,
+            reg_pde=reg_loss,
+            loss_data=data_loss,
+            learning_rate=config.optim.learning_rate,
+            warmup=config.optim.warmup,
+            warmup_start_lr=config.optim.warmup_start_lr,
+            eta_min=config.optim.eta_min,
+            num_epochs=config.optim.num_epochs,
+            alpha=config.loss.alpha,
+            qg=config.loss.qg,
+        )
 
     # initialize callbacks
     callbacks = initialize_callbacks(config, wandb_logger.experiment.dir)
@@ -152,17 +193,17 @@ def train(config: ml_collections.ConfigDict, workdir: str, savedir: str):
             # q = diffops.div(p_grad, ix)
 
         # collect
-        truths.append(iy)
-        coords.append(ix)
-        preds.append(p_pred)
-        grads.append(p_grad)
-        qs.append(q)
+        truths.append(iy.detach().cpu())
+        coords.append(ix.detach().cpu())
+        preds.append(p_pred.detach().cpu())
+        grads.append(p_grad.detach().cpu())
+        qs.append(q.detach().cpu())
 
-    coords = torch.cat(coords).detach().numpy()
-    preds = torch.cat(preds).detach().numpy()
-    truths = torch.cat(truths).detach().numpy()
-    grads = torch.cat(grads).detach().numpy()
-    qs = torch.cat(qs).detach().numpy()
+    coords = torch.cat(coords).numpy()
+    preds = torch.cat(preds).numpy()
+    truths = torch.cat(truths).numpy()
+    grads = torch.cat(grads).numpy()
+    qs = torch.cat(qs).numpy()
 
     df_data = dm.create_predictions_df()
 

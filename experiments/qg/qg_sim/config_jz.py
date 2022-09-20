@@ -14,9 +14,18 @@ def get_config():
 
     # data args
     config.data = config_dict.ConfigDict()
+    config.data.data = "qgsim"
+    config.data.sim = "simple"
+    config.data.res = "128x128"
     config.data.data_dir = (
         "/gpfswork/rech/cli/uvo53rl/projects/inr4ssh/data/qgsim_simple_128x128.nc"
     )
+
+    # checkpoint args
+    config.pretrained = config_dict.ConfigDict()
+    config.pretrained.checkpoint = False
+    config.pretrained.run_path = "ige/inr4ssh/2z8tsrfn"
+    config.pretrained.model_path = "checkpoints/epoch=836-step=329778.ckpt"
 
     # preprocessing args
     config.pre = config_dict.ConfigDict()
@@ -59,7 +68,9 @@ def get_config():
     config.optim = config_dict.ConfigDict()
     config.optim.warmup = 10
     config.optim.num_epochs = 50
-    config.optim.learning_rate = 1e-4
+    config.optim.learning_rate = 1e-3
+    config.optim.eta_min = 1e-6
+    config.optim.warmup_start_lr = 1e-6
 
     # trainer args
     config.trainer = config_dict.ConfigDict()

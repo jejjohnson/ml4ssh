@@ -1,4 +1,5 @@
 import sys, os
+
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 
 from pyprojroot import here
@@ -27,8 +28,16 @@ from pytorch_lightning.loggers import WandbLogger
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import TensorDataset, DataLoader
 
-from utils import get_interpolation_alongtrack_prediction_ds, get_alongtrack_prediction_ds
-from utils import plot_psd_figs, get_grid_stats, postprocess_predictions, get_alongtrack_stats
+from utils import (
+    get_interpolation_alongtrack_prediction_ds,
+    get_alongtrack_prediction_ds,
+)
+from utils import (
+    plot_psd_figs,
+    get_grid_stats,
+    postprocess_predictions,
+    get_alongtrack_stats,
+)
 from losses import loss_factory, regularization_factory
 from optimizers import optimizer_factory, lr_scheduler_factory
 from models import model_factory, CoordinatesLearner
@@ -40,6 +49,7 @@ import wandb
 from inr4ssh._src.io import simpleargs_2_ndict
 
 seed_everything(123)
+
 
 def main(args):
 
@@ -57,7 +67,8 @@ def main(args):
         project=log_options.project,
         entity=log_options.entity,
         dir=log_options.log_dir,
-        resume=False
+        resume=False,
+        log_model="all",
     )
 
     # DATA MODULE
@@ -68,7 +79,7 @@ def main(args):
         traintest=args.traintest,
         features=args.features,
         dataloader=args.dataloader,
-        eval=args.eval
+        eval=args.eval,
     )
 
     dm.setup()
@@ -87,23 +98,17 @@ def main(args):
     logger.info("extracting train and test...")
     x_train, y_train = dm.ds_train[:]
 
-
     logger.info(f"Creating {args.model.model} neural network...")
 
     dim_in = x_train.shape[1]
     dim_out = y_train.shape[1]
 
     # update params
-    params_dict["model"].update({
-            "dim_in": dim_in, "dim_out": dim_out
-        })
+    params_dict["model"].update({"dim_in": dim_in, "dim_out": dim_out})
     wandb_logger.experiment.config.update(params_dict, allow_val_change=True)
 
     net = model_factory(
-        model=args.model.model,
-        dim_in=dim_in,
-        dim_out=dim_out,
-        config=args
+        model=args.model.model, dim_in=dim_in, dim_out=dim_out, config=args
     )
 
     logger.info("Initializing callbacks...")
@@ -127,9 +132,7 @@ def main(args):
     # PYTORCH LIGHTNING CLASS
     # ============================
 
-
     logger.info("Initializing trainer class...")
-
 
     learn = CoordinatesLearner(net, args)
 
@@ -173,11 +176,14 @@ def main(args):
 
     ds_oi = postprocess_predictions(predictions, dm, args, logger)
 
-    alongtracks, tracks = get_interpolation_alongtrack_prediction_ds(ds_oi, args, logger)
+    alongtracks, tracks = get_interpolation_alongtrack_prediction_ds(
+        ds_oi, args, logger
+    )
 
     logger.info("Getting RMSE Metrics (GRID)...")
-    rmse_metrics = get_grid_stats(alongtracks, args.metrics, None, wandb_logger.log_metrics)
-
+    rmse_metrics = get_grid_stats(
+        alongtracks, args.metrics, None, wandb_logger.log_metrics
+    )
 
     logger.info(f"Grid Stats: {rmse_metrics}")
 
@@ -189,7 +195,7 @@ def main(args):
         delta_x=args.metrics.velocity * args.metrics.delta_t,
         npt=tracks.npt,
         scaling="density",
-        noverlap=0
+        noverlap=0,
     )
 
     logger.info(f"Grid PSD: {psd_metrics}")
@@ -224,13 +230,15 @@ def main(args):
         batch_size=args.dataloader.batch_size_eval,
         shuffle=False,
         num_workers=args.dataloader.num_workers,
-        pin_memory=args.dataloader.pin_memory
+        pin_memory=args.dataloader.pin_memory,
     )
 
     logger.info(f"Predicting alongtrack data...")
     t0 = time.time()
     with torch.inference_mode():
-        predictions = trainer.predict(learn, dataloaders=dl_test, return_predictions=True)
+        predictions = trainer.predict(
+            learn, dataloaders=dl_test, return_predictions=True
+        )
         predictions = torch.cat(predictions)
         predictions = predictions.numpy()
     t1 = time.time() - t0
@@ -268,7 +276,7 @@ def main(args):
     wandb.finish()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # initialize argparse
     parser = ArgumentParser()
 
@@ -293,7 +301,5 @@ if __name__ == '__main__':
 
     # parse args
     args = parser.parse_args()
-
-
 
     main(args)

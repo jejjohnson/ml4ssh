@@ -134,6 +134,8 @@ class INRModel(pl.LightningModule):
             optimizer,
             warmup_epochs=self.hyperparams.get("warmup", 10),
             max_epochs=self.hyperparams.get("num_epochs", 100),
+            warmup_start_lr=self.hyperparams.get("warmup_start_lr", 1e-6),
+            eta_min=self.hyperparams.get("eta_min", 1e-6),
         )
         return {
             "optimizer": optimizer,

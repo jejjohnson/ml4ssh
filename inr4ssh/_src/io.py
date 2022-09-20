@@ -15,10 +15,12 @@ def load_multiple_nc_files(files: List[str]) -> List:
 
     return list_of_datasets
 
+
 def save_object(model, path):
-    with open(path, 'wb') as file:
+    with open(path, "wb") as file:
         pickle.dump(model, file)
     return None
+
 
 def load_object(path):
     with open(path, "rb") as file:
@@ -46,9 +48,10 @@ def transform_dict(config_dict: Dict, expand: bool = True):
             # Transform to YAML-friendly (str) format
             # Need to handle both Classes, Callables, Object Instances
             # Custom Classes might not have great __repr__ so __name__ might be better in these cases
-            vname = v.__name__ if hasattr(v, '__name__') else v.__class__.__name__
+            vname = v.__name__ if hasattr(v, "__name__") else v.__class__.__name__
             ret[k] = f"{v.__module__}:{vname}"
     return ret
+
 
 def simpleargs_2_ndict(args):
 
@@ -61,22 +64,19 @@ def simpleargs_2_ndict(args):
 def get_wandb_config(run_path):
     # init API
     api = wandb.Api()
-    
+
     # init run
     run = api.run(run_path)
-    
+
     # return config
     return run.config
 
 
 def get_wandb_model(run_path, checkpoint_path):
-    
+
     # initialize api
     api = wandb.Api()
-    
+
     run = api.run(run_path)
-    
-    
-    
-    
+
     return run.file(checkpoint_path)
