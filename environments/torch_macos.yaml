@@ -70,6 +70,7 @@ dependencies:
   - loguru
   - simple-parsing
   - ml_collections
+  - absl-py
   # plotting
   - celluloid
   - corner
