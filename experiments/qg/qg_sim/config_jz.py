@@ -16,9 +16,9 @@ def get_config():
     config.data = config_dict.ConfigDict()
     config.data.data = "qgsim"
     config.data.sim = "simple"
-    config.data.res = "128x128"
+    config.data.res = "512x512"
     config.data.data_dir = (
-        "/gpfswork/rech/cli/uvo53rl/projects/inr4ssh/data/qgsim_simple_128x128.nc"
+        "/gpfswork/rech/cli/uvo53rl/data/qg_sim/qgsim_simple_512x512.nc"
     )
 
     # checkpoint args

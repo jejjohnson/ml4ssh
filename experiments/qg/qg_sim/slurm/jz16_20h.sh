@@ -36,11 +36,22 @@ source activate torch_py39
 #    --my_config.optim.num_epochs=10 \
 #    --my_config.optim.warmup=5 \
 #    --my_config.loss.qg=False \
-#    --my_config.log.mode="offline"
+#    --my_config.log.mode="disabled" \
+#    --my_config.trainer.grad_batches=10
+
+## run script
+#srun python experiments/qg/qg_sim/main.py \
+#    --my_config=experiments/qg/qg_sim/config_jz.py \
+#    --my_config.optim.num_epochs=10000 \
+#    --my_config.optim.warmup=100 \
+#    --my_config.loss.qg=False \
+#    --my_config.trainer.grad_batches=10
 
 # run script
 srun python experiments/qg/qg_sim/main.py \
     --my_config=experiments/qg/qg_sim/config_jz.py \
-    --my_config.optim.num_epochs=1000 \
-    --my_config.optim.warmup=25 \
-    --my_config.loss.qg=False
+    --my_config.optim.num_epochs=10000 \
+    --my_config.optim.warmup=100 \
+    --my_config.loss.qg=True \
+    --my_config.loss.alpha=1e4 \
+    --my_config.trainer.grad_batches=10
