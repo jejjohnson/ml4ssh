@@ -1,16 +1,16 @@
 #!/bin/bash
 
-#SBATCH --job-name=dc21b                     # name of job
+#SBATCH --job-name=qg128                     # name of job
 #SBATCH --account=cli@v100                   # for statistics
 #SBATCH --nodes=1                            # we ALWAYS request one node
 #SBATCH --ntasks-per-node=1                  # number of tasks per node
 #SBATCH --cpus-per-task=10                   # number of cpus per task
 #SBATCH -C v100-16g                          # V100 GPU + 16 GBs RAM
-#SBATCH --qos=qos_gpu-t3                     # GPU partition (max 20� hrs)
+#SBATCH --qos=qos_gpu-t4                     # GPU partition (max 20� hrs)
 #SBATCH --gres=gpu:1                         # number of GPUs (1/4 of GPUs)
-#SBATCH --time=20:00:00                      # maximum execution time requested (HH:MM:SS)
-#SBATCH --output=/gpfsscratch/rech/cli/uvo53rl/logs/inr4ssh_dc_2021b_%j.log      # name of output file
-#SBATCH --error=/gpfsscratch/rech/cli/uvo53rl/errs/inr4ssh_dc_2021b_%j.err       # name of error file
+#SBATCH --time=90:00:00                      # maximum execution time requested (HH:MM:SS)
+#SBATCH --output=/gpfsscratch/rech/cli/uvo53rl/logs/nerf_qg_128_%j.log      # name of output file
+#SBATCH --error=/gpfsscratch/rech/cli/uvo53rl/errs/nerf_qg_128_%j.err       # name of error file
 #SBATCH --export=ALL
 
 # loading of modules
@@ -42,18 +42,22 @@ source activate torch_py39
 ## run script
 #srun python experiments/qg/qg_sim/main.py \
 #    --my_config=experiments/qg/qg_sim/config_jz.py \
-#    --my_config.optim.num_epochs=10000 \
+#    --my_config.optim.num_epochs=50000 \
 #    --my_config.optim.warmup=100 \
 #    --my_config.loss.qg=False \
-#    --my_config.trainer.grad_batches=10
+#    --my_config.trainer.grad_batches=10 \
+#    --my_config.dl.batchsize_train=1096 \
+#    --my_config.data.data_dir="/gpfswork/rech/cli/uvo53rl/data/qg_sim/qgsim_simple_128x128.nc" \
+#    --my_config.data.res="128x128"
 
 # run script
 srun python experiments/qg/qg_sim/main.py \
     --my_config=experiments/qg/qg_sim/config_jz.py \
-    --my_config.optim.num_epochs=5000 \
-    --my_config.optim.warmup=50 \
-    --my_config.loss.qg=False \
+    --my_config.optim.num_epochs=50000 \
+    --my_config.optim.warmup=100 \
+    --my_config.loss.qg=True \
     --my_config.loss.alpha=1e-4 \
-    --my_config.trainer.grad_batches=50 \
-    --my_config.data.data_dir="/gpfswork/rech/cli/uvo53rl/data/qg_sim/qgsim_simple_256x256.nc" \
-    --my_config.data.res="256x256"
+    --my_config.trainer.grad_batches=10 \
+    --my_config.dl.batchsize_train=1096 \
+    --my_config.data.data_dir="/gpfswork/rech/cli/uvo53rl/data/qg_sim/qgsim_simple_128x128.nc" \
+    --my_config.data.res="128x128"

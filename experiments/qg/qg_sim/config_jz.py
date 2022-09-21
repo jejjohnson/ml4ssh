@@ -46,7 +46,7 @@ def get_config():
     config.dl.batchsize_test = 1_000
     config.dl.batchsize_predict = 4096
     config.dl.num_workers = 10
-    config.dl.pin_memory = False
+    config.dl.pin_memory = True
 
     # model arguments
     config.model = model = config_dict.ConfigDict()
@@ -69,8 +69,8 @@ def get_config():
     config.optim.warmup = 10
     config.optim.num_epochs = 50
     config.optim.learning_rate = 1e-3
-    config.optim.eta_min = 1e-6
-    config.optim.warmup_start_lr = 1e-6
+    config.optim.eta_min = 0.0
+    config.optim.warmup_start_lr = 0.0
 
     # trainer args
     config.trainer = config_dict.ConfigDict()

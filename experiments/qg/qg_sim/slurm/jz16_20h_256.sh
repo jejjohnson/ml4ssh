@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name=dc21b                     # name of job
+#SBATCH --job-name=qg256                     # name of job
 #SBATCH --account=cli@v100                   # for statistics
 #SBATCH --nodes=1                            # we ALWAYS request one node
 #SBATCH --ntasks-per-node=1                  # number of tasks per node
@@ -9,8 +9,8 @@
 #SBATCH --qos=qos_gpu-t3                     # GPU partition (max 20� hrs)
 #SBATCH --gres=gpu:1                         # number of GPUs (1/4 of GPUs)
 #SBATCH --time=20:00:00                      # maximum execution time requested (HH:MM:SS)
-#SBATCH --output=/gpfsscratch/rech/cli/uvo53rl/logs/inr4ssh_dc_2021b_%j.log      # name of output file
-#SBATCH --error=/gpfsscratch/rech/cli/uvo53rl/errs/inr4ssh_dc_2021b_%j.err       # name of error file
+#SBATCH --output=/gpfsscratch/rech/cli/uvo53rl/logs/nerf_256_2021b_%j.log      # name of output file
+#SBATCH --error=/gpfsscratch/rech/cli/uvo53rl/errs/nerf_256_2021b_%j.err       # name of error file
 #SBATCH --export=ALL
 
 # loading of modules
@@ -46,6 +46,8 @@ source activate torch_py39
 #    --my_config.optim.warmup=100 \
 #    --my_config.loss.qg=False \
 #    --my_config.trainer.grad_batches=10
+#    --my_config.data.data_dir="/gpfswork/rech/cli/uvo53rl/data/qg_sim/qgsim_simple_256x256.nc" \
+#    --my_config.data.res="256x256"
 
 # run script
 srun python experiments/qg/qg_sim/main.py \
@@ -53,7 +55,7 @@ srun python experiments/qg/qg_sim/main.py \
     --my_config.optim.num_epochs=5000 \
     --my_config.optim.warmup=50 \
     --my_config.loss.qg=False \
-    --my_config.loss.alpha=1e-4 \
+    --my_config.loss.alpha=1e-6 \
     --my_config.trainer.grad_batches=50 \
     --my_config.data.data_dir="/gpfswork/rech/cli/uvo53rl/data/qg_sim/qgsim_simple_256x256.nc" \
     --my_config.data.res="256x256"
