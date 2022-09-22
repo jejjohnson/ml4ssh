@@ -31,16 +31,16 @@ export PYTHONPATH=$WORK/projects/inr4ssh:${PYTHONPATH}
 source activate torch_py39
 
 ## run script (smoke test)
-#srun python experiments/qg/qg_image/main.py \
-#    --my_config=experiments/qg/qg_image/config.py \
+#srun python experiments/qg/main.py \
+#    --experiment="simulation" \
+#    --my_config=experiments/qg/config.py \
 #    --my_config.log.mode="disabled" \
 #    --my_config.optim.num_epochs=20 \
 #    --my_config.optim.warmup=5 \
-#    --my_config.optim_qg.num_epochs=20 \
-#    --my_config.optim_qg.warmup=5 \
+#    --my_config.loss.qg=False \
 #    --my_config.trainer.grad_batches=10
 
 
 # run script
-srun python experiments/qg/qg_image/main.py \
-    --my_config=experiments/qg/qg_image/config.py
+srun python experiments/qg/main.py \
+    --my_config=experiments/qg/configs/config.py

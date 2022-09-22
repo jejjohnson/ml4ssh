@@ -31,9 +31,9 @@ def get_config():
     config.pre = config_dict.ConfigDict()
     config.pre.noise = 0.01
     config.pre.dt = 1.0
-    config.pre.time_subset = False
+    config.pre.time_subset = True
     config.pre.time_min = 0
-    config.pre.time_max = 1
+    config.pre.time_max = 2
     config.pre.seed = 123
 
     # train/test args
@@ -76,8 +76,8 @@ def get_config():
     # optimizer (QG) args
     config.optim_qg = config_dict.ConfigDict()
     config.optim_qg.warmup = 100
-    config.optim_qg.num_epochs = 10000
-    config.optim_qg.learning_rate = 1e-3
+    config.optim_qg.num_epochs = 20000
+    config.optim_qg.learning_rate = 1e-4
     config.optim_qg.eta_min = 1e-6
     config.optim_qg.warmup_start_lr = 1e-6
 
@@ -85,12 +85,12 @@ def get_config():
     config.trainer = config_dict.ConfigDict()
     config.trainer.accelerator = "gpu"
     config.trainer.devices = 1
-    config.trainer.grad_batches = 1
+    config.trainer.grad_batches = 10
 
     # trainer (QG Reg) args
     config.trainer_qg = config_dict.ConfigDict()
     config.trainer_qg.accelerator = "gpu"
     config.trainer_qg.devices = 1
-    config.trainer_qg.grad_batches = 1
+    config.trainer_qg.grad_batches = 10
 
     return config

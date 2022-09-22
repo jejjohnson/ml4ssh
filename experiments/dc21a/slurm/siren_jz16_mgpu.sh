@@ -52,7 +52,7 @@ python experiments/expv2/train_pl.py \
     --abs_time_max 2018-02-01
 
 ## run script
-#python experiments/dc21a/train.py \
+#python experiments/dc21a/train_image.py \
 #    --num_epochs 10 \
 #    --wandb_mode "disabled" \
 #    --wandb_log_dir "/gpfsscratch/rech/cli/uvo53rl/" \
@@ -100,4 +100,3 @@ python experiments/expv2/train_pl.py \
 #     --train-data-dir /gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/train \
 #     --ref-data-dir /gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/ref \
 #     --test-data-dir /gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/test
-

@@ -8,10 +8,11 @@ export PYTHONPATH=$HOME/code_projects/inr4ssh/:${PYTHONPATH}
 conda activate torch_py39
 
 # run script (smoke-test)
-python experiments/qg/qg_image/main.py \
-    --my_config=experiments/qg/qg_image/config.py \
+python experiments/qg/main.py \
+    --experiment="image" \
+    --my_config=experiments/qg/configs/config_image.py \
     --my_config.log.mode="disabled" \
-    --my_config.optim.num_epochs=5 \
+    --my_config.optim.num_epochs=2 \
     --my_config.optim.warmup=1 \
     --my_config.optim_qg.num_epochs=2 \
     --my_config.optim_qg.warmup=1 \
@@ -24,4 +25,5 @@ python experiments/qg/qg_image/main.py \
     --my_config.dl.num_workers=1 \
     --my_config.dl.pin_memory=False \
     --my_config.trainer.accelerator="mps" \
-    --my_config.trainer_qg.accelerator="cpu"
+    --my_config.trainer_qg.accelerator="cpu" \
+    --my_config.pre.time_max=1

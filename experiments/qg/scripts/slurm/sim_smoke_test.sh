@@ -17,14 +17,12 @@ export PYTHONPATH=$WORK/projects/inr4ssh:${PYTHONPATH}
 # loading of modules
 source activate torch_py39
 
-# run script
-python experiments/qg/qg_image/main.py \
-    --my_config=experiments/qg/qg_image/config.py \
+# run script (smoke test)
+python experiments/qg/main.py \
+    --experiment="simulation" \
+    --my_config=experiments/qg/configs/config.py \
     --my_config.log.mode="disabled" \
-    --my_config.optim.num_epochs=5 \
-    --my_config.optim.warmup=2 \
-    --my_config.optim_qg.num_epochs=5 \
-    --my_config.optim_qg.warmup=2 \
-    --my_config.trainer.grad_batches=10 \
-    --my_config.pre.time_min=0 \
-    --my_config.pre.time_max=1
+    --my_config.optim.num_epochs=20 \
+    --my_config.optim.warmup=5 \
+    --my_config.loss.qg=False \
+    --my_config.trainer.grad_batches=10

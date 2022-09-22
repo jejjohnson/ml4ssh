@@ -18,6 +18,7 @@ class QGSimulation(pl.LightningModule):
 
         if config.time_subset:
             ds = ds.isel(steps=slice(config.time_min, config.time_max))
+
         return ds
 
     def setup(self, stage=None):
