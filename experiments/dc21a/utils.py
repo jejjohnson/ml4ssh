@@ -54,7 +54,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from inr4ssh._src.viz.movie import create_movie
 
-def postprocess_predictions(predictions, dm, args, logger):
+
+def postprocess_predictions(predictions, dm, ref_data_dir, logger):
 
     # POSTPROCESS
     # convert to da
@@ -65,7 +66,7 @@ def postprocess_predictions(predictions, dm, args, logger):
 
     # open correction dataset
     logger.info("Loading SSH corrections...")
-    ds_correct = load_ssh_correction(args.data.ref_data_dir)
+    ds_correct = load_ssh_correction(ref_data_dir)
 
     # correct predictions
     logger.info("Correcting SSH predictions...")
@@ -73,19 +74,25 @@ def postprocess_predictions(predictions, dm, args, logger):
 
     return ds_oi
 
-def get_interpolation_alongtrack_prediction_ds(ds_oi, config, logger):
+
+def get_interpolation_alongtrack_prediction_ds(
+    ds_oi, test_data_dir, config_eval_data, logger
+):
     # open along track dataset
     logger.info("Loading test dataset...")
-    ds_alongtrack = load_ssh_altimetry_data_test(config.data.test_data_dir)
+    ds_alongtrack = load_ssh_altimetry_data_test(test_data_dir)
 
     # interpolate along track
     logger.info("Interpolating alongtrack obs...")
     alongtracks = interp_on_alongtrack(
         gridded_dataset=ds_oi,
         ds_alongtrack=ds_alongtrack,
-        lon_min=config.eval.lon_min, lon_max=config.eval.lon_max,
-        lat_min=config.eval.lat_min, lat_max=config.eval.lat_max,
-        time_min=config.eval.time_min, time_max=config.eval.time_max
+        lon_min=config_eval_data.lon_min,
+        lon_max=config_eval_data.lon_max,
+        lat_min=config_eval_data.lat_min,
+        lat_max=config_eval_data.lat_max,
+        time_min=config_eval_data.time_min,
+        time_max=config_eval_data.time_max,
     )
 
     logger.info("Selecting track segments...")
@@ -97,20 +104,19 @@ def get_interpolation_alongtrack_prediction_ds(ds_oi, config, logger):
         ssh_map_interp=alongtracks.ssh_map,
     )
 
-
     return alongtracks, tracks
 
-def get_grid_stats(alongtracks, args, logger, wandb_fn=None):
 
+def get_grid_stats(alongtracks, args, logger, wandb_fn=None):
 
     rmse_metrics = calculate_nrmse(
         true=alongtracks.ssh_alongtrack,
         pred=alongtracks.ssh_map,
         time_vector=alongtracks.time,
         dt_freq=args.bin_time_step,
-        min_obs=args.min_obs
+        min_obs=args.min_obs,
     )
-    
+
     if wandb_fn is not None:
         wandb_fn(
             {
@@ -121,16 +127,18 @@ def get_grid_stats(alongtracks, args, logger, wandb_fn=None):
             }
         )
 
-
     return rmse_metrics
 
-def get_alongtrack_prediction_ds(dm, config, logger):
+
+def get_alongtrack_prediction_ds(
+    dm, test_data_dir, config_preprocess, config_eval_data, logger
+):
     # ==================================
     # PREDICTIONS - ALONGTRACK
     # ==================================
 
     logger.info(f"Opening alongtrack dataset...")
-    ds_alongtrack = load_ssh_altimetry_data_test(config.data.test_data_dir)
+    ds_alongtrack = load_ssh_altimetry_data_test(test_data_dir)
 
     logger.info(f"Correcting coordinate labels...")
     ds_alongtrack = correct_coordinate_labels(ds_alongtrack)
@@ -142,20 +150,20 @@ def get_alongtrack_prediction_ds(dm, config, logger):
     logger.info(f"Temporal subset...")
     ds_alongtrack = temporal_subset(
         ds_alongtrack,
-        time_min=np.datetime64(config.preprocess.time_min),
-        time_max=np.datetime64(config.preprocess.time_max),
-        time_buffer=config.preprocess.time_buffer,
+        time_min=np.datetime64(config_preprocess.time_min),
+        time_max=np.datetime64(config_preprocess.time_max),
+        time_buffer=config_preprocess.time_buffer,
     )
 
     logger.info(f"Spatial subset...")
     ds_alongtrack = spatial_subset(
         ds_alongtrack,
-        lon_min=config.eval.lon_min,
-        lon_max=config.eval.lon_max,
-        lon_buffer=config.eval.lon_buffer,
-        lat_min=config.eval.lat_min,
-        lat_max=config.eval.lat_max,
-        lat_buffer=config.eval.lat_buffer,
+        lon_min=config_eval_data.lon_min,
+        lon_max=config_eval_data.lon_max,
+        lon_buffer=config_eval_data.lon_buffer,
+        lat_min=config_eval_data.lat_min,
+        lat_max=config_eval_data.lat_max,
+        lat_buffer=config_eval_data.lat_buffer,
     )
 
     logger.info(f"Converting to a dataframe...")
@@ -166,12 +174,13 @@ def get_alongtrack_prediction_ds(dm, config, logger):
     y_test = ds_alongtrack["sla_unfiltered"]
     return X_test, y_test
 
+
 def get_alongtrack_stats(y_test, predictions, logger, wandb_fn=None):
 
     # STATS
     logger.info(f"Calculating alongtrack RMSE...")
     rmse_mean, rmse_std = calculate_rmse_elementwise(y_test, predictions)
-    
+
     if wandb_fn is not None:
         wandb_fn(
             {
@@ -187,10 +196,14 @@ def get_alongtrack_stats(y_test, predictions, logger, wandb_fn=None):
     metrics = ["custom", "std", "mean", "minmax", "iqr"]
 
     for imetric in metrics:
-        nrmse_mean, nrmse_std = calculate_nrmse_elementwise(y_test, predictions, imetric)
+        nrmse_mean, nrmse_std = calculate_nrmse_elementwise(
+            y_test, predictions, imetric
+        )
 
-        logger.info(f"RMSE ({imetric}): mean - {nrmse_mean:.4f}, stddev - {nrmse_std:.4f}")
-        
+        logger.info(
+            f"RMSE ({imetric}): mean - {nrmse_mean:.4f}, stddev - {nrmse_std:.4f}"
+        )
+
         if wandb_fn is not None:
             wandb_fn(
                 {
@@ -200,8 +213,9 @@ def get_alongtrack_stats(y_test, predictions, logger, wandb_fn=None):
             )
     return None
 
-def plot_psd_figs(psd_metrics, logger, wandb_fn=None, method: str="alongtrack"):
-    
+
+def plot_psd_figs(psd_metrics, logger, wandb_fn=None, method: str = "alongtrack"):
+
     if wandb_fn is not None:
         wandb_fn(
             {
@@ -217,7 +231,7 @@ def plot_psd_figs(psd_metrics, logger, wandb_fn=None, method: str="alongtrack"):
         wavenumber=psd_metrics.wavenumber,
         resolved_scale=psd_metrics.resolved_scale,
     )
-    
+
     if wandb_fn is not None:
         wandb_fn(
             {
@@ -230,7 +244,7 @@ def plot_psd_figs(psd_metrics, logger, wandb_fn=None, method: str="alongtrack"):
         psd_ref=psd_metrics.psd_ref,
         wavenumber=psd_metrics.wavenumber,
     )
-    
+
     if wandb_fn is not None:
         wandb_fn(
             {
@@ -238,4 +252,3 @@ def plot_psd_figs(psd_metrics, logger, wandb_fn=None, method: str="alongtrack"):
             }
         )
     return None
-

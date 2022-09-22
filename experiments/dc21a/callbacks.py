@@ -1,15 +1,17 @@
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
 from pathlib import Path
+
+
 def get_callbacks(config, wandb_logger=None):
     callbacks = []
-    if config.callbacks.early_stopping is True:
+    if config.early_stopping is True:
         cb = EarlyStopping(
             monitor="valid_loss",
             mode="min",
-            patience=config.callbacks.patience,
+            patience=config.patience,
         )
         callbacks.append(cb)
-    if config.callbacks.model_checkpoint is True:
+    if config.model_checkpoint is True:
         if wandb_logger is not None:
             log_dir = wandb_logger.experiment.dir
         else:
@@ -18,10 +20,11 @@ def get_callbacks(config, wandb_logger=None):
             dirpath=str(Path(log_dir).joinpath("checkpoints")),
             monitor="valid_loss",
             mode="min",
-            save_top_k=2,
+            save_top_k=1,
         )
         callbacks.append(cb)
     return callbacks
+
 
 # from skorch.callbacks import EarlyStopping, LRScheduler, WandbLogger
 #

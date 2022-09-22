@@ -6,80 +6,78 @@ from losses import loss_factory
 import pytorch_lightning as pl
 import torch.nn as nn
 
+
 def model_factory(model, dim_in, dim_out, config):
 
     if model == "siren":
-        siren_config = config.siren
         return SirenNet(
             dim_in=dim_in,
-            dim_hidden=siren_config.hidden_dim,
+            dim_hidden=config.hidden_dim,
             dim_out=dim_out,
-            num_layers=siren_config.num_layers,
-            w0=siren_config.w0,
-            w0_initial=siren_config.w0_initial,
-            use_bias=siren_config.use_bias,
-            c=siren_config.c,
-            final_activation=get_activation(siren_config.final_activation)
+            num_layers=config.num_layers,
+            w0=config.w0,
+            w0_initial=config.w0_initial,
+            use_bias=config.use_bias,
+            c=config.c,
+            final_activation=get_activation(config.final_activation),
         )
     elif model == "modsiren":
-        modsiren_config = config.modsiren
         return ModulatedSirenNet(
             dim_in=dim_in,
-            dim_hidden=modsiren_config.hidden_dim,
+            dim_hidden=config.hidden_dim,
             dim_out=dim_out,
-            num_layers=modsiren_config.num_layers,
-            w0=modsiren_config.w0,
-            w0_initial=modsiren_config.w0_initial,
-            c=modsiren_config.c,
-            final_activation=get_activation(modsiren_config.final_activation),
-            latent_dim=modsiren_config.latent_dim,
-            num_layers_latent=modsiren_config.num_layers,
-            operation=modsiren_config.operation
+            num_layers=config.num_layers,
+            w0=config.w0,
+            w0_initial=config.w0_initial,
+            c=config.c,
+            final_activation=get_activation(config.final_activation),
+            latent_dim=config.latent_dim,
+            num_layers_latent=config.num_layers,
+            operation=config.operation,
         )
 
     elif model == "fouriernet":
-        fn_config = config.mfn
         return FourierNet(
             dim_in=dim_in,
             dim_out=dim_out,
-            dim_hidden=fn_config.hidden_dim,
-            num_layers=fn_config.num_layers,
-            input_scale=fn_config.input_scale,
-            weight_scale=fn_config.weight_scale,
-            use_bias=fn_config.use_bias,
-            final_activation=get_activation(fn_config.final_activation)
+            dim_hidden=config.hidden_dim,
+            num_layers=config.num_layers,
+            input_scale=config.input_scale,
+            weight_scale=config.weight_scale,
+            use_bias=config.use_bias,
+            final_activation=get_activation(config.final_activation),
         )
     elif model == "gabornet":
-        fn_config = config.mfn
         return GaborNet(
             dim_in=dim_in,
             dim_out=dim_out,
-            dim_hidden=fn_config.hidden_dim,
-            num_layers=fn_config.num_layers,
-            input_scale=fn_config.input_scale,
-            weight_scale=fn_config.weight_scale,
-            alpha=fn_config.alpha,
-            beta=fn_config.beta,
-            use_bias=fn_config.use_bias,
-            final_activation=get_activation(fn_config.final_activation)
+            dim_hidden=config.hidden_dim,
+            num_layers=config.num_layers,
+            input_scale=config.input_scale,
+            weight_scale=config.weight_scale,
+            alpha=config.alpha,
+            beta=config.beta,
+            use_bias=config.use_bias,
+            final_activation=get_activation(config.final_activation),
         )
     else:
         raise ValueError(f"Unrecognized model: {model}")
 
+
 class CoordinatesLearner(pl.LightningModule):
-    def __init__(self, model: nn.Module, params):
+    def __init__(self, model: nn.Module, params_loss, params_optim, params_lr):
         super().__init__()
         self.model = model
-        self.loss = loss_factory(params)
-        self.params = params
+        self.loss = loss_factory(params_loss)
+        self.params_optim = params_optim
+        self.params_lr = params_lr
 
     def forward(self, x):
         return self.model(x)
 
     def predict_step(self, batch, batch_idx, dataloader_idx=0):
 
-
-        x, = batch
+        (x,) = batch
 
         pred = self.forward(x)
 
@@ -107,14 +105,11 @@ class CoordinatesLearner(pl.LightningModule):
 
     def configure_optimizers(self):
 
+        optimizer = optimizer_factory(self.params_optim)(params=self.model.parameters())
 
-
-        optimizer = optimizer_factory(self.params)(params=self.model.parameters())
-
-
-        scheduler = lr_scheduler_factory(self.params)(optimizer=optimizer)
+        scheduler = lr_scheduler_factory(self.params_lr)(optimizer=optimizer)
         return {
             "optimizer": optimizer,
             "lr_scheduler": scheduler,
-            "monitor": "valid_loss"
+            "monitor": "valid_loss",
         }

@@ -53,6 +53,7 @@ def train(config: ml_collections.ConfigDict, workdir: str, savedir: str):
         entity=config.log.entity,
         dir=config.log.log_dir,
         resume=False,
+        log_model="all",
     )
 
     # initialize dataloader

@@ -41,16 +41,6 @@ from inr4ssh._src.models.siren import SirenNet
 seed_everything(123)
 
 
-def load_model_from_cpkt(config):
-
-    # load previous model
-    logger.info(f"Loading previous wandb model...")
-    best_model = get_wandb_model(config.run_path, config.model_path)
-    best_model.download(replace=True)
-
-    return best_model.name
-
-
 def train(config: ml_collections.ConfigDict, workdir: str, savedir: str):
 
     # initialize logger
@@ -62,6 +52,7 @@ def train(config: ml_collections.ConfigDict, workdir: str, savedir: str):
         entity=config.log.entity,
         dir=config.log.log_dir,
         resume=False,
+        log_model="all",
     )
 
     # initialize dataloader
