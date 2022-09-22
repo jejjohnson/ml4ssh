@@ -1,5 +1,4 @@
-import sys, os
-
+import sys
 
 from pyprojroot import here
 
@@ -16,15 +15,14 @@ import wandb
 import torch
 from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.loggers import WandbLogger
-from pytorch_lightning.callbacks import TQDMProgressBar, ModelCheckpoint
+from pytorch_lightning.callbacks import ModelCheckpoint
 from pathlib import Path
 
 import numpy as np
-import pandas as pd
 from loguru import logger
 
 
-from data import QGSimulation
+from inr4ssh._src.datamodules.qg_sim import QGSimulation
 from losses import RegQG, initialize_data_loss
 from model import INRModel
 from figures import plot_maps
@@ -172,7 +170,6 @@ def train(config: ml_collections.ConfigDict, workdir: str, savedir: str):
     ds_pred = dm.create_predictions_ds(predictions)
 
     from inr4ssh._src.operators import differential_simp as diffops_simp
-    from inr4ssh._src.operators import differential as diffops
 
     learn.model.eval()
     coords, truths, preds, grads, qs = [], [], [], [], []
@@ -211,13 +208,11 @@ def train(config: ml_collections.ConfigDict, workdir: str, savedir: str):
     np.testing.assert_array_almost_equal(truths, df_data[["p"]])
 
     df_data["p_pred"] = preds
-    df_data["u_pred"] = grads[:, 0]
+    df_data["u_pred"] = -grads[:, 0]
     df_data["v_pred"] = grads[:, 1]
     df_data["q_pred"] = qs
 
     xr_data = df_data.set_index(["Nx", "Ny", "steps"]).to_xarray()
-
-    print(xr_data)
 
     # stream function
     plot_maps(

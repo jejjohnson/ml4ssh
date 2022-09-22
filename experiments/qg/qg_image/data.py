@@ -13,10 +13,20 @@ class QGSimulation(pl.LightningModule):
         super().__init__()
         self.config = config
 
+    @staticmethod
+    def preprocess(ds, config):
+
+        if config.time_subset:
+            ds = ds.isel(steps=slice(config.time_min, config.time_max))
+        return ds
+
     def setup(self, stage=None):
 
         # load data
         data = xr.open_dataset(self.config.data.data_dir, engine="netcdf4")
+
+        # preprocess data
+        data = self.preprocess(data, self.config.pre)
 
         data_df = data.to_dataframe().reset_index()
 
@@ -56,12 +66,18 @@ class QGSimulation(pl.LightningModule):
         # load data
         data = xr.open_dataset(self.config.data.data_dir, engine="netcdf4")
 
+        # preprocess data
+        data = self.preprocess(data, self.config.pre)
+
         return data.to_dataframe().reset_index()
 
     def create_predictions_ds(self, predictions):
 
         # load data
         data = xr.open_dataset(self.config.data.data_dir, engine="netcdf4")
+
+        # preprocess data
+        data = self.preprocess(data, self.config.pre)
 
         data_df = data.to_dataframe().reset_index()
 

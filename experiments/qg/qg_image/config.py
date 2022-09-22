@@ -1,5 +1,4 @@
 from ml_collections import config_dict
-from typing import Optional
 
 
 def get_config():
@@ -7,16 +6,19 @@ def get_config():
 
     # logging args
     config.log = config_dict.ConfigDict()
-    config.log.mode = "disabled"  # "online" #
+    config.log.mode = "offline"
     config.log.project = "inr4ssh"
     config.log.entity = "ige"
-    config.log.log_dir = "/Users/eman/code_projects/logs/"
+    config.log.log_dir = "/gpfsscratch/rech/cli/uvo53rl/"
     config.log.resume = False
 
     # data args
     config.data = config_dict.ConfigDict()
+    config.data.data = "qgsim"
+    config.data.sim = "simple"
+    config.data.res = "128x128"
     config.data.data_dir = (
-        f"/Users/eman/code_projects/torchqg/data/qgsim_simple_128x128.nc"
+        f"/gpfswork/rech/cli/uvo53rl/data/qg_sim/qgsim_simple_128x128.nc"
     )
 
     # checkpoint args
@@ -29,7 +31,7 @@ def get_config():
     config.pre = config_dict.ConfigDict()
     config.pre.noise = 0.01
     config.pre.dt = 1.0
-    config.pre.time_subset = True
+    config.pre.time_subset = False
     config.pre.time_min = 0
     config.pre.time_max = 1
     config.pre.seed = 123
@@ -41,11 +43,11 @@ def get_config():
     # dataloader args
     config.dl = config_dict.ConfigDict()
     config.dl.batchsize_train = 2048
-    config.dl.batchsize_val = 2048
+    config.dl.batchsize_val = 4096
     config.dl.batchsize_test = 4096
-    config.dl.batchsize_predict = 64
-    config.dl.num_workers = 0
-    config.dl.pin_memory = False
+    config.dl.batchsize_predict = 4096
+    config.dl.num_workers = 10
+    config.dl.pin_memory = True
 
     # model arguments
     config.model = model = config_dict.ConfigDict()
@@ -60,21 +62,35 @@ def get_config():
     config.loss = loss = config_dict.ConfigDict()
     loss.loss = "mse"
     loss.reduction = "mean"
-    loss.qg = False
+    loss.qg = True
     loss.alpha = 1e-4
 
     # optimizer args
     config.optim = config_dict.ConfigDict()
     config.optim.warmup = 100
-    config.optim.num_epochs = 10_000
+    config.optim.num_epochs = 10000
     config.optim.learning_rate = 1e-3
-    config.optim.warmup_start_lr = 1e-5
-    config.optim.eta_min = 1e-5
+    config.optim.eta_min = 1e-6
+    config.optim.warmup_start_lr = 1e-6
+
+    # optimizer (QG) args
+    config.optim_qg = config_dict.ConfigDict()
+    config.optim_qg.warmup = 100
+    config.optim_qg.num_epochs = 10000
+    config.optim_qg.learning_rate = 1e-3
+    config.optim_qg.eta_min = 1e-6
+    config.optim_qg.warmup_start_lr = 1e-6
 
     # trainer args
     config.trainer = config_dict.ConfigDict()
-    config.trainer.accelerator = "cpu"
+    config.trainer.accelerator = "gpu"
     config.trainer.devices = 1
     config.trainer.grad_batches = 1
+
+    # trainer (QG Reg) args
+    config.trainer_qg = config_dict.ConfigDict()
+    config.trainer_qg.accelerator = "gpu"
+    config.trainer_qg.devices = 1
+    config.trainer_qg.grad_batches = 1
 
     return config

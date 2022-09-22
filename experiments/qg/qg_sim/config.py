@@ -29,8 +29,9 @@ def get_config():
     config.pre = config_dict.ConfigDict()
     config.pre.noise = 0.01
     config.pre.dt = 1.0
-    config.pre.time_min = 500
-    config.pre.time_max = 511
+    config.pre.time_subset = False
+    config.pre.time_min = 0
+    config.pre.time_max = 1
     config.pre.seed = 123
 
     # train/test args
