@@ -65,7 +65,7 @@ def train(config: ml_collections.ConfigDict, workdir, savedir):
         entity=config.log.entity,
         dir=config.log.log_dir,
         resume=False,
-        log_model=True,
+        log_model=False,
     )
 
     # DATA MODULE
@@ -137,6 +137,8 @@ def train(config: ml_collections.ConfigDict, workdir, savedir):
         logger=wandb_logger,
         callbacks=callbacks,
         accumulate_grad_batches=config.trainer.grad_batches,
+        strategy=config.trainer.strategy,
+        num_nodes=config.trainer.num_nodes,
     )
 
     logger.info("Training...")

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name=qgimg                     # name of job
+#SBATCH --job-name=dc21a                     # name of job
 #SBATCH --account=cli@v100                   # for statistics
 #SBATCH --nodes=1                            # we ALWAYS request one node
 #SBATCH --ntasks-per-node=1                  # number of tasks per node
@@ -9,10 +9,11 @@
 #SBATCH --qos=qos_gpu-t3                     # GPU partition (max 20� hrs)
 #SBATCH --gres=gpu:1                         # number of GPUs (1/4 of GPUs)
 #SBATCH --time=20:00:00                      # maximum execution time requested (HH:MM:SS)
-#SBATCH --output=/gpfsscratch/rech/cli/uvo53rl/logs/nerf4ssh_qgimg_128_%j.log      # name of output file
-#SBATCH --error=/gpfsscratch/rech/cli/uvo53rl/errs/nerf4ssh_qgimg_128_%j.err       # name of error file
+#SBATCH --output=/gpfsscratch/rech/cli/uvo53rl/logs/nerf4ssh_dc21a_overfit_%j.log      # name of output file
+#SBATCH --error=/gpfsscratch/rech/cli/uvo53rl/errs/nerf4ssh_dc21a_overfit_%j.err       # name of error file
 #SBATCH --export=ALL
 #SBATCH --signal=SIGUSR1@90
+
 
 # loading of modules
 module purge
@@ -31,20 +32,20 @@ export PYTHONPATH=$WORK/projects/inr4ssh:${PYTHONPATH}
 # loading of modules
 source activate torch_py39
 
+srun experiments/dc21a/scripts_v2/jz/dc21a_overfit.sh
+
 ## run script (smoke test)
-#srun python experiments/qg/main.py \
-#    --experiment="image" \
-#    --my_config=experiments/qg/config_image.py \
-#    --my_config.log.mode="disabled" \
-#    --my_config.optim.num_epochs=20 \
-#    --my_config.optim.warmup=5 \
-#    --my_config.optim_qg.num_epochs=20 \
-#    --my_config.optim_qg.warmup=5 \
-#    --my_config.trainer.grad_batches=10
-
-
-# run script
-srun python experiments/qg/main.py \
-    --experiment="image" \
-    --my_config=experiments/qg/configs/config_image.py \
-    --my_config.pre.time_max=2
+#srun python experiments/dc21a/main.py \
+#    --experiment="dc21a" \
+#    --my_config=experiments/dc21a/configs/config_v2.py \
+#    --my_config.log.mode="offline" \
+#    --my_config.trainer.accelerator="gpu" \
+#    --my_config.optimizer.num_epochs=1000 \
+#    --my_config.lr_scheduler.warmup_epochs=50 \
+#    --my_config.dataloader.num_workers=10 \
+#    --my_config.dataloader.pin_memory=True \
+#    --my_config.trainer.dev_run=False \
+#    --my_config.preprocess.time_min="2017-01-01" \
+#    --my_config.preprocess.time_max="2017-02-01" \
+#    --my_config.eval_data.time_min="2017-01-01" \
+#    --my_config.eval_data.time_max="2017-02-01"

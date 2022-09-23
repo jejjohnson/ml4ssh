@@ -19,16 +19,18 @@ source activate torch_py39
 
 # run script (smoke test)
 python experiments/dc21a/main.py \
-    --experiment="simulation" \
+    --experiment="dc21a" \
     --my_config=experiments/dc21a/configs/config_v2.py \
-    --my_config.log.mode="disabled" \
+    --my_config.log.mode="offline" \
     --my_config.trainer.accelerator="gpu" \
     --my_config.optimizer.num_epochs=50 \
     --my_config.lr_scheduler.warmup_epochs=10 \
     --my_config.dataloader.num_workers=10 \
     --my_config.dataloader.pin_memory=True \
-    --my_config.trainer.dev_run=False
-#    --my_config.preprocess.time_min="2017-01-01" \
-#    --my_config.preprocess.time_max="2017-02-01" \
-#    --my_config.eval_data.time_min="2017-01-01" \
-#    --my_config.eval_data.time_max="2017-02-01"
+    --my_config.trainer.dev_run=False \
+    --my_config.preprocess.time_min="2017-01-01" \
+    --my_config.preprocess.time_max="2017-02-01" \
+    --my_config.eval_data.time_min="2017-01-01" \
+    --my_config.eval_data.time_max="2017-02-01" \
+    --my_config.trainer.devices=1 \
+    --my_config.trainer.num_nodes=1

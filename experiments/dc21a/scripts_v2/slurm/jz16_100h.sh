@@ -33,4 +33,5 @@ source activate torch_py39
 # run script
 python experiments/dc21a/main.py \
     --my_config=experiments/dc21a/configs/config_v2.py \
-    --my_config.model.hidden_dim=512
+    --my_config.optimizer.optimizer="adamw" \
+    --my_config.optimizer.num_epochs=5000

@@ -1,6 +1,3 @@
-from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
-from pathlib import Path
-
 # wandb
 from pytorch_lightning.loggers import LoggerCollection, WandbLogger
 import wandb
@@ -50,7 +47,7 @@ class UploadCheckpointsToWandbAsArtifact(Callback):
             ):
                 ckpts.add_file(path)
 
-        experiment.log_artifact(ckpts)
+        experiment.use_artifact(ckpts)
 
 
 class WatchModelWithWandb(Callback):
@@ -63,60 +60,3 @@ class WatchModelWithWandb(Callback):
     def on_train_start(self, trainer, pl_module):
         logger = get_wandb_logger(trainer=trainer)
         logger.watch(model=trainer.model, log=self.log, log_freq=self.log_freq)
-
-
-def get_callbacks(config, wandb_logger=None):
-    callbacks = []
-    if config.early_stopping is True:
-        cb = EarlyStopping(
-            monitor="valid_loss",
-            mode="min",
-            patience=config.patience,
-        )
-        callbacks.append(cb)
-    if config.model_checkpoint is True:
-        if wandb_logger is not None:
-            log_dir = wandb_logger.experiment.dir
-        else:
-            log_dir = "./"
-        cb = ModelCheckpoint(
-            dirpath=str(Path(log_dir).joinpath("checkpoints")),
-            monitor="valid_loss",
-            mode="min",
-            save_top_k=3,
-            save_last=True,
-        )
-        callbacks.append(cb)
-
-        cb_2 = UploadCheckpointsToWandbAsArtifact(
-            ckpt_dir=str(Path(log_dir).joinpath("checkpoints")), upload_best_only=True
-        )
-
-        callbacks.append(cb_2)
-
-    if config.watch_model is True:
-
-        cb = WatchModelWithWandb()
-
-        callbacks.append(cb)
-
-    return callbacks
-
-
-# from skorch.callbacks import EarlyStopping, LRScheduler, WandbLogger
-#
-# def get_callbacks(config, wandb_logger=None):
-#     callbacks = []
-#     if config.wandb is True:
-#         cb = EarlyStopping(
-#             monitor="valid_loss",
-#             patience=config.patience,
-#         )
-#         callbacks.append(("early_stopping", cb))
-#     if config.early_stopping is True:
-#         cb = WandbLogger(
-#             wandb_run=wandb_logger,
-#             save_model=config.save_model
-#         )
-#         callbacks.append(("wandb", cb))
-#     return callbacks

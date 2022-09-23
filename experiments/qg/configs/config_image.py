@@ -68,7 +68,7 @@ def get_config():
     # optimizer args
     config.optim = config_dict.ConfigDict()
     config.optim.warmup = 100
-    config.optim.num_epochs = 10000
+    config.optim.num_epochs = 5000
     config.optim.learning_rate = 1e-3
     config.optim.eta_min = 0.0
     config.optim.warmup_start_lr = 0.0
@@ -76,7 +76,7 @@ def get_config():
     # optimizer (QG) args
     config.optim_qg = config_dict.ConfigDict()
     config.optim_qg.warmup = 100
-    config.optim_qg.num_epochs = 20000
+    config.optim_qg.num_epochs = 5000
     config.optim_qg.learning_rate = 1e-4
     config.optim_qg.eta_min = 0.0
     config.optim_qg.warmup_start_lr = 0.0

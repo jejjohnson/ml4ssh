@@ -24,6 +24,7 @@ def get_config():
     # DATA ARGS
     # ===============================
     config.data = data = config_dict.ConfigDict()
+    data.data = "dc21a"
     data.train_data_dir = "/gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/train"
     data.ref_data_dir = "/gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/ref"
     data.test_data_dir = "/gpfsdswork/projects/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2021/test"
@@ -134,7 +135,7 @@ def get_config():
     config.optimizer = optimizer = config_dict.ConfigDict()
     optimizer.optimizer = "adam"  # "adamw" # "adamax"
     optimizer.learning_rate = 1e-4
-    optimizer.num_epochs = 10_000
+    optimizer.num_epochs = 2_000
     optimizer.min_epochs = 1
 
     # ===============================
@@ -143,6 +144,10 @@ def get_config():
     config.trainer = config_dict.ConfigDict()
     config.trainer.accelerator = "gpu"  # "cpu", "mps"
     config.trainer.devices = 1
+    # "ddp"
+    config.trainer.strategy = config_dict.placeholder(str)
+    # 4
+    config.trainer.num_nodes = 1
     config.trainer.grad_batches = 10
     config.trainer.dev_run = False
 
@@ -178,6 +183,7 @@ def get_config():
     # early stopping
     callbacks.early_stopping = False
     callbacks.patience = 20
+    callbacks.watch_model = False
 
     # ===============================
     # EVALULATION DATA ARGS

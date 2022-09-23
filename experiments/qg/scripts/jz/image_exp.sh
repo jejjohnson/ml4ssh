@@ -22,8 +22,4 @@ python experiments/qg/main.py \
     --experiment="image" \
     --my_config=experiments/qg/configs/config_image.py \
     --my_config.log.mode="disabled" \
-    --my_config.optim.num_epochs=20 \
-    --my_config.optim.warmup=5 \
-    --my_config.optim_qg.num_epochs=20 \
-    --my_config.optim_qg.warmup=5 \
-    --my_config.trainer.grad_batches=10
+    --my_config.pre.time_max=1

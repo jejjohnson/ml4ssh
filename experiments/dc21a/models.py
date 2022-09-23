@@ -99,7 +99,7 @@ class CoordinatesLearner(pl.LightningModule):
         pred = self.forward(x)
         loss = self.loss(pred, y)
 
-        self.log("valid_loss", loss)
+        self.log("valid_loss", loss, prog_bar=True)
 
         return loss
 

@@ -47,4 +47,4 @@ source activate torch_py39
 srun python experiments/qg/main.py \
     --experiment="image" \
     --my_config=experiments/qg/configs/config_image.py \
-    --my_config.pre.time_max=3
+    --my_config.pre.time_max=1
