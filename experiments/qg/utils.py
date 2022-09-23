@@ -73,7 +73,7 @@ def get_physical_arrays(model, dm):
             p_grad = diffops_simp.gradient(p_pred, ix)
             # p_grad = diffops.grad(p_pred, ix)
             # q
-            q = diffops_simp.divergence(p_grad, ix)
+            q = diffops_simp.divergence(p_grad, ix, (0, 1))
             # q = diffops.div(p_grad, ix)
 
         # collect

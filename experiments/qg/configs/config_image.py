@@ -42,7 +42,7 @@ def get_config():
 
     # dataloader args
     config.dl = config_dict.ConfigDict()
-    config.dl.batchsize_train = 2048
+    config.dl.batchsize_train = 128
     config.dl.batchsize_val = 4096
     config.dl.batchsize_test = 4096
     config.dl.batchsize_predict = 4096
@@ -70,22 +70,22 @@ def get_config():
     config.optim.warmup = 100
     config.optim.num_epochs = 10000
     config.optim.learning_rate = 1e-3
-    config.optim.eta_min = 1e-6
-    config.optim.warmup_start_lr = 1e-6
+    config.optim.eta_min = 0.0
+    config.optim.warmup_start_lr = 0.0
 
     # optimizer (QG) args
     config.optim_qg = config_dict.ConfigDict()
     config.optim_qg.warmup = 100
     config.optim_qg.num_epochs = 20000
     config.optim_qg.learning_rate = 1e-4
-    config.optim_qg.eta_min = 1e-6
-    config.optim_qg.warmup_start_lr = 1e-6
+    config.optim_qg.eta_min = 0.0
+    config.optim_qg.warmup_start_lr = 0.0
 
     # trainer args
     config.trainer = config_dict.ConfigDict()
     config.trainer.accelerator = "gpu"
     config.trainer.devices = 1
-    config.trainer.grad_batches = 10
+    config.trainer.grad_batches = 1
 
     # trainer (QG Reg) args
     config.trainer_qg = config_dict.ConfigDict()

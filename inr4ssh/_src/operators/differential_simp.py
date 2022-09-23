@@ -33,9 +33,11 @@ def laplace(y, x):
     return divergence(grad, x)
 
 
-def divergence(y, x):
+def divergence(y, x, indices=None):
     div = 0.0
-    for i in range(y.shape[-1]):
+    if indices is None:
+        indices = torch.arange(y.shape[-1])
+    for i in indices:
         div += grad(y[..., i], x, torch.ones_like(y[..., i]), create_graph=True)[0][
             ..., i : i + 1
         ]

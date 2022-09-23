@@ -24,7 +24,7 @@ from loguru import logger
 
 from inr4ssh._src.datamodules.qg_sim import QGSimulation
 from losses import RegQG, initialize_data_loss
-from model import INRModel
+from trainer import INRModel
 from figures import plot_maps
 from utils import (
     initialize_siren_model,

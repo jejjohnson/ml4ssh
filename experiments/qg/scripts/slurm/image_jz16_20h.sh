@@ -12,6 +12,7 @@
 #SBATCH --output=/gpfsscratch/rech/cli/uvo53rl/logs/nerf4ssh_qgimg_128_%j.log      # name of output file
 #SBATCH --error=/gpfsscratch/rech/cli/uvo53rl/errs/nerf4ssh_qgimg_128_%j.err       # name of error file
 #SBATCH --export=ALL
+#SBATCH --signal=SIGUSR1@90
 
 # loading of modules
 module purge
@@ -44,4 +45,7 @@ source activate torch_py39
 
 # run script
 srun python experiments/qg/main.py \
-    --my_config=experiments/qg/configs/config.py
+    --experiment="image" \
+    --my_config=experiments/qg/configs/config_image.py \
+    --my_config.pre.time_max=1 \
+    --my_config.model.dim_hidden=512

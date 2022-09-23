@@ -85,7 +85,7 @@ def get_config():
     dataloader.train_shuffle = True
     dataloader.pin_memory = True
     dataloader.num_workers = 10
-    dataloader.batchsize_train = 4096
+    dataloader.batchsize_train = 128
     dataloader.batchsize_valid = 4096
     dataloader.batchsize_test = 1_000
     dataloader.batchsize_predict = 10_000

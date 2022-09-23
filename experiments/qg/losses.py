@@ -39,14 +39,19 @@ class RegQG(nn.Module):
 
             u = f(x)
 
+            # 𝛁𝑢
             grad_nn = diffops_simp.gradient(u, x)
-            q_nn = diffops_simp.divergence(grad_nn, x)
+
+            # div𝛁𝑢 = ∂𝑥𝛁𝑢 + ∂𝑦𝛁𝑢 = △𝑢
+            q_nn = diffops_simp.divergence(grad_nn, x, [0, 1])
+
+            #
             dlaplacU = diffops_simp.gradient(q_nn, x)
             Jacob_U_laplacU = (
-                grad_nn[:, 1] * dlaplacU[:, 2] - grad_nn[:, 2] * dlaplacU[:, 1]
+                grad_nn[:, 0] * dlaplacU[:, 1] - grad_nn[:, 1] * dlaplacU[:, 0]
             )
 
             pde_loss = F.mse_loss(
-                dlaplacU[:, 0] + Jacob_U_laplacU, torch.zeros_like(Jacob_U_laplacU)
+                dlaplacU[:, 2] + Jacob_U_laplacU, torch.zeros_like(Jacob_U_laplacU)
             )
             return self.alpha * pde_loss
