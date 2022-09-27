@@ -6,12 +6,13 @@
 #SBATCH --ntasks-per-node=1                  # number of tasks per node
 #SBATCH --cpus-per-task=10                   # number of cpus per task
 #SBATCH -C v100-16g                          # V100 GPU + 16 GBs RAM
-#SBATCH --qos=qos_gpu-t4                     # GPU partition (max 20� hrs)
+#SBATCH --qos=qos_gpu-t3                     # GPU partition (max 20� hrs)
 #SBATCH --gres=gpu:1                         # number of GPUs (1/4 of GPUs)
-#SBATCH --time=90:00:00                      # maximum execution time requested (HH:MM:SS)
-#SBATCH --output=/gpfsscratch/rech/cli/uvo53rl/logs/nerf4ssh_dc21a_%j.log      # name of output file
-#SBATCH --error=/gpfsscratch/rech/cli/uvo53rl/errs/nerf4ssh_dc21a_%j.err       # name of error file
+#SBATCH --time=20:00:00                      # maximum execution time requested (HH:MM:SS)
+#SBATCH --output=/gpfsscratch/rech/cli/uvo53rl/logs/nerf4ssh_dc21a_overfit_%j.log      # name of output file
+#SBATCH --error=/gpfsscratch/rech/cli/uvo53rl/errs/nerf4ssh_dc21a_overfit_%j.err       # name of error file
 #SBATCH --export=ALL
+#SBATCH --signal=SIGUSR1@90
 
 # loading of modules
 module purge
@@ -35,6 +36,12 @@ python experiments/dc21a/main.py \
     --my_config=experiments/dc21a/configs/config_v2.py \
     --my_config.optimizer.optimizer="adam" \
     --my_config.optimizer.num_epochs=5000 \
-    --my_config.dataloader.batchsize_train=2048 \
+    --my_config.lr_scheduler.max_epochs=1000 \
+    --my_config.dataloader.batchsize_train=128 \
+    --my_config.preprocess.time_min="2017-01-01" \
+    --my_config.preprocess.time_max="2017-02-01" \
+    --my_config.eval_data.time_min="2017-01-01" \
+    --my_config.eval_data.time_max="2017-02-01" \
     --my_config.callbacks.early_stopping=True \
-    --my_config.callbacks.patience=50
+    --my_config.callbacks.patience=300 \
+    --my_config.trainer.grad_batches=1

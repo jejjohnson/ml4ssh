@@ -89,7 +89,7 @@ def get_callbacks(config, wandb_logger=None):
         callbacks.append(cb)
 
         cb_2 = UploadCheckpointsToWandbAsArtifact(
-            ckpt_dir=str(Path(log_dir).joinpath("checkpoints")), upload_best_only=True
+            ckpt_dir=str(Path(log_dir).joinpath("checkpoints")), upload_best_only=False
         )
 
         callbacks.append(cb_2)
