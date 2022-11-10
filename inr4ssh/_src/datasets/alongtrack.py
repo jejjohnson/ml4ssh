@@ -13,7 +13,10 @@ class AlongTrackDataset(torch.utils.data.Dataset):
         output_columns=None,
         transform=None,
     ):
-        df = ds.to_dataframe().reset_index().dropna()
+        if isinstance(ds, xr.Dataset):
+            df = ds.to_dataframe().reset_index().dropna()
+        else:
+            df = ds
         self.x = df[spatial_columns].values
         self.t = df[temporal_columns].values
         if output_columns is not None:
