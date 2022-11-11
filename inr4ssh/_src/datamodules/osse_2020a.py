@@ -25,8 +25,17 @@ class AlongTrackDataModule(pl.LightningDataModule):
         self.config = config
         self.download = download
 
+    def prepare_download(self):
+        # download
+        pass
+
     def setup(self, stage=None):
 
+        # check
+
+        self.ds_train, self.ds_valid, self.ds_test, self.ds_predict = self._setup()
+
+    def _setup(self):
         # TODO: check if root directory exists
         # TODO: download dataset if option
 
@@ -85,64 +94,66 @@ class AlongTrackDataModule(pl.LightningDataModule):
         num_train, num_valid = get_num_training(
             len(ds), train_prct=self.config.traintest.train_prct
         )
-
-        train_set, valid_set = torch.utils.data.random_split(
+        logger.info(f"Creating train/valid datasets...")
+        ds_train, ds_valid = torch.utils.data.random_split(
             ds,
             [num_train, num_valid],
             generator=torch.Generator().manual_seed(self.config.traintest.seed),
         )
 
         # train/valid dataset
-        logger.info(
-            f"Creating train/valid datasets: {len(train_set):,}/{len(valid_set):,} pts"
+        logger.info(f"{len(ds_train):,}/{len(ds_valid):,} pts")
+
+        # TEST
+        logger.info("Opening xarray dataset...")
+        logger.info(f"Dataset: {self.config.data.ref_dir}")
+        ds = xr.open_mfdataset(self.config.data.ref_dir, engine="netcdf4")
+
+        logger.info("Subsetting data...")
+        ds = (
+            ds.sel(
+                time=slice(
+                    self.config.evaluation.time_min, self.config.evaluation.time_max
+                ),
+                lon=slice(
+                    self.config.evaluation.lon_min, self.config.evaluation.lon_max
+                ),
+                lat=slice(
+                    self.config.evaluation.lat_min, self.config.evaluation.lat_max
+                ),
+                drop=True,
+            )
+            .resample(time=self.config.evaluation.time_resample)
+            .mean()
         )
-        self.ds_train = train_set
-        self.ds_valid = valid_set
+        ds = correct_coordinate_labels(ds)
 
-        # # TEST
-        # ds = xr.open_mfdataset(self.config.data.ref_dir, engine="netcdf4")
-        # ds = (
-        #     ds.sel(
-        #         time=slice(
-        #             self.config.evaluation.time_min, self.config.evaluation.time_max
-        #         ),
-        #         lon=slice(
-        #             self.config.evaluation.lon_min, self.config.evaluation.lon_max
-        #         ),
-        #         lat=slice(
-        #             self.config.evaluation.lat_min, self.config.evaluation.lat_max
-        #         ),
-        #         drop=True,
-        #     )
-        #     .resample(time=self.config.evaluation.time_resample)
-        #     .mean()
-        # )
-        # ds - correct_coordinate_labels(ds)
+        logger.info("Creating coordinates...")
+        x, y, z = np.meshgrid(
+            ds.coords["time"].data,
+            ds.coords["latitude"].data,
+            ds.coords["longitude"].data,
+        )
 
-        # x, y, z = np.meshgrid(
-        #     ds.coords["time"].data,
-        #     ds.coords["latitude"].data,
-        #     ds.coords["longitude"].data,
-        # )
+        ds_ref_coords = pd.DataFrame(
+            {
+                "longitude": z.flatten(),
+                "latitude": y.flatten(),
+                "time": x.flatten(),
+                "ssh_model": ds["sossheig"].data.flatten(),
+            }
+        )
 
-        # ds_ref_coords = pd.DataFrame(
-        #     {
-        #         "longitude": x.flatten(),
-        #         "latitude": y.flatten(),
-        #         "time": z.flatten(),
-        #         "ssh_model": ds["sossheig"].data.flatten(),
-        #     }
-        # )
-        # test_ds = AlongTrackDataset(
-        #     ds=ds_ref_coords,
-        #     spatial_columns=["longitude", "latitude"],
-        #     temporal_columns=["time"],
-        #     output_columns=["ssh_model"],
-        #     transform=transforms,
-        # )
-        # # TODO: predict dataset
-        # logger.info(f"{len(test_ds):,} pts")
-        # self.ds_test = test_ds
+        logger.info("Creating test dataset...")
+        ds_test = AlongTrackDataset(
+            ds=ds_ref_coords,
+            spatial_columns=["longitude", "latitude"],
+            temporal_columns=["time"],
+            output_columns=["ssh_model"],
+            transform=transforms,
+        )
+        # TODO: predict dataset
+        logger.info(f"{len(ds_test):,} pts")
 
         # TODO: create grid-coordinates
         logger.info("Creating spatial-temporal grid...")
@@ -169,7 +180,7 @@ class AlongTrackDataModule(pl.LightningDataModule):
         )
         # TODO: create dataset from grid coordinates
         logger.info("Creating prediction dataset...")
-        predict_ds = AlongTrackDataset(
+        ds_predict = AlongTrackDataset(
             ds=coords,
             spatial_columns=["longitude", "latitude"],
             temporal_columns=["time"],
@@ -177,8 +188,8 @@ class AlongTrackDataModule(pl.LightningDataModule):
             transform=transforms,
         )
         # TODO: predict dataset
-        logger.info(f"{len(predict_ds):,} pts")
-        self.ds_predict = predict_ds
+        logger.info(f"{len(ds_predict):,} pts")
+        return ds_train, ds_valid, ds_test, ds_predict
 
     def train_dataloader(self):
         return torch.utils.data.DataLoader(
@@ -198,14 +209,24 @@ class AlongTrackDataModule(pl.LightningDataModule):
             pin_memory=self.config.dataloader.pin_memory_valid,
         )
 
+    def test_dataloader(self):
+        # raise NotImplementedError()
+        return torch.utils.data.DataLoader(
+            self.ds_test,
+            batch_size=self.config.dataloader.batchsize_test,
+            shuffle=self.config.dataloader.shuffle_test,
+            num_workers=self.config.dataloader.num_workers_test,
+            pin_memory=self.config.dataloader.pin_memory_test,
+        )
+
     def predict_dataloader(self):
         # raise NotImplementedError()
         return torch.utils.data.DataLoader(
             self.ds_predict,
-            batch_size=self.config.dataloader.batchsize_valid,
-            shuffle=self.config.dataloader.shuffle_valid,
-            num_workers=self.config.dataloader.num_workers_valid,
-            pin_memory=self.config.dataloader.pin_memory_valid,
+            batch_size=self.config.dataloader.batchsize_predict,
+            shuffle=self.config.dataloader.shuffle_predict,
+            num_workers=self.config.dataloader.num_workers_predict,
+            pin_memory=self.config.dataloader.pin_memory_predict,
         )
 
 
@@ -256,6 +277,11 @@ def get_demo_config():
     dataloader.num_workers_valid = 1
     dataloader.shuffle_valid = False
     dataloader.pin_memory_valid = False
+    # test dataloader
+    dataloader.batchsize_test = 32
+    dataloader.num_workers_test = 1
+    dataloader.shuffle_test = False
+    dataloader.pin_memory_test = False
     # predict dataloader
     dataloader.batchsize_predict = 32
     dataloader.num_workers_predict = 1
