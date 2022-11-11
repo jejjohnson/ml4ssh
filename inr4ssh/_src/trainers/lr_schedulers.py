@@ -1,5 +1,3 @@
-import torch
-from functools import partial
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 from torch.optim.lr_scheduler import (
     ReduceLROnPlateau,
@@ -7,60 +5,53 @@ from torch.optim.lr_scheduler import (
     StepLR,
     MultiStepLR,
 )
+from functools import partial
 from ml_collections import config_dict
 
 
-def get_default_optimizer_config():
-    config = config_dict.ConfigDict()
-    config.optimizer = "adam"
-    config.learning_rate = 1e-4
-    return config
-
-
-def get_default_scheduler_config():
+def default_lr_scheduler_config():
     config = config_dict.ConfigDict()
     config.lr_scheduler = "warmcosine"
+    # STEP LR
+    config.steps = 100
+    # Step LR, MultiStep LR
+    config.gamma = 1e-4
+    # Cosine Annealing
+    config.min_learning_rate = 1e-10
+    config.T_max = 1000
+    # WarmUp Cosine
+    config.num_epochs = 100
     config.warmup_epochs = 10
-    config.max_epochs = 100
     config.warmup_lr = 1e-10
-    config.eta_min = 1e-10
-
+    # Warmup Cosine + Cosine Annealing
+    config.eta_min = 0
+    # MULTISTEP
+    config.milestones = [10, 100, 1_000]
+    # Reduce LR
+    config.patience = 10
+    config.factor = 1
+    config.mode = "min"
     return config
 
 
-def optimizer_factory(config):
+def lr_scheduler_factory(config=None):
     if config is None:
-        config = get_default_optimizer_config()
-
-    if config.optimizer == "adam":
-        return partial(torch.optim.Adam, lr=config.learning_rate)
-    elif config.optimizer == "adamw":
-        return partial(torch.optim.AdamW, lr=config.learning_rate)
-    elif config.optimizer == "adamax":
-        return partial(torch.optim.Adamax, lr=config.learning_rate)
-    else:
-        raise ValueError(f"Unrecognized optimizer: {config.optimizer}")
-
-
-def lr_scheduler_factory(config):
-
-    if config is None:
-        config = get_default_scheduler_config()
+        config = default_lr_scheduler_config()
 
     if config.lr_scheduler == "reduce":
         lr_scheduler = partial(
             ReduceLROnPlateau,
             patience=config.patience,
             factor=config.factor,
-            mode="min",
+            mode=config.mode,
         )
         return lr_scheduler
 
     elif config.lr_scheduler == "cosine":
         return partial(
             CosineAnnealingLR,
-            T_max=config.dataloader.batch_size * config.optimizer.num_epochs,
-            eta_min=config.min_learning_rate,
+            T_max=config.T_max,
+            eta_min=config.eta_min,
         )
 
     elif config.lr_scheduler == "onecyle":

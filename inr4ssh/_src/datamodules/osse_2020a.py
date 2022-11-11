@@ -67,7 +67,8 @@ class AlongTrackDataModule(pl.LightningDataModule):
             lon_max = self.config.preprocess.subset_spatial.lon_max
             lat_min = self.config.preprocess.subset_spatial.lat_min
             lat_max = self.config.preprocess.subset_spatial.lat_max
-            logger.debug(f"Lon Min: {lon_min} | Lon Max: {lon_min}...")
+            logger.debug(f"Lon Min: {lon_min} | Lon Max: {lon_max}...")
+            logger.debug(f"Lat Min: {lat_min} | Lat Max: {lat_max}...")
             ds = ds.where(
                 (ds["longitude"] >= lon_min)
                 & (ds["longitude"] <= lon_max)

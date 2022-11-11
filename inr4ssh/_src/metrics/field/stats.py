@@ -1,13 +1,13 @@
 def rmse_spacetime(da, da_ref):
 
-    rmse_xyt = ((da - da_ref) ** 2).mean()
+    rmse_xyt = ((da - da_ref) ** 2).mean() ** 0.5
 
     return rmse_xyt
 
 
 def nrmse_spacetime(da, da_ref):
     rmse_xyt = rmse_spacetime(da, da_ref)
-    std = (da_ref**2).mean()
+    std = (da_ref**2).mean() ** 0.5
     nrmse_xyt = 1.0 - (rmse_xyt / std)
     return nrmse_xyt
 
