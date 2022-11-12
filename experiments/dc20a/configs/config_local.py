@@ -93,6 +93,7 @@ def get_config():
 
     # MODEL
     config.model = model = config_dict.ConfigDict()
+
     model.model = "siren"
     # encoder specific
     model.encoder = config_dict.placeholder(str)
@@ -108,9 +109,17 @@ def get_config():
     model.final_scale = 1.0
     model.c = 6.0
 
+    # pretraining params
+    model.pretrain = True
+    model.pretrain_reference = "experiment-ckpts:v17"
+    model.pretrain_checkpoint = "last.ckpt"
+    model.pretrain_id = "299njfhp"  # ige/inr4ssh/299njfhp
+    model.pretrain_entity = "ige"
+    model.pretrain_project = "inr4ssh"
+
     # SPATIAL_TEMPORAL ENCODERS
     config.transform_spatial = config_dict.ConfigDict()
-    config.transform_spatial.transform = "identity"
+    config.transform_spatial.transform = "deg2rad"
     config.transform_spatial.scaler = [1.0 / math.pi, 1.0 / (math.pi / 2.0)]
 
     config.transform_temporal = config_dict.ConfigDict()
