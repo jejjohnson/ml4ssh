@@ -1,7 +1,7 @@
 import numpy as np
 from typing import List, Union
 import pyinterp
-from tqdm.notebook import tqdm
+from tqdm import tqdm
 import xarray as xr
 
 
