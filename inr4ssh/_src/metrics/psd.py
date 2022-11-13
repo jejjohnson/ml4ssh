@@ -89,8 +89,8 @@ def psd_isotropic(ds, **kwargs):
         truncate=kwargs.get("truncate", True),
     )
 
-    # calculate mean signal
-    signal_psd_mean = signal_psd.mean(dim=["time"], skipna=True)
+    # calculate mean signal wrt time
+    signal_psd_mean = signal_psd.mean(dim=["time"], skipna=kwargs.get("skipna", True))
 
     return signal_psd_mean
 

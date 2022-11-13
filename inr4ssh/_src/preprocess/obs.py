@@ -1,5 +1,8 @@
 import numpy as np
 from typing import List, Union
+import pyinterp
+from tqdm.notebook import tqdm
+import xarray as xr
 
 
 def add_noise(
@@ -98,3 +101,53 @@ def add_obs_tracks(obs1, obs2):
     obs[obs == 0] = np.nan
 
     return obs
+
+
+def bin_observations(
+    ds_obs: xr.Dataset, ds_ref: xr.Dataset, variable: str, time_buffer: np.timedelta64
+) -> xr.Dataset:
+
+    # create binning object
+    binning = pyinterp.Binning2D(
+        pyinterp.Axis(ds_ref.longitude.values), pyinterp.Axis(ds_ref.latitude.values)
+    )
+
+    # initialize datasets
+    ds_obs_binned = []
+
+    for t in tqdm(ds_ref.time):
+        binning.clear()
+
+        # get all indices within timestamp + buffer
+        ids = np.where((np.abs(ds_obs.time.values - t.values) < 2.0 * time_buffer))[0]
+
+        # extract lat,lon,values
+        values = np.ravel(ds_obs[variable].values[ids])
+        lons = np.ravel(ds_obs.longitude.values[ids])
+        lats = np.ravel(ds_obs.latitude.values[ids])
+
+        # mask all nans
+        msk = np.isfinite(values)
+
+        binning.push(lons[msk], lats[msk], values[msk])
+
+        gridded = (
+            ("time", "latitude", "longitude"),
+            binning.variable("mean").T[None, ...],
+        )
+
+        # create gridded dataset
+        ds_obs_binned.append(
+            xr.Dataset(
+                {variable: gridded},
+                {
+                    "time": [t.values],
+                    "latitude": np.array(binning.y),
+                    "longitude": np.array(binning.x),
+                },
+            ).astype("float32", casting="same_kind")
+        )
+
+    # concatenate final dataset
+    ds_obs_binned = xr.concat(ds_obs_binned, dim="time")
+    return ds_obs_binned

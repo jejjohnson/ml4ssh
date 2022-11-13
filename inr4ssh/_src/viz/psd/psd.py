@@ -16,7 +16,7 @@ def plot_psd_spectrum(psd_study, psd_ref, wavenumber):
     # plot the reference PSD
     ax.plot((1.0 / wavenumber), psd_ref, label="Reference", color="k")
     # plot reconstruction PSD
-    ax.plot((1.0 / wavenumber), psd_study, label="Reconstruction", color="lime")
+    ax.plot((1.0 / wavenumber), psd_study, label="Reconstruction", color="red")
 
     ax.set(
         xlabel="Wavelength [km]",
@@ -89,75 +89,3 @@ import seaborn as sns
 import xarray as xr
 
 sns.set_context(context="talk", font_scale=0.7)
-
-
-def plot_isotropic_psd_wavenumber(
-    da: xr.DataArray, freq_scale: float = 1e3, psd_scale: float = 1
-):
-
-    fig, ax = plt.subplots()
-
-    ax.plot(da.freq_r * freq_scale, da * psd_scale, label=getattr(da, "label", None))
-
-    ax.set(
-        yscale="log",
-        xscale="log",
-        xlabel="Wavenumber [cycles/km]",
-        ylabel="PSD [m$^{2}$/cycles/m]",
-    )
-
-    ax.legend()
-    ax.grid(which="both", alpha=0.5)
-
-    return fig, ax
-
-
-def plot_isotropic_psd_wavelength(
-    da: xr.DataArray, freq_scale: float = 1, psd_scale: float = 1
-):
-
-    fig, ax = plt.subplots()
-
-    ax.plot(
-        1 / da.freq_r * freq_scale, da * psd_scale, label=getattr(da, "label", None)
-    )
-
-    ax.set(
-        yscale="log",
-        xscale="log",
-        xlabel="Wavelength [km]",
-        ylabel="PSD [m$^{2}$/cycles/m]",
-    )
-
-    ax.xaxis.set_major_formatter("{x:.0f}")
-    ax.invert_xaxis()
-
-    ax.legend()
-    ax.grid(which="both", alpha=0.5)
-
-    return fig, ax
-
-
-def plot_isotropic_psd(da: xr.DataArray, freq_scale: float = 1, psd_scale: float = 1):
-
-    fig, ax = plt.subplots()
-
-    ax.plot(da.freq_r * freq_scale, da * psd_scale, label=getattr(da, "label", None))
-
-    ax.set(
-        yscale="log",
-        xscale="log",
-        xlabel="Wavenumber [cycles/km]",
-        ylabel="PSD [m$^{2}$/cycles/m]",
-    )
-
-    secax = ax.secondary_xaxis(
-        "top", functions=(lambda x: 1 / (x + 1e-20), lambda x: 1 / (x + 1e-20))
-    )
-    secax.xaxis.set_major_formatter("{x:.0f}")
-    secax.set(xlabel="Wavelength [km]")
-
-    ax.legend()
-    ax.grid(which="both", alpha=0.5, color="gray")
-
-    return fig, ax
