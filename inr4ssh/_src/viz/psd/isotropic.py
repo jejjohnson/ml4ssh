@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import xarray as xr
 import seaborn as sns
+import numpy as np
 
 sns.reset_defaults()
 sns.set_context(context="talk", font_scale=0.7)
@@ -52,7 +53,7 @@ def plot_psd_isotropic(freq, psd, **kwargs):
     secax.xaxis.set_major_formatter("{x:.0f}")
     secax.set(xlabel="Wavelength [km]")
 
-    return fig, ax
+    return fig, ax, secax
 
 
 def plot_psd_score_isotropic_wavenumber(freq, psd_ref, psd_study, **kwargs):

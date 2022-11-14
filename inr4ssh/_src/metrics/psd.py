@@ -62,10 +62,14 @@ def psd_spacetime_score(da, da_ref, **kwargs):
 
 def wavelength_resolved_spacetime(psd_score, level: float = 0.5):
 
+    x_shape = psd_score.freq_longitude.values.shape[0]
+    y_shape = psd_score.freq_time.values.shape[0]
+    values = psd_score.values.reshape((y_shape, x_shape))
+
     cs = plt.contour(
         1.0 / psd_score.freq_longitude.values,
         1.0 / psd_score.freq_time.values,
-        psd_score.T,
+        values,
         levels=[level],
     )
     x05, y05 = cs.collections[0].get_paths()[0].vertices.T
