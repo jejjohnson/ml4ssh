@@ -18,7 +18,7 @@ def plot_obs_demo(
     tmin = central_date - delta_t
     tmax = central_date + delta_t
 
-    ds = ds.sel(time=slice(tmin, tmax))
+    ds = ds.sel(time=slice(str(tmin), str(tmax)))
 
     ds = ds.drop_duplicates(dim="time")
     if verbose:
