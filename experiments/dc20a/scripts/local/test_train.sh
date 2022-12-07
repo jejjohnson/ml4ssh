@@ -11,7 +11,8 @@ conda activate torch_py39
 python experiments/dc20a/main.py \
     --stage="train" \
     --my_config=experiments/dc20a/configs/config_local.py \
-    --my_config.data.dataset_dir="/Volumes/EMANS_HDD/data/dc20a_osse/test/ml/nadir4.nc" \
+    --my_config.datadir.staging.staging_dir="/Volumes/EMANS_HDD/data/dc20a_osse/test_2/ml_ready/" \
+    --my_config.experiment="swot1nadir5" \
     --my_config.trainer.num_epochs=10 \
     --my_config.lr_scheduler.warmup_epochs=5 \
     --my_config.lr_scheduler.max_epochs=10 \

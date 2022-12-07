@@ -1,5 +1,6 @@
 import torch
 import numpy as np
+from pathlib import Path
 from loguru import logger
 from inr4ssh._src.datasets.utils import get_num_training
 from inr4ssh._src.preprocess.coords import correct_coordinate_labels
@@ -35,15 +36,30 @@ class AlongTrackDataModule(pl.LightningDataModule):
 
         self.ds_train, self.ds_valid, self.ds_test, self.ds_predict = self._setup()
 
+    def _open_xr_ds(self, dataset: str):
+        # TODO: check if root directory exists
+        # TODO: download dataset if option
+
+        # open xarray dataset
+        logger.info("Opening xarray dataset...")
+        logger.info(f"Dataset: {dataset}")
+        logger.info(f"Dataset dir: {self.config.datadir.obs_dir}")
+
+        return None
+
     def _setup(self):
         # TODO: check if root directory exists
         # TODO: download dataset if option
 
         # open xarray dataset
         logger.info("Opening xarray dataset...")
-        logger.info(f"Dataset: {self.config.data.dataset_dir}")
+        logger.info(f"Dataset: {self.config.experiment}")
 
-        ds = xr.open_dataset(self.config.data.dataset_dir)
+        ds_path = Path(self.config.datadir.staging.staging_dir).joinpath(
+            f"{self.config.experiment}.nc"
+        )
+
+        ds = xr.open_dataset(ds_path)
 
         # correct the labels
         logger.info("Correcting labels...")
@@ -78,7 +94,7 @@ class AlongTrackDataModule(pl.LightningDataModule):
             )
 
         # get dataloader transformations
-        transforms = Compose(transform_factory(self.config.preprocess.transform))
+        transforms = Compose(transform_factory(self.config.transform))
 
         # create dataset
         logger.info("Creating dataset...")
@@ -107,8 +123,12 @@ class AlongTrackDataModule(pl.LightningDataModule):
 
         # TEST
         logger.info("Opening xarray dataset...")
-        logger.info(f"Dataset: {self.config.data.ref_dir}")
-        ds = xr.open_mfdataset(self.config.data.ref_dir, engine="netcdf4")
+        logger.info(f"Dataset: {self.config.datadir.clean.ref_dir}")
+        ds_filenames = Path(self.config.datadir.clean.ref_dir).joinpath(
+            "NATL60-CJM165_GULFSTREAM_y*"
+        )
+        logger.info(f"Dataset: {ds_filenames}")
+        ds = xr.open_mfdataset(str(ds_filenames), engine="netcdf4")
 
         logger.info("Subsetting data...")
         ds = (

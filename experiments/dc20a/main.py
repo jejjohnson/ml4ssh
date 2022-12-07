@@ -1,6 +1,7 @@
 from absl import app
 from absl import flags
 from ml_collections import config_flags
+import data
 import train
 import train_more
 
@@ -8,6 +9,7 @@ FLAGS = flags.FLAGS
 
 config_flags.DEFINE_config_file("my_config")
 flags.DEFINE_string("workdir", None, "work directory")
+flags.DEFINE_string("datadir", None, "data directory")
 flags.DEFINE_string("stage", "train", "the experimental stage")
 
 
@@ -15,11 +17,17 @@ def main(_):
 
     if FLAGS.stage == "download":
         # TODO: write download stage
-        raise NotImplementedError()
+        data.download(FLAGS.datadir, dataset="obs")
+        data.download(FLAGS.datadir, dataset="ref")
 
     elif FLAGS.stage == "preprocess":
-        # TODO: write preprocessing stage
-        raise NotImplementedError()
+        data.preprocess(FLAGS.my_config)
+
+    elif FLAGS.stage == "ml_ready":
+        data.ml_ready(FLAGS.my_config, experiment="swot1nadir5")
+        data.ml_ready(FLAGS.my_config, experiment="swot1nadir1")
+        data.ml_ready(FLAGS.my_config, experiment="nadir1")
+        data.ml_ready(FLAGS.my_config, experiment="nadir4")
 
     elif FLAGS.stage == "train":
         train.train(FLAGS.my_config, None, None)

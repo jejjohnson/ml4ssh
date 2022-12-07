@@ -157,8 +157,8 @@ def train(config: ml_collections.ConfigDict, workdir, savedir):
         temporal_transform_factory,
     )
 
-    spatial_transform = spatial_transform_factory(config.transform_spatial)
-    temporal_transform = temporal_transform_factory(config.transform_temporal)
+    spatial_transform = spatial_transform_factory(config.encoder_spatial)
+    temporal_transform = temporal_transform_factory(config.encoder_temporal)
 
     logger.info("Initializing callbacks...")
     from inr4ssh._src.callbacks.utils import get_callbacks

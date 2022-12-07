@@ -4,6 +4,31 @@ import tqdm
 import xarray as xr
 from dataclasses import asdict
 import wandb
+import subprocess
+from pathlib import Path
+import warnings
+from dask.array.core import PerformanceWarning
+
+
+def runcmd(cmd, verbose=False, *args, **kwargs):
+    """_summary_
+
+    Args:
+        cmd str: the command
+        verbose (bool, optional): _description_. Defaults to False.
+
+    Information:
+    Command taken from:
+        https://www.scrapingbee.com/blog/python-wget/
+    """
+
+    process = subprocess.Popen(
+        cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True
+    )
+    std_out, std_err = process.communicate()
+    if verbose:
+        print(std_out.strip(), std_err)
+    pass
 
 
 def load_multiple_nc_files(files: List[str]) -> List:
@@ -80,3 +105,45 @@ def get_wandb_model(run_path, checkpoint_path):
     run = api.run(run_path)
 
     return run.file(checkpoint_path)
+
+
+def check_if_directory(directory: str):
+
+    if not Path(directory).exists():
+        raise ValueError("Directory doesn't exist...")
+    else:
+        return True
+
+
+def check_if_file(directory: str):
+
+    if not Path(directory).is_file():
+        raise ValueError("File doesn't exist...")
+    else:
+        return True
+
+
+def get_file_names(files: List[str]):
+
+    # convert to Path file
+    files = list(map(lambda x: Path(x), files))
+
+    # get file names
+    files = list(map(lambda x: x.name, files))
+
+    return files
+
+
+def list_all_files(
+    directory: str, ext: str = "**/*", full_path: bool = True
+) -> List[str]:
+
+    # check if directory exists
+    check_if_directory(directory)
+
+    files = [x for x in Path(directory).glob(ext) if x.is_file()]
+
+    if not full_path:
+        files = get_file_names(files)
+
+    return files

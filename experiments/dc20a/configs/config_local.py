@@ -2,47 +2,126 @@ from ml_collections import config_dict
 import math
 
 
-def get_config():
+def get_osse_2020a_setup() -> config_dict.ConfigDict:
+    config = config_dict.ConfigDict()
+
+    # SUBSET Arguments
+    config.nadir4 = [
+        "2020a_SSH_mapping_NATL60_topex-poseidon_interleaved.nc",
+        "2020a_SSH_mapping_NATL60_envisat.nc",
+        "2020a_SSH_mapping_NATL60_geosat2.nc",
+        "2020a_SSH_mapping_NATL60_jason1.nc",
+    ]
+
+    config.nadir1 = ["2020a_SSH_mapping_NATL60_jason1.nc"]
+
+    config.swot1 = [
+        "2020a_SSH_mapping_NATL60_karin_swot.nc",
+        "2020a_SSH_mapping_NATL60_nadir_swot.nc",
+    ]
+    config.swot1nadir1 = [
+        "2020a_SSH_mapping_NATL60_karin_swot.nc",
+        "2020a_SSH_mapping_NATL60_nadir_swot.nc",
+    ]
+    config.swot1nadir5 = [
+        "2020a_SSH_mapping_NATL60_karin_swot.nc",
+        "2020a_SSH_mapping_NATL60_nadir_swot.nc",
+        "2020a_SSH_mapping_NATL60_topex-poseidon_interleaved.nc",
+        "2020a_SSH_mapping_NATL60_envisat.nc",
+        "2020a_SSH_mapping_NATL60_geosat2.nc",
+        "2020a_SSH_mapping_NATL60_jason1.nc",
+    ]
+
+    return config
+
+
+def get_eval_period() -> config_dict.ConfigDict:
+    """This period goes over 42 days:
+    - 2012-10-01
+    - 2012-12-02
+    This is the equivalent for 2 SWOT cycles period for the new SWOT satellite.
+    We allow for a spin up period of:
+    - 2012-10-01
+    - 2012-10-22
+    however, we can include this within the training/evaluation scripts.
+    """
 
     config = config_dict.ConfigDict()
 
-    # LOGGING
-    config.log = config_dict.ConfigDict()
-    config.log.mode = "disabled"  # "online" #
-    config.log.project = "inr4ssh"
-    config.log.entity = "ige"
-    config.log.log_dir = "/Users/eman/code_projects/logs/"
-    config.log.resume = False
+    config.time_min = "2012-10-01"
+    config.time_max = "2012-12-02"
 
-    # data directory
-    config.data = data = config_dict.ConfigDict()
-    data.dataset_dir = "/Volumes/EMANS_HDD/data/dc20a_osse/test/ml/nadir4.nc"
-    data.ref_dir = (
-        "/Volumes/EMANS_HDD/data/dc20a_osse/raw/dc_ref/NATL60-CJM165_GULFSTREAM*"
-    )
-    # preprocessing
-    config.preprocess = config_dict.ConfigDict()
-    config.preprocess.subset_time = subset_time = config_dict.ConfigDict()
-    subset_time.subset_time = True
-    subset_time.time_min = "2012-10-22"
-    subset_time.time_max = "2012-12-02"
+    return config
 
-    config.preprocess.subset_spatial = subset_spatial = config_dict.ConfigDict()
-    subset_spatial.subset_spatial = True
-    subset_spatial.lon_min = -65.0
-    subset_spatial.lon_max = -55.0
-    subset_spatial.lat_min = 33.0
-    subset_spatial.lat_max = 43.0
 
-    # transformations
-    config.preprocess.transform = transform = config_dict.ConfigDict()
+def get_train_period() -> config_dict.ConfigDict:
+    """
+    This period goes over 42 days:
+        - 2012-10-01
+        - 2012-12-02
+        This is the equivalent for a period for the SWOT data.
+        We allow for a spin up period of:
+        - 2012-10-01
+        - 2012-10-22
+        however, we can include this within the training/evaluation scripts.
+    """
+    config = config_dict.ConfigDict()
+
+    config.time_min = "2013-01-01"
+    config.time_max = "2013-09-30"
+
+    return config
+
+
+def get_wandb_config() -> config_dict.ConfigDict:
+    config = config_dict.ConfigDict()
+
+    config.mode = "disabled"
+    config.project = "inr4ssh"
+    config.entity = "ige"
+    config.log_dir = "/Users/eman/code_projects/logs"
+    config.resume = False
+    return config
+
+
+def get_datadir_raw():
+    config = config_dict.ConfigDict()
+
+    config.ref_dir = "/Volumes/EMANS_HDD/data/dc20a_osse/test_2/raw/dc_ref/"
+    config.obs_dir = "/Volumes/EMANS_HDD/data/dc20a_osse/test_2/raw/dc_obs/"
+
+    return config
+
+
+def get_datadir_clean():
+    config = config_dict.ConfigDict()
+
+    config.ref_dir = "/Volumes/EMANS_HDD/data/dc20a_osse/test_2/raw/dc_ref/"
+    config.obs_dir = "/Volumes/EMANS_HDD/data/dc20a_osse/test_2/clean/"
+
+    return config
+
+
+def get_datadir_staging():
+
+    config = config_dict.ConfigDict()
+
+    config.staging_dir = "/Volumes/EMANS_HDD/data/dc20a_osse/test_2/ml_ready"
+
+    return config
+
+
+def get_transformations_config():
+    config = transform = config_dict.ConfigDict()
     transform.time_transform = "minmax"
     transform.time_min = "2012-01-01"
     transform.time_max = "2013-01-01"
 
-    # DATALOADER
-    # dataloader
-    config.dataloader = dataloader = config_dict.ConfigDict()
+    return config
+
+
+def get_dataloader_config():
+    config = dataloader = config_dict.ConfigDict()
     # train dataloader
     dataloader.batchsize_train = 32
     dataloader.num_workers_train = 0
@@ -64,35 +143,95 @@ def get_config():
     dataloader.shuffle_predict = False
     dataloader.pin_memory_predict = False
 
-    # train/valid arguments
-    config.traintest = traintest = config_dict.ConfigDict()
+    return config
+
+
+def get_traintest_config():
+    config = traintest = config_dict.ConfigDict()
+
     traintest.train_prct = 0.9
     traintest.seed = 42
 
-    # EVALUATION
-    config.evaluation = evaluation = config_dict.ConfigDict()
-    evaluation.lon_min = -65.0
-    evaluation.lon_max = -55.0
-    evaluation.dlon = 0.1
-    evaluation.lat_min = 33.0
-    evaluation.lat_max = 43.0
-    evaluation.dlat = 0.1
+    return config
 
-    evaluation.time_min = "2012-10-22"
-    evaluation.time_max = "2012-12-02"
-    evaluation.dt_freq = 1
-    evaluation.dt_unit = "D"
 
-    evaluation.time_resample = "1D"
-    # , get_demo_config
+def get_optimizer_config():
+    # OPTIMIZER
+    config = optimizer = config_dict.ConfigDict()
+    optimizer.optimizer = "adam"
+    optimizer.learning_rate = 1e-4
+    return config
 
-    # config = get_demo_config()
 
-    config.preprocess.subset_spatial.subset_spatial = True
-    config.preprocess.subset_time.subset_time = True
+def get_trainer_config():
+    config = trainer = config_dict.ConfigDict()
+    trainer.num_epochs = 10
+    trainer.accelerator = "mps"  # "cpu", "gpu"
+    trainer.devices = 1
+    trainer.strategy = config_dict.placeholder(str)
+    trainer.num_nodes = 1
+    trainer.grad_batches = 10
+    trainer.dev_run = False
+    trainer.deterministic = True
 
-    # MODEL
-    config.model = model = config_dict.ConfigDict()
+    return config
+
+
+def get_lr_scheduler_config():
+    # LEARNING RATE WARMUP
+    config = lr_scheduler = config_dict.ConfigDict()
+    lr_scheduler.lr_scheduler = "warmcosine"
+    lr_scheduler.warmup_epochs = 5
+    lr_scheduler.max_epochs = 20
+    lr_scheduler.warmup_lr = 0.0
+    lr_scheduler.eta_min = 0.0
+    return config
+
+
+def get_callbacks_config():
+    # CALLBACKS
+    config = callbacks = config_dict.ConfigDict()
+    # wandb logging
+    callbacks.wandb = True
+    callbacks.model_checkpoint = True
+    # early stopping
+    callbacks.early_stopping = False
+    callbacks.patience = 20
+    # model watch
+    callbacks.watch_model = False
+    # tqdm
+    callbacks.tqdm = True
+    callbacks.tqdm_refresh = 10
+
+    return config
+
+
+def get_loss_config():
+    # LOSSES
+    config = loss = config_dict.ConfigDict()
+    loss.loss = "mse"
+    loss.reduction = "mean"
+    return config
+
+
+def get_spatial_encoders_config():
+    # SPATIAL_TEMPORAL ENCODERS
+    config = transform_spatial = config_dict.ConfigDict()
+    transform_spatial.transform = "deg2rad"
+    transform_spatial.scaler = [1.0 / math.pi, 1.0 / (math.pi / 2.0)]
+    return config
+
+
+def get_temporal_encoders_config():
+
+    config = transform_temporal = config_dict.ConfigDict()
+    transform_temporal.transform = "identity"
+
+    return config
+
+
+def get_model_config():
+    config = model = config_dict.ConfigDict()
 
     model.model = "siren"
     # encoder specific
@@ -117,55 +256,77 @@ def get_config():
     model.pretrain_entity = "ige"
     model.pretrain_project = "inr4ssh"
 
-    # SPATIAL_TEMPORAL ENCODERS
-    config.transform_spatial = config_dict.ConfigDict()
-    config.transform_spatial.transform = "deg2rad"
-    config.transform_spatial.scaler = [1.0 / math.pi, 1.0 / (math.pi / 2.0)]
+    return config
 
-    config.transform_temporal = config_dict.ConfigDict()
-    config.transform_temporal.transform = "identity"
 
-    # LOSSES
-    config.loss = config_dict.ConfigDict()
-    config.loss.loss = "mse"
-    config.loss.reduction = "mean"
+def get_evaluation_config():
+    # EVALUATION
+    config = evaluation = config_dict.ConfigDict()
+    evaluation.lon_min = -65.0
+    evaluation.lon_max = -55.0
+    evaluation.dlon = 0.1
+    evaluation.lat_min = 33.0
+    evaluation.lat_max = 43.0
+    evaluation.dlat = 0.1
 
-    # OPTIMIZER
-    config.optimizer = config_dict.ConfigDict()
-    config.optimizer.optimizer = "adam"
-    config.optimizer.learning_rate = 1e-4
+    evaluation.time_min = "2012-10-22"
+    evaluation.time_max = "2012-12-02"
+    evaluation.dt_freq = 1
+    evaluation.dt_unit = "D"
+    evaluation.time_resample = "1D"
+    return config
 
-    # TRAINER
-    config.trainer = config_dict.ConfigDict()
-    config.trainer.num_epochs = 10
-    config.trainer.accelerator = "mps"  # "cpu", "gpu"
-    config.trainer.devices = 1
-    config.trainer.strategy = config_dict.placeholder(str)
-    config.trainer.num_nodes = 1
-    config.trainer.grad_batches = 10
-    config.trainer.dev_run = False
-    config.trainer.deterministic = True
 
-    # LEARNING RATE WARMUP
-    config.lr_scheduler = config_dict.ConfigDict()
-    config.lr_scheduler.lr_scheduler = "warmcosine"
-    config.lr_scheduler.warmup_epochs = 5
+def get_preprocess_config():
+    # preprocessing
+    config = preprocess = config_dict.ConfigDict()
+    preprocess.subset_time = subset_time = config_dict.ConfigDict()
+    subset_time.subset_time = True
+    subset_time.time_min = "2012-10-22"
+    subset_time.time_max = "2012-12-02"
+
+    config.subset_spatial = subset_spatial = config_dict.ConfigDict()
+    subset_spatial.subset_spatial = True
+    subset_spatial.lon_min = -65.0
+    subset_spatial.lon_max = -55.0
+    subset_spatial.lat_min = 33.0
+    subset_spatial.lat_max = 43.0
+
+    return config
+
+
+def get_config():
+    config = config_dict.ConfigDict()
+
+    # LOGGING
+    config.experiment = "swot1nadir5"
+    config.log = get_wandb_config()
+
+    # DATA DIRECTORIES
+    config.datadir = config_dict.ConfigDict()
+
+    # raw data
+    config.datadir.raw = get_datadir_raw()
+    config.datadir.clean = get_datadir_clean()
+    config.datadir.staging = get_datadir_staging()
+
+    # TODO: results
+
+    config.dataloader = get_dataloader_config()
+
+    config.traintest = get_traintest_config()
+    config.preprocess = get_preprocess_config()
+    config.transform = get_transformations_config()
+
+    config.trainer = get_trainer_config()
+    config.optimizer = get_optimizer_config()
+    config.lr_scheduler = get_lr_scheduler_config()
     config.lr_scheduler.max_epochs = config.trainer.num_epochs
-    config.lr_scheduler.warmup_lr = 0.0
-    config.lr_scheduler.eta_min = 0.0
-
-    # CALLBACKS
-    config.callbacks = config_dict.ConfigDict()
-    # wandb logging
-    config.callbacks.wandb = True
-    config.callbacks.model_checkpoint = True
-    # early stopping
-    config.callbacks.early_stopping = False
-    config.callbacks.patience = 20
-    # model watch
-    config.callbacks.watch_model = False
-    # tqdm
-    config.callbacks.tqdm = True
-    config.callbacks.tqdm_refresh = 10
+    config.callbacks = get_callbacks_config()
+    config.encoder_spatial = get_spatial_encoders_config()
+    config.encoder_temporal = get_temporal_encoders_config()
+    config.model = get_model_config()
+    config.loss = get_loss_config()
+    config.evaluation = get_evaluation_config()
 
     return config
