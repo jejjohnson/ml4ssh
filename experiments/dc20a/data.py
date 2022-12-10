@@ -70,7 +70,8 @@ def preprocess(config: ml_collections.ConfigDict) -> None:
     file_path = get_raw_altimetry_files(obs_dir, "swot")
 
     logger.info("Open KARIN SWOT dataset...")
-    ds_karin_swot = xr.open_dataset(file_path[0])
+    logger.debug(f"File path: \n{file_path}")
+    ds_karin_swot = xr.open_dataset(file_path[0], engine="netcdf4")
 
     logger.info("Preprocess KARIN SWOT dataset...")
     ds_karin_swot = preprocess_karin_swot(ds_karin_swot, author="")
@@ -87,7 +88,8 @@ def preprocess(config: ml_collections.ConfigDict) -> None:
     file_path = get_raw_altimetry_files(obs_dir, "swotnadir")
 
     logger.info("Open KARIN SWOT NADIR dataset...")
-    ds_karin_swot_nadir = xr.open_dataset(file_path[0])
+    logger.debug(f"File path: \n{file_path}")
+    ds_karin_swot_nadir = xr.open_dataset(file_path[0], engine="netcdf4")
 
     # select the first cycle
     ds_karin_swot_nadir = ds_karin_swot_nadir.isel(cycle=0)

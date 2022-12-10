@@ -16,6 +16,7 @@ dependencies:
 - conda-forge::cftime             # Xarray compatible time stamps
 - conda-forge::pyinterp           # Interpolation
 - conda-forge::rasterio
+- conda-forge::xrft
 # PLOTTING LIBRARY
 - matplotlib                      # standard plotting library
 - seaborn                         # Stats viz library
@@ -29,6 +30,7 @@ dependencies:
 # Storage
 - hdf5                            # standard large storage h5
 - conda-forge::zarr               # optimized zarr storage
+- conda-forge::netcdf4
 # PYTORCH ECOSYSTEM
 - pytorch::pytorch                # pytorch tensor library
 - pytorch::torchvision            # pytorch vision library
@@ -50,7 +52,6 @@ dependencies:
   - einops
   # OTHER
   - plum-dispatch
-  - netCDF4
   # formatting
   - black
   - pylint

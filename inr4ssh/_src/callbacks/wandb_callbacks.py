@@ -1,5 +1,6 @@
 # wandb
-from pytorch_lightning.loggers import LoggerCollection, WandbLogger
+from typing import List
+from pytorch_lightning.loggers import WandbLogger
 import wandb
 
 # pytorch
@@ -13,13 +14,10 @@ import os
 
 
 def get_wandb_logger(trainer: pl.Trainer) -> WandbLogger:
-    if isinstance(trainer.logger, WandbLogger):
-        return trainer.logger
 
-    if isinstance(trainer.logger, LoggerCollection):
-        for logger in trainer.logger:
-            if isinstance(logger, WandbLogger):
-                return logger
+    for logger in trainer.loggers:
+        if isinstance(logger, WandbLogger):
+            return trainer.logger
 
     raise Exception(
         "You are using wandb related callback, but WandbLogger was not found for some reason..."

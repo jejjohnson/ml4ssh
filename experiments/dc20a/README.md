@@ -1,4 +1,26 @@
 
+## Experiments
+
+### Local Machine
+
+
+### JeanZay
+
+```bash
+python -u experiments/dc20a/main.py
+```
+
+**SRun Job**
+
+```bash
+bash experiments/dc20a/scripts/jeanzay/train.sh
+```
+
+**SBatch Job** (CPU)
+
+```bash
+sbatch experiments/dc20a/scripts/jeanzay/jz_cpu_100h.sh
+```
 
 ## Results
 

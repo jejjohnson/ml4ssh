@@ -9,7 +9,7 @@ FLAGS = flags.FLAGS
 
 config_flags.DEFINE_config_file("my_config")
 flags.DEFINE_string("workdir", None, "work directory")
-flags.DEFINE_string("datadir", None, "data directory")
+flags.DEFINE_string("dldir", None, "data directory")
 flags.DEFINE_string("stage", "train", "the experimental stage")
 
 
@@ -17,8 +17,8 @@ def main(_):
 
     if FLAGS.stage == "download":
         # TODO: write download stage
-        data.download(FLAGS.datadir, dataset="obs")
-        data.download(FLAGS.datadir, dataset="ref")
+        data.download(FLAGS.dldir, dataset="obs")
+        data.download(FLAGS.dldir, dataset="ref")
 
     elif FLAGS.stage == "preprocess":
         data.preprocess(FLAGS.my_config)

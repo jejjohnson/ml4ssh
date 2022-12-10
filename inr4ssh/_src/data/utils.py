@@ -33,7 +33,7 @@ def load_alongtrack_parallel(
             files,
             combine="nested",
             concat_dim=concat_dim,
-            parallel=True,
+            parallel=False,
             preprocess=preprocess,
             engine="netcdf4",
         )

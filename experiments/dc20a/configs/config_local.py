@@ -328,5 +328,4 @@ def get_config():
     config.model = get_model_config()
     config.loss = get_loss_config()
     config.evaluation = get_evaluation_config()
-
     return config

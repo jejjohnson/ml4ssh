@@ -19,7 +19,7 @@ python experiments/dc20a/main.py \
     --my_config.lr_scheduler.eta_min=1e-5 \
     --my_config.preprocess.subset_time.time_max="2012-12-02" \
     --my_config.evaluation.time_max="2012-11-01" \
-    --my_config.log.mode="online" \
+    --my_config.log.mode="disabled" \
     --my_config.model.hidden_dim=256 \
     --my_config.preprocess.subset_spatial.lon_min=-62.0 \
     --my_config.preprocess.subset_spatial.lon_max=-58.0 \

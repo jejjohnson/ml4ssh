@@ -1,17 +1,16 @@
 #!/bin/bash
 
 # go to appropriate directory
-cd $HOME/code_projects/inr4ssh/
-export PYTHONPATH=$HOME/code_projects/inr4ssh/:${PYTHONPATH}
+cd /gpfswork/rech/cli/uvo53rl/projects/inr4ssh/
+export PYTHONPATH=/gpfswork/rech/cli/uvo53rl/projects/inr4ssh/:${PYTHONPATH}
 
 # loading of modules
 conda activate torch_py39
 
 # run script (smoke-test: subset)
 python experiments/dc20a/main.py \
-    --stage="train_more" \
-    --my_config=experiments/dc20a/configs/config_local.py \
-    --my_config.datadir.staging.staging_dir="/Volumes/EMANS_HDD/data/dc20a_osse/test_2/ml_ready/" \
+    --stage="train" \
+    --my_config=experiments/dc20a/configs/config.py \
     --my_config.experiment="swot1nadir5" \
     --my_config.trainer.num_epochs=10 \
     --my_config.lr_scheduler.warmup_epochs=5 \
@@ -19,7 +18,6 @@ python experiments/dc20a/main.py \
     --my_config.lr_scheduler.eta_min=1e-5 \
     --my_config.preprocess.subset_time.time_max="2012-12-02" \
     --my_config.evaluation.time_max="2012-11-01" \
-    --my_config.log.mode="online" \
     --my_config.model.hidden_dim=256 \
     --my_config.preprocess.subset_spatial.lon_min=-62.0 \
     --my_config.preprocess.subset_spatial.lon_max=-58.0 \
