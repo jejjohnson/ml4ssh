@@ -45,7 +45,7 @@ class UploadCheckpointsToWandbAsArtifact(Callback):
             ):
                 ckpts.add_file(path)
 
-        experiment.use_artifact(ckpts)
+        experiment.log_artifact(ckpts)
 
 
 class WatchModelWithWandb(Callback):

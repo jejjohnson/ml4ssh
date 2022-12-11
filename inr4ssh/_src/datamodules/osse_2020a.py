@@ -131,22 +131,24 @@ class AlongTrackDataModule(pl.LightningDataModule):
         ds = xr.open_mfdataset(str(ds_filenames), engine="netcdf4")
 
         logger.info("Subsetting data...")
-        ds = (
-            ds.sel(
-                time=slice(
-                    self.config.evaluation.time_min, self.config.evaluation.time_max
-                ),
-                lon=slice(
-                    self.config.evaluation.lon_min, self.config.evaluation.lon_max
-                ),
-                lat=slice(
-                    self.config.evaluation.lat_min, self.config.evaluation.lat_max
-                ),
-                drop=True,
-            )
-            .resample(time=self.config.evaluation.time_resample)
-            .mean()
+        ds = ds.sel(
+            time=slice(
+                self.config.evaluation.time_min, self.config.evaluation.time_max
+            ),
+            lon=slice(self.config.evaluation.lon_min, self.config.evaluation.lon_max),
+            lat=slice(self.config.evaluation.lat_min, self.config.evaluation.lat_max),
+            drop=True,
         )
+
+        if self.config.evaluation.time_resample is not None:
+            ds = ds.resample(time=self.config.evaluation.time_resample).mean()
+
+        if self.config.evaluation.lon_coarsen > 0:
+            ds = ds.coarsen(dim={"lon": self.config.evaluation.lon_coarsen}).mean()
+
+        if self.config.evaluation.lat_coarsen > 0:
+            ds = ds.coarsen(dim={"lat": self.config.evaluation.lat_coarsen}).mean()
+
         ds = correct_coordinate_labels(ds)
 
         logger.info("Creating coordinates...")

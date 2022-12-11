@@ -2,6 +2,45 @@ from ml_collections import config_dict
 import math
 
 
+def get_wandb_config() -> config_dict.ConfigDict:
+    config = config_dict.ConfigDict()
+
+    config.mode = "disabled"
+    config.project = "inr4ssh"
+    config.entity = "ige"
+    config.log_dir = "/Users/eman/code_projects/logs"
+    config.resume = False
+    config.id = config_dict.placeholder(str)
+    return config
+
+
+def get_datadir_raw():
+    config = config_dict.ConfigDict()
+
+    config.ref_dir = "/Volumes/EMANS_HDD/data/dc20a_osse/test_2/raw/dc_ref/"
+    config.obs_dir = "/Volumes/EMANS_HDD/data/dc20a_osse/test_2/raw/dc_obs/"
+
+    return config
+
+
+def get_datadir_clean():
+    config = config_dict.ConfigDict()
+
+    config.ref_dir = "/Volumes/EMANS_HDD/data/dc20a_osse/test_2/raw/dc_ref/"
+    config.obs_dir = "/Volumes/EMANS_HDD/data/dc20a_osse/test_2/clean/"
+
+    return config
+
+
+def get_datadir_staging():
+
+    config = config_dict.ConfigDict()
+
+    config.staging_dir = "/Volumes/EMANS_HDD/data/dc20a_osse/test_2/ml_ready"
+
+    return config
+
+
 def get_osse_2020a_setup() -> config_dict.ConfigDict:
     config = config_dict.ConfigDict()
 
@@ -69,44 +108,6 @@ def get_train_period() -> config_dict.ConfigDict:
 
     config.time_min = "2013-01-01"
     config.time_max = "2013-09-30"
-
-    return config
-
-
-def get_wandb_config() -> config_dict.ConfigDict:
-    config = config_dict.ConfigDict()
-
-    config.mode = "disabled"
-    config.project = "inr4ssh"
-    config.entity = "ige"
-    config.log_dir = "/Users/eman/code_projects/logs"
-    config.resume = False
-    return config
-
-
-def get_datadir_raw():
-    config = config_dict.ConfigDict()
-
-    config.ref_dir = "/Volumes/EMANS_HDD/data/dc20a_osse/test_2/raw/dc_ref/"
-    config.obs_dir = "/Volumes/EMANS_HDD/data/dc20a_osse/test_2/raw/dc_obs/"
-
-    return config
-
-
-def get_datadir_clean():
-    config = config_dict.ConfigDict()
-
-    config.ref_dir = "/Volumes/EMANS_HDD/data/dc20a_osse/test_2/raw/dc_ref/"
-    config.obs_dir = "/Volumes/EMANS_HDD/data/dc20a_osse/test_2/clean/"
-
-    return config
-
-
-def get_datadir_staging():
-
-    config = config_dict.ConfigDict()
-
-    config.staging_dir = "/Volumes/EMANS_HDD/data/dc20a_osse/test_2/ml_ready"
 
     return config
 
@@ -194,6 +195,8 @@ def get_callbacks_config():
     # wandb logging
     callbacks.wandb = True
     callbacks.model_checkpoint = True
+    # wandb artifacts
+    callbacks.wandb_artifact = True
     # early stopping
     callbacks.early_stopping = False
     callbacks.patience = 20
@@ -238,7 +241,7 @@ def get_model_config():
     model.encoder = config_dict.placeholder(str)
     # generalized
     model.num_layers = 5
-    model.hidden_dim = 64  # 256
+    model.hidden_dim = 256
     model.use_bias = True
     model.final_activation = "identity"
     # SIREN SPECIFIC
@@ -265,9 +268,11 @@ def get_evaluation_config():
     evaluation.lon_min = -65.0
     evaluation.lon_max = -55.0
     evaluation.dlon = 0.1
+    evaluation.lon_coarsen = 0
     evaluation.lat_min = 33.0
     evaluation.lat_max = 43.0
     evaluation.dlat = 0.1
+    evaluation.lat_coarsen = 0
 
     evaluation.time_min = "2012-10-22"
     evaluation.time_max = "2012-12-02"

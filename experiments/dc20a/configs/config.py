@@ -2,6 +2,43 @@ from ml_collections import config_dict
 import math
 
 
+def get_datadir_raw():
+    config = config_dict.ConfigDict()
+
+    config.ref_dir = (
+        "/gpfswork/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2020a/raw/dc_ref"
+    )
+    config.obs_dir = (
+        "/gpfswork/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2020a/raw/dc_obs/"
+    )
+
+    return config
+
+
+def get_datadir_clean():
+    config = config_dict.ConfigDict()
+
+    config.ref_dir = (
+        "/gpfswork/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2020a/raw/dc_ref/"
+    )
+    config.obs_dir = (
+        "/gpfswork/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2020a/clean/"
+    )
+
+    return config
+
+
+def get_datadir_staging():
+
+    config = config_dict.ConfigDict()
+
+    config.staging_dir = (
+        "/gpfswork/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2020a/ml_ready"
+    )
+
+    return config
+
+
 def get_osse_2020a_setup() -> config_dict.ConfigDict:
     config = config_dict.ConfigDict()
 
@@ -81,43 +118,7 @@ def get_wandb_config() -> config_dict.ConfigDict:
     config.entity = "ige"
     config.log_dir = "/gpfsscratch/rech/cli/uvo53rl"
     config.resume = False
-    return config
-
-
-def get_datadir_raw():
-    config = config_dict.ConfigDict()
-
-    config.ref_dir = (
-        "/gpfswork/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2020a/raw/dc_ref"
-    )
-    config.obs_dir = (
-        "/gpfswork/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2020a/raw/dc_obs/"
-    )
-
-    return config
-
-
-def get_datadir_clean():
-    config = config_dict.ConfigDict()
-
-    config.ref_dir = (
-        "/gpfswork/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2020a/raw/dc_ref/"
-    )
-    config.obs_dir = (
-        "/gpfswork/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2020a/clean/"
-    )
-
-    return config
-
-
-def get_datadir_staging():
-
-    config = config_dict.ConfigDict()
-
-    config.staging_dir = (
-        "/gpfswork/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2020a/ml_ready"
-    )
-
+    config.id = config_dict.placeholder(str)
     return config
 
 
@@ -205,7 +206,7 @@ def get_callbacks_config():
     callbacks.wandb = True
     callbacks.model_checkpoint = True
     # wandb artifacts
-    callbacks.wandb_artifact = False
+    callbacks.wandb_artifact = True
     # early stopping
     callbacks.early_stopping = False
     callbacks.patience = 20

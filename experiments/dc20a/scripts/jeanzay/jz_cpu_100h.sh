@@ -53,7 +53,7 @@ source activate torch_py39
 python experiments/dc20a/main.py \
     --stage="train" \
     --my_config=experiments/dc20a/configs/config.py \
-    --my_config.experiment="swot1nadir1" \
+    --my_config.experiment="nadir1" \
     --my_config.trainer.num_epochs=1000 \
     --my_config.lr_scheduler.warmup_epochs=50 \
     --my_config.lr_scheduler.eta_min=1e-5

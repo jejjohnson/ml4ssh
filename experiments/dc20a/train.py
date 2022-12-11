@@ -44,6 +44,7 @@ def train(config: ml_collections.ConfigDict, workdir, savedir):
 
     # INITIALIZE LOGGER
     logger.info("Initializaing Logger...")
+    logger.debug(f"Log directory: {config.log.log_dir}")
     wandb_logger = WandbLogger(
         config=config.to_dict(),
         mode=config.log.mode,
@@ -183,8 +184,6 @@ def train(config: ml_collections.ConfigDict, workdir, savedir):
         df_pred.reset_index().set_index(["longitude", "latitude", "time"]).to_xarray()
     )
 
-    # RMSE STATS
-
     from inr4ssh._src.metrics.field.stats import nrmse_spacetime, rmse_space, nrmse_time
 
     logger.info("nRMSE Stats...")
@@ -221,8 +220,21 @@ def train(config: ml_collections.ConfigDict, workdir, savedir):
     # mean psd of signal
     ds_pred["time"] = (ds_pred.time - ds_pred.time[0]) / time_norm
 
+    #### Degrees
+    # %%
     # Time-Longitude (Lat avg) PSD Score
-    psd_score = psd_spacetime_score(ds_pred["ssh_model"], ds_pred["ssh_model_predict"])
+    ds_field = ds_pred.chunk(
+        {
+            "time": 1,
+            "longitude": ds_pred["longitude"].size,
+            "latitude": ds_pred["latitude"].size,
+        }
+    ).compute()
+
+    # Time-Longitude (Lat avg) PSD Score
+    psd_score = psd_spacetime_score(
+        ds_field["ssh_model_predict"], ds_field["ssh_model"]
+    )
 
     logger.info("PSD Space-time statistics...")
     spatial_resolved, time_resolved = wavelength_resolved_spacetime(psd_score)
@@ -245,7 +257,7 @@ def train(config: ml_collections.ConfigDict, workdir, savedir):
     # Isotropic (Time avg) PSD Score
     logger.info("PSD Isotropic statistics...")
     psd_iso_score = psd_isotropic_score(
-        ds_pred["ssh_model"], ds_pred["ssh_model_predict"]
+        ds_pred["ssh_model_predict"], ds_pred["ssh_model"]
     )
 
     space_iso_resolved = wavelength_resolved_isotropic(psd_iso_score, level=0.5)
@@ -262,13 +274,13 @@ def train(config: ml_collections.ConfigDict, workdir, savedir):
 
     data = [
         [
-            "SIREN GF/GF",
+            "SIREN",
             nrmse_xyt,
             err_var_time,
             spatial_resolved,
             time_resolved,
             space_iso_resolved,
-            "GF/GF",
+            f"{config.experiment}",
             "eval_siren.ipynb",
         ]
     ]
@@ -288,124 +300,5 @@ def train(config: ml_collections.ConfigDict, workdir, savedir):
     )
     print("Summary of the leaderboard metrics:")
     print(Leaderboard.to_markdown())
-
-    wandb.finish()
-
-    # # TESTING
-    # logger.info("Making predictions (grid)...")
-    # t0 = time.time()
-    # with torch.inference_mode():
-    #     predictions = trainer.predict(learn, datamodule=dm, return_predictions=True)
-    #     predictions = torch.cat(predictions)
-    #     predictions = predictions.numpy()
-    # t1 = time.time() - t0
-
-    # logger.info(f"Time Taken for {dm.ds_predict[:][0].shape[0]} points: {t1:.4f} secs")
-    # wandb_logger.log_metrics(
-    #     {
-    #         "time_predict_grid": t1,
-    #     }
-    # )
-
-    # ds_oi = postprocess_predictions(predictions, dm, config.data.ref_data_dir, logger)
-
-    # alongtracks, tracks = get_interpolation_alongtrack_prediction_ds(
-    #     ds_oi, config.data.test_data_dir, config.eval_data, logger
-    # )
-
-    # logger.info("Getting RMSE Metrics (GRID)...")
-    # rmse_metrics = get_grid_stats(
-    #     alongtracks, config.metrics, None, wandb_logger.log_metrics
-    # )
-
-    # logger.info(f"Grid Stats: {rmse_metrics}")
-
-    # # compute scores
-    # logger.info("Computing PSD Scores (Grid)...")
-    # psd_metrics = compute_psd_scores(
-    #     ssh_true=tracks.ssh_alongtrack,
-    #     ssh_pred=tracks.ssh_map,
-    #     delta_x=config.metrics.velocity * config.metrics.delta_t,
-    #     npt=tracks.npt,
-    #     scaling="density",
-    #     noverlap=0,
-    # )
-    # #
-    # logger.info(f"Grid PSD: {psd_metrics}")
-
-    # logger.info(f"Resolved scale (grid): {psd_metrics.resolved_scale:.2f}")
-    # wandb_logger.log_metrics(
-    #     {
-    #         "resolved_scale_grid": psd_metrics.resolved_scale,
-    #     }
-    # )
-
-    # logger.info(f"Plotting PSD Score and Spectrum (Grid)...")
-    # plot_psd_figs(psd_metrics, logger, wandb_logger.experiment.log, method="grid")
-    # logger.info("Finished GRID Script...!")
-
-    # # ==============================
-    # # ALONGTRACK PREDICTIONS
-    # # ==============================
-
-    # logger.info("ALONGTRACK STATS...")
-
-    # X_test, y_test = get_alongtrack_prediction_ds(
-    #     dm, config.data.test_data_dir, config.preprocess, config.eval_data, logger
-    # )
-
-    # # initialize dataset
-    # ds_test = TensorDataset(
-    #     torch.FloatTensor(X_test)
-    #     # torch.Tensor(y_test)
-    # )
-    # # initialize dataloader
-    # dl_test = DataLoader(
-    #     ds_test,
-    #     batch_size=config.dataloader.batchsize_test,
-    #     shuffle=False,
-    #     num_workers=config.dataloader.num_workers,
-    #     pin_memory=config.dataloader.pin_memory,
-    # )
-
-    # logger.info(f"Predicting alongtrack data...")
-    # t0 = time.time()
-    # with torch.inference_mode():
-    #     predictions = trainer.predict(
-    #         learn, dataloaders=dl_test, return_predictions=True
-    #     )
-    #     predictions = torch.cat(predictions)
-    #     predictions = predictions.numpy()
-    # t1 = time.time() - t0
-
-    # wandb_logger.log_metrics(
-    #     {
-    #         "time_predict_alongtrack": t1,
-    #     }
-    # )
-
-    # logger.info("Calculating stats (alongtrack)...")
-    # get_alongtrack_stats(y_test, predictions, logger, wandb_logger.log_metrics)
-
-    # # PSD
-    # logger.info(f"Getting PSD Scores (alongtrack)...")
-    # psd_metrics = compute_psd_scores(
-    #     ssh_true=y_test.squeeze(),
-    #     ssh_pred=predictions.squeeze(),
-    #     delta_x=config.metrics.velocity * config.metrics.delta_t,
-    #     npt=None,
-    #     scaling="density",
-    #     noverlap=0,
-    # )
-
-    # logger.info(f"Resolved scale (alongtrack): {psd_metrics.resolved_scale:.2}")
-    # wandb_logger.log_metrics(
-    #     {
-    #         "resolved_scale_alongtrack": psd_metrics.resolved_scale,
-    #     }
-    # )
-
-    # logger.info(f"Plotting PSD Score and Spectrum (AlongTrack)...")
-    # plot_psd_figs(psd_metrics, logger, wandb_logger.experiment.log, method="alongtrack")
 
     wandb.finish()

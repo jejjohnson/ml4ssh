@@ -17,6 +17,7 @@ dependencies:
 - conda-forge::pyinterp           # Interpolation
 - conda-forge::rasterio
 - conda-forge::xrft
+- conda-forge::numpy_groupies
 # PLOTTING LIBRARY
 - matplotlib                      # standard plotting library
 - seaborn                         # Stats viz library

@@ -4,12 +4,17 @@ from ml_collections import config_flags
 import data
 import train
 import train_more
+import metrics
+import figures
+import inference
 
 FLAGS = flags.FLAGS
 
 config_flags.DEFINE_config_file("my_config")
 flags.DEFINE_string("workdir", None, "work directory")
 flags.DEFINE_string("dldir", None, "data directory")
+flags.DEFINE_string("results_name", None, "directory + save name for results file")
+flags.DEFINE_string("variable_name", "ssh", "variable name in xr dataset")
 flags.DEFINE_string("stage", "train", "the experimental stage")
 
 
@@ -37,12 +42,10 @@ def main(_):
         train_more.train(FLAGS.my_config, None, None)
 
     elif FLAGS.stage == "inference":
-        # TODO: write inference script
-        raise NotImplementedError()
+        inference.inference(FLAGS.my_config, FLAGS.results_name)
 
     elif FLAGS.stage == "metrics":
-        # TODO: write metrics script
-        raise NotImplementedError()
+        metrics.metrics(FLAGS.my_config, FLAGS.results_name, FLAGS.variable_name)
 
     elif FLAGS.stage == "figures":
         # TODO: write interactive script
