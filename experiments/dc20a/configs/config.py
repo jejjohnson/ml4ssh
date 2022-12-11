@@ -204,6 +204,8 @@ def get_callbacks_config():
     # wandb logging
     callbacks.wandb = True
     callbacks.model_checkpoint = True
+    # wandb artifacts
+    callbacks.wandb_artifact = False
     # early stopping
     callbacks.early_stopping = False
     callbacks.patience = 20

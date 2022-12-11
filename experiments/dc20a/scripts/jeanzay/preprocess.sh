@@ -13,10 +13,10 @@ conda activate torch_py39
 #    --my_config=experiments/dc20a/configs/config.py \
 #    --dldir=/gpfswork/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2020a/raw
 
-## run script (smoke-test: subset)
-#python experiments/dc20a/main.py \
-#    --stage="preprocess" \
-#    --my_config=experiments/dc20a/configs/config.py
+# run script (smoke-test: subset)
+python experiments/dc20a/main.py \
+    --stage="preprocess" \
+    --my_config=experiments/dc20a/configs/config.py
 
 # run script (smoke-test: subset)
 python experiments/dc20a/main.py \

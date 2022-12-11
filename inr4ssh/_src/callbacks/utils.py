@@ -29,11 +29,13 @@ def get_callbacks(config, wandb_logger=None):
         )
         callbacks.append(cb)
 
-        cb_2 = UploadCheckpointsToWandbAsArtifact(
+    if config.wandb_artifact is True:
+
+        cb = UploadCheckpointsToWandbAsArtifact(
             ckpt_dir=str(Path(log_dir).joinpath("checkpoints")), upload_best_only=False
         )
 
-        callbacks.append(cb_2)
+        callbacks.append(cb)
 
     if config.watch_model is True:
 
