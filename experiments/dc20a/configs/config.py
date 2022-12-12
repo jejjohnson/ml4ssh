@@ -116,7 +116,7 @@ def get_wandb_config() -> config_dict.ConfigDict:
     config.mode = "offline"
     config.project = "inr4ssh"
     config.entity = "ige"
-    config.log_dir = "/gpfsscratch/rech/cli/uvo53rl"
+    config.log_dir = "/gpfsscratch/rech/cli/uvo53rl/"
     config.resume = False
     config.id = config_dict.placeholder(str)
     return config
@@ -135,22 +135,22 @@ def get_dataloader_config():
     config = dataloader = config_dict.ConfigDict()
     # train dataloader
     dataloader.batchsize_train = 32
-    dataloader.num_workers_train = 0
+    dataloader.num_workers_train = 16
     dataloader.shuffle_train = True
     dataloader.pin_memory_train = False
     # valid dataloader
     dataloader.batchsize_valid = 32
-    dataloader.num_workers_valid = 0
+    dataloader.num_workers_valid = 16
     dataloader.shuffle_valid = False
     dataloader.pin_memory_valid = False
     # test dataloader
     dataloader.batchsize_test = 32
-    dataloader.num_workers_test = 0
+    dataloader.num_workers_test = 16
     dataloader.shuffle_test = False
     dataloader.pin_memory_test = False
     # predict dataloader
     dataloader.batchsize_predict = 32
-    dataloader.num_workers_predict = 0
+    dataloader.num_workers_predict = 16
     dataloader.shuffle_predict = False
     dataloader.pin_memory_predict = False
 
@@ -278,9 +278,11 @@ def get_evaluation_config():
     evaluation.lon_min = -65.0
     evaluation.lon_max = -55.0
     evaluation.dlon = 0.1
+    evaluation.lon_coarsen = 0
     evaluation.lat_min = 33.0
     evaluation.lat_max = 43.0
     evaluation.dlat = 0.1
+    evaluation.lat_coarsen = 0
 
     evaluation.time_min = "2012-10-22"
     evaluation.time_max = "2012-12-02"

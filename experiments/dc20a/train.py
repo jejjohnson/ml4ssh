@@ -36,6 +36,12 @@ import pytorch_lightning as pl
 import wandb
 from inr4ssh._src.io import simpleargs_2_ndict
 from inr4ssh._src.datamodules.osse_2020a import AlongTrackDataModule
+from inr4ssh._src.preprocess.coords import (
+    correct_coordinate_labels,
+    correct_longitude_domain,
+)
+from inr4ssh._src.preprocess.regrid import oi_regrid
+import xarray as xr
 
 seed_everything(123, workers=True)
 
@@ -184,12 +190,55 @@ def train(config: ml_collections.ConfigDict, workdir, savedir):
         df_pred.reset_index().set_index(["longitude", "latitude", "time"]).to_xarray()
     )
 
+    logger.info(f"Loading reference dataset")
+    ds_filenames = Path(config.datadir.clean.ref_dir).joinpath(
+        "NATL60-CJM165_GULFSTREAM_y*"
+    )
+    logger.info(f"Dataset: {ds_filenames}")
+    ds_ref = xr.open_mfdataset(str(ds_filenames), engine="netcdf4")
+
+    logger.info("Postprocessing data...")
+
+    logger.info(f"Correcting spatial coord labels...")
+    ds_pred = correct_coordinate_labels(ds_pred)
+    ds_ref = correct_coordinate_labels(ds_ref)
+
+    logger.info("Subsetting datasets (temporal)...")
+    ds_pred = ds_pred.sel(
+        time=slice(config.evaluation.time_min, config.evaluation.time_max),
+        longitude=slice(config.evaluation.lon_min, config.evaluation.lon_max),
+        latitude=slice(config.evaluation.lat_min, config.evaluation.lat_max),
+        drop=True,
+    )
+    ds_ref = ds_ref.sel(
+        time=slice(config.evaluation.time_min, config.evaluation.time_max),
+        longitude=slice(config.evaluation.lon_min, config.evaluation.lon_max),
+        latitude=slice(config.evaluation.lat_min, config.evaluation.lat_max),
+        drop=True,
+    )
+
+    if config.evaluation.time_resample is not "":
+        ds_ref = ds_ref.resample(time=config.evaluation.time_resample).mean()
+
+    logger.info(f"Correcting variable labels...")
+    ds_ref = ds_ref.rename({"sossheig": "ssh"})
+    ds_pred = ds_pred.rename({"ssh_model_predict": "ssh"})
+
+    logger.info(f"Correcting longitude domain...")
+    ds_ref = correct_longitude_domain(ds_ref)
+    ds_pred = correct_longitude_domain(ds_pred)
+
+    ds_pred = ds_pred.transpose("time", "latitude", "longitude")
+
+    logger.info(f"Regridding predictions to reference...")
+    ds_ref["ssh_predict"] = oi_regrid(ds_pred["ssh"], ds_ref["ssh"])
+
+    # RMSE STATS
+
     from inr4ssh._src.metrics.field.stats import nrmse_spacetime, rmse_space, nrmse_time
 
     logger.info("nRMSE Stats...")
-    nrmse_xyt = nrmse_spacetime(
-        ds_pred["ssh_model_predict"], ds_pred["ssh_model"]
-    ).values
+    nrmse_xyt = nrmse_spacetime(ds_ref["ssh_predict"], ds_ref["ssh"]).values
     logger.info(f"Leaderboard SSH RMSE score =  {nrmse_xyt:.2f}")
     wandb_logger.log_metrics(
         {
@@ -197,7 +246,7 @@ def train(config: ml_collections.ConfigDict, workdir, savedir):
         }
     )
 
-    rmse_t = nrmse_time(ds_pred["ssh_model_predict"], ds_pred["ssh_model"])
+    rmse_t = nrmse_time(ds_ref["ssh_predict"], ds_ref["ssh"])
 
     err_var_time = rmse_t.std().values
     logger.info(f"Error Variability =  {err_var_time:.2f}")
@@ -218,23 +267,21 @@ def train(config: ml_collections.ConfigDict, workdir, savedir):
 
     time_norm = np.timedelta64(1, "D")
     # mean psd of signal
-    ds_pred["time"] = (ds_pred.time - ds_pred.time[0]) / time_norm
+    ds_ref["time"] = (ds_ref.time - ds_ref.time[0]) / time_norm
 
     #### Degrees
     # %%
     # Time-Longitude (Lat avg) PSD Score
-    ds_field = ds_pred.chunk(
+    ds_field = ds_ref.chunk(
         {
             "time": 1,
-            "longitude": ds_pred["longitude"].size,
-            "latitude": ds_pred["latitude"].size,
+            "longitude": ds_ref["longitude"].size,
+            "latitude": ds_ref["latitude"].size,
         }
     ).compute()
 
     # Time-Longitude (Lat avg) PSD Score
-    psd_score = psd_spacetime_score(
-        ds_field["ssh_model_predict"], ds_field["ssh_model"]
-    )
+    psd_score = psd_spacetime_score(ds_field["ssh_predict"], ds_field["ssh"])
 
     logger.info("PSD Space-time statistics...")
     spatial_resolved, time_resolved = wavelength_resolved_spacetime(psd_score)
@@ -256,9 +303,7 @@ def train(config: ml_collections.ConfigDict, workdir, savedir):
 
     # Isotropic (Time avg) PSD Score
     logger.info("PSD Isotropic statistics...")
-    psd_iso_score = psd_isotropic_score(
-        ds_pred["ssh_model_predict"], ds_pred["ssh_model"]
-    )
+    psd_iso_score = psd_isotropic_score(ds_ref["ssh_predict"], ds_ref["ssh"])
 
     space_iso_resolved = wavelength_resolved_isotropic(psd_iso_score, level=0.5)
     logger.info(
@@ -274,13 +319,13 @@ def train(config: ml_collections.ConfigDict, workdir, savedir):
 
     data = [
         [
-            "SIREN",
+            "SIREN GF/GF",
             nrmse_xyt,
             err_var_time,
             spatial_resolved,
             time_resolved,
             space_iso_resolved,
-            f"{config.experiment}",
+            "GF/GF",
             "eval_siren.ipynb",
         ]
     ]
@@ -300,5 +345,122 @@ def train(config: ml_collections.ConfigDict, workdir, savedir):
     )
     print("Summary of the leaderboard metrics:")
     print(Leaderboard.to_markdown())
+
+    # from inr4ssh._src.metrics.field.stats import nrmse_spacetime, rmse_space, nrmse_time
+    #
+    # logger.info("nRMSE Stats...")
+    # nrmse_xyt = nrmse_spacetime(
+    #     ds_pred["ssh_model_predict"], ds_pred["ssh_model"]
+    # ).values
+    # logger.info(f"Leaderboard SSH RMSE score =  {nrmse_xyt:.2f}")
+    # wandb_logger.log_metrics(
+    #     {
+    #         "nrmse_mu": nrmse_xyt,
+    #     }
+    # )
+    #
+    # rmse_t = nrmse_time(ds_pred["ssh_model_predict"], ds_pred["ssh_model"])
+    #
+    # err_var_time = rmse_t.std().values
+    # logger.info(f"Error Variability =  {err_var_time:.2f}")
+    # wandb_logger.log_metrics(
+    #     {
+    #         "nrmse_std": err_var_time,
+    #     }
+    # )
+    #
+    # # PSD STATS
+    # from inr4ssh._src.metrics.psd import (
+    #     psd_isotropic_score,
+    #     psd_spacetime_score,
+    #     wavelength_resolved_spacetime,
+    #     wavelength_resolved_isotropic,
+    # )
+    # import numpy as np
+    #
+    # time_norm = np.timedelta64(1, "D")
+    # # mean psd of signal
+    # ds_pred["time"] = (ds_pred.time - ds_pred.time[0]) / time_norm
+    #
+    # #### Degrees
+    # # %%
+    # # Time-Longitude (Lat avg) PSD Score
+    # ds_field = ds_pred.chunk(
+    #     {
+    #         "time": 1,
+    #         "longitude": ds_pred["longitude"].size,
+    #         "latitude": ds_pred["latitude"].size,
+    #     }
+    # ).compute()
+    #
+    # # Time-Longitude (Lat avg) PSD Score
+    # psd_score = psd_spacetime_score(
+    #     ds_field["ssh_model_predict"], ds_field["ssh_model"]
+    # )
+    #
+    # logger.info("PSD Space-time statistics...")
+    # spatial_resolved, time_resolved = wavelength_resolved_spacetime(psd_score)
+    # logger.info(
+    #     f"Shortest Spatial Wavelength Resolved = {spatial_resolved:.2f} (degree lon)"
+    # )
+    # logger.info(f"Shortest Temporal Wavelength Resolved = {time_resolved:.2f} (days)")
+    #
+    # wandb_logger.log_metrics(
+    #     {
+    #         "wavelength_space_deg": spatial_resolved,
+    #     }
+    # )
+    # wandb_logger.log_metrics(
+    #     {
+    #         "wavelength_time_days": time_resolved,
+    #     }
+    # )
+    #
+    # # Isotropic (Time avg) PSD Score
+    # logger.info("PSD Isotropic statistics...")
+    # psd_iso_score = psd_isotropic_score(
+    #     ds_pred["ssh_model_predict"], ds_pred["ssh_model"]
+    # )
+    #
+    # space_iso_resolved = wavelength_resolved_isotropic(psd_iso_score, level=0.5)
+    # logger.info(
+    #     f"Shortest Spatial Wavelength Resolved = {space_iso_resolved:.2f} (degree)"
+    # )
+    # wandb_logger.log_metrics(
+    #     {
+    #         "wavelength_iso_degree": space_iso_resolved,
+    #     }
+    # )
+    #
+    # import pandas as pd
+    #
+    # data = [
+    #     [
+    #         "SIREN",
+    #         nrmse_xyt,
+    #         err_var_time,
+    #         spatial_resolved,
+    #         time_resolved,
+    #         space_iso_resolved,
+    #         f"{config.experiment}",
+    #         "eval_siren.ipynb",
+    #     ]
+    # ]
+    #
+    # Leaderboard = pd.DataFrame(
+    #     data,
+    #     columns=[
+    #         "Method",
+    #         "µ(RMSE) ",
+    #         "σ(RMSE)",
+    #         "λx (degree)",
+    #         "λt (days)",
+    #         "λr (degree)",
+    #         "Notes",
+    #         "Reference",
+    #     ],
+    # )
+    # print("Summary of the leaderboard metrics:")
+    # print(Leaderboard.to_markdown())
 
     wandb.finish()

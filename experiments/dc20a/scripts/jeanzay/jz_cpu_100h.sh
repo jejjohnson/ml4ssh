@@ -28,32 +28,34 @@ export PYTHONPATH=$WORK/projects/inr4ssh:${PYTHONPATH}
 # loading of modules
 source activate torch_py39
 
-## run script
+
+## ====================================================================
+## EXPERIMENT - FULL
+## ====================================================================
 #python experiments/dc20a/main.py \
 #    --stage="train" \
 #    --my_config=experiments/dc20a/configs/config.py \
-#    --my_config.experiment="swot1nadir5" \
-#    --my_config.trainer.num_epochs=100 \
-#    --my_config.lr_scheduler.warmup_epochs=10 \
-#    --my_config.lr_scheduler.eta_min=1e-5 \
-#    --my_config.preprocess.subset_time.time_max="2012-12-02" \
-#    --my_config.evaluation.time_max="2012-11-01" \
-#    --my_config.model.hidden_dim=256 \
-#    --my_config.preprocess.subset_spatial.lon_min=-62.0 \
-#    --my_config.preprocess.subset_spatial.lon_max=-58.0 \
-#    --my_config.preprocess.subset_spatial.lat_min=35.0 \
-#    --my_config.preprocess.subset_spatial.lat_max=40.0 \
-#    --my_config.evaluation.lon_min=-62.0 \
-#    --my_config.evaluation.lon_max=-58.0 \
-#    --my_config.evaluation.lat_min=35.0 \
-#    --my_config.evaluation.lat_max=40.0
+#    --my_config.experiment="nadir1" \
+#    --my_config.trainer.num_epochs=1000 \
+#    --my_config.lr_scheduler.warmup_epochs=50 \
+#    --my_config.lr_scheduler.eta_min=1e-5
 
-
-# run script
+# ====================================================================
+# EXPERIMENT - SUBSET
+# ====================================================================
 python experiments/dc20a/main.py \
     --stage="train" \
     --my_config=experiments/dc20a/configs/config.py \
-    --my_config.experiment="nadir1" \
-    --my_config.trainer.num_epochs=1000 \
+    --my_config.experiment="swot1nadir5" \
+    --my_config.trainer.num_epochs=10000 \
     --my_config.lr_scheduler.warmup_epochs=50 \
-    --my_config.lr_scheduler.eta_min=1e-5
+    --my_config.lr_scheduler.max_epochs=100 \
+    --my_config.lr_scheduler.eta_min=1e-5 \
+    --my_config.preprocess.subset_time.time_max="2012-11-01" \
+    --my_config.evaluation.time_max="2012-11-01" \
+    --my_config.log.mode="offline" \
+    --my_config.model.hidden_dim=256 \
+    --my_config.evaluation.lon_coarsen=5 \
+    --my_config.evaluation.lat_coarsen=5 \
+    --my_config.callbacks.early_stopping=True \
+    --my_config.callbacks.patience=20

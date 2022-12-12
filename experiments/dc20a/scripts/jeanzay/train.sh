@@ -11,12 +11,12 @@ conda activate torch_py39
 python experiments/dc20a/main.py \
     --stage="train" \
     --my_config=experiments/dc20a/configs/config.py \
-    --my_config.experiment="swot1nadir5" \
+    --my_config.experiment="nadir4" \
     --my_config.trainer.num_epochs=10 \
     --my_config.lr_scheduler.warmup_epochs=5 \
     --my_config.lr_scheduler.max_epochs=10 \
     --my_config.lr_scheduler.eta_min=1e-5 \
-    --my_config.preprocess.subset_time.time_max="2012-12-02" \
+    --my_config.preprocess.subset_time.time_max="2012-11-01" \
     --my_config.evaluation.time_max="2012-11-01" \
     --my_config.model.hidden_dim=256 \
     --my_config.preprocess.subset_spatial.lon_min=-62.0 \
