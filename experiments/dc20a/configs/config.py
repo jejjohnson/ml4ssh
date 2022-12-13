@@ -181,7 +181,7 @@ def get_trainer_config():
     trainer.devices = 1
     trainer.strategy = config_dict.placeholder(str)
     trainer.num_nodes = 1
-    trainer.grad_batches = 10
+    trainer.grad_batches = 0
     trainer.dev_run = False
     trainer.deterministic = True
 
@@ -196,6 +196,7 @@ def get_lr_scheduler_config():
     lr_scheduler.max_epochs = 20
     lr_scheduler.warmup_lr = 0.0
     lr_scheduler.eta_min = 0.0
+    lr_scheduler.patience = 100
     return config
 
 
@@ -288,7 +289,7 @@ def get_evaluation_config():
     evaluation.time_max = "2012-12-02"
     evaluation.dt_freq = 1
     evaluation.dt_unit = "D"
-    evaluation.time_resample = "1D"
+    evaluation.time_resample = str(evaluation.dt_freq) + str(evaluation.dt_unit)
     return config
 
 
@@ -297,7 +298,7 @@ def get_preprocess_config():
     config = preprocess = config_dict.ConfigDict()
     preprocess.subset_time = subset_time = config_dict.ConfigDict()
     subset_time.subset_time = True
-    subset_time.time_min = "2012-10-22"
+    subset_time.time_min = "2012-10-02"
     subset_time.time_max = "2012-12-02"
 
     config.subset_spatial = subset_spatial = config_dict.ConfigDict()

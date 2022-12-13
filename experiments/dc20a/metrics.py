@@ -140,8 +140,12 @@ def metrics(config: ml_collections.ConfigDict, savedir, variable_name=None):
     )
     import numpy as np
 
-    time_norm = np.timedelta64(1, "D")
-    # mean psd of signal
+    # get the temporal normalization criteria
+    logger.info(f"Normalizing temporal domain...")
+    time_norm = np.timedelta64(config.evalulation.dt_freq, config.evalulation.dt_unit)
+    logger.info(f"Normalizing: {time_norm}")
+
+    # temporally normalize
     ds_ref["time"] = (ds_ref.time - ds_ref.time[0]) / time_norm
 
     #### Degrees

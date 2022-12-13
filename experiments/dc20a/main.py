@@ -5,7 +5,7 @@ import data
 import train
 import train_more
 import metrics
-import figures
+import viz
 import inference
 
 FLAGS = flags.FLAGS
@@ -15,6 +15,8 @@ flags.DEFINE_string("workdir", None, "work directory")
 flags.DEFINE_string("dldir", None, "data directory")
 flags.DEFINE_string("results_name", None, "directory + save name for results file")
 flags.DEFINE_string("variable_name", "ssh", "variable name in xr dataset")
+flags.DEFINE_string("figure", "density", "the figure type for viz")
+flags.DEFINE_string("figure_dir", None, "the directory for the figures")
 flags.DEFINE_string("stage", "train", "the experimental stage")
 
 
@@ -47,9 +49,15 @@ def main(_):
     elif FLAGS.stage == "metrics":
         metrics.metrics(FLAGS.my_config, FLAGS.results_name, FLAGS.variable_name)
 
-    elif FLAGS.stage == "figures":
+    elif FLAGS.stage == "viz":
         # TODO: write interactive script
-        raise NotImplementedError()
+        viz.viz(
+            config=FLAGS.my_config,
+            figure=FLAGS.figure,
+            resultsfile=FLAGS.results_name,
+            savedir=FLAGS.figure_dir,
+            variable_name=FLAGS.variable_name,
+        )
 
     else:
         raise NotImplementedError(f"Exp Stage implemented: {FLAGS.stage}")

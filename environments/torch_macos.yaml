@@ -53,6 +53,7 @@ dependencies:
   - einops
   # OTHER
   - plum-dispatch
+  - hyppo
   # formatting
   - black
   - pylint
