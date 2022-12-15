@@ -142,7 +142,7 @@ def metrics(config: ml_collections.ConfigDict, savedir, variable_name=None):
 
     # get the temporal normalization criteria
     logger.info(f"Normalizing temporal domain...")
-    time_norm = np.timedelta64(config.evalulation.dt_freq, config.evalulation.dt_unit)
+    time_norm = np.timedelta64(config.evaluation.dt_freq, config.evaluation.dt_unit)
     logger.info(f"Normalizing: {time_norm}")
 
     # temporally normalize

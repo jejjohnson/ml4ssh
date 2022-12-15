@@ -231,7 +231,7 @@ def inference(config: ml_collections.ConfigDict, savedir):
     ds_pred["time"] = (ds_pred.time - ds_pred.time[0]) / time_norm
 
     # Time-Longitude (Lat avg) PSD Score
-    psd_score = psd_spacetime_score(ds_pred["ssh_model"], ds_pred["ssh_model_predict"])
+    psd_score = psd_spacetime_score(ds_pred["ssh_model_predict"], ds_pred["ssh_model"])
 
     logger.info("PSD Space-time statistics...")
     spatial_resolved, time_resolved = wavelength_resolved_spacetime(psd_score)
@@ -254,7 +254,7 @@ def inference(config: ml_collections.ConfigDict, savedir):
     # Isotropic (Time avg) PSD Score
     logger.info("PSD Isotropic statistics...")
     psd_iso_score = psd_isotropic_score(
-        ds_pred["ssh_model"], ds_pred["ssh_model_predict"]
+        ds_pred["ssh_model_predict"], ds_pred["ssh_model"]
     )
 
     space_iso_resolved = wavelength_resolved_isotropic(psd_iso_score, level=0.5)

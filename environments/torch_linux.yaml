@@ -80,7 +80,8 @@ dependencies:
   # plotting
   - celluloid
   - corner
-  # experiment
+  - SciencePlots
+    # experiment
   - hydra-core
   - hydra-colorlog
   - hydra-optuna-sweeper

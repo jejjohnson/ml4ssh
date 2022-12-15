@@ -7,9 +7,13 @@ sns.reset_defaults()
 sns.set_context(context="talk", font_scale=0.7)
 
 
-def plot_psd_isotropic_wavenumber(freq, psd, **kwargs):
+def plot_psd_isotropic_wavenumber(freq, psd, ax=None, **kwargs):
 
-    fig, ax = plt.subplots(figsize=(6, 5))
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(6, 5))
+
+    else:
+        fig = plt.gcf()
 
     ax.plot(freq, psd, **kwargs)
 
@@ -26,9 +30,9 @@ def plot_psd_isotropic_wavenumber(freq, psd, **kwargs):
     return fig, ax
 
 
-def plot_psd_isotropic_wavelength(freq, psd, **kwargs):
+def plot_psd_isotropic_wavelength(freq, psd, ax=None, **kwargs):
 
-    fig, ax = plot_psd_isotropic_wavenumber(1.0 / freq, psd, **kwargs)
+    fig, ax = plot_psd_isotropic_wavenumber(1.0 / freq, psd, ax=ax, **kwargs)
 
     ax.set(
         yscale="log",
@@ -43,9 +47,9 @@ def plot_psd_isotropic_wavelength(freq, psd, **kwargs):
     return fig, ax
 
 
-def plot_psd_isotropic(freq, psd, **kwargs):
+def plot_psd_isotropic(freq, psd, ax=None, **kwargs):
 
-    fig, ax = plot_psd_isotropic_wavenumber(freq, psd, **kwargs)
+    fig, ax = plot_psd_isotropic_wavenumber(freq, psd, ax=ax, **kwargs)
 
     secax = ax.secondary_xaxis(
         "top", functions=(lambda x: 1 / (x + 1e-20), lambda x: 1 / (x + 1e-20))
