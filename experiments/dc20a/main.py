@@ -23,7 +23,6 @@ flags.DEFINE_string("stage", "train", "the experimental stage")
 def main(_):
 
     if FLAGS.stage == "download":
-        # TODO: write download stage
         data.download(FLAGS.dldir, dataset="obs")
         data.download(FLAGS.dldir, dataset="ref")
 
@@ -58,7 +57,6 @@ def main(_):
             savedir=FLAGS.figure_dir,
             variable_name=FLAGS.variable_name,
         )
-
     else:
         raise NotImplementedError(f"Exp Stage implemented: {FLAGS.stage}")
 

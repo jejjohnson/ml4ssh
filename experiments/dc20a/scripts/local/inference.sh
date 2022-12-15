@@ -14,9 +14,9 @@ python experiments/dc20a/main.py \
     --my_config=experiments/dc20a/configs/config_local.py \
     --my_config.datadir.staging.staging_dir="/Volumes/EMANS_HDD/data/dc20a_osse/test_2/ml_ready/" \
     --my_config.model.pretrain=True \
-    --my_config.model.pretrain_reference="experiment-ckpts:v28" \
+    --my_config.model.pretrain_reference="experiment-ckpts:v30" \
     --my_config.model.pretrain_checkpoint="last.ckpt" \
-    --my_config.model.pretrain_id="3dw5swoo" \
+    --my_config.model.pretrain_id="3o1s9zze" \
     --my_config.model.pretrain_entity="ige" \
     --my_config.model.pretrain_project="inr4ssh" \
     --my_config.log.mode="disabled" \
@@ -24,3 +24,7 @@ python experiments/dc20a/main.py \
     --my_config.evaluation.lat_coarsen=2 \
     --my_config.preprocess.subset_time.time_max="2012-12-02" \
     --my_config.evaluation.time_max="2012-12-02"
+
+
+# experiment-ckpts:v28 | 3dw5swoo
+# experiment-ckpts:v30 | 3o1s9zze

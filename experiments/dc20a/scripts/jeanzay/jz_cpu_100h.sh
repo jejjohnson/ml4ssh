@@ -69,9 +69,9 @@ python experiments/dc20a/main.py \
     --stage=train \
     --my_config=experiments/dc20a/configs/config.py \
     --my_config.experiment="nadir4" \
-    --my_config.dataloader.batchsize_train=32 \
-    --my_config.trainer.grad_batches=128 \
-    --my_config.trainer.num_epochs=30000 \
+    --my_config.dataloader.batchsize_train=8192 \
+    --my_config.trainer.grad_batches=1 \
+    --my_config.trainer.num_epochs=20000 \
     --my_config.lr_scheduler.warmup_epochs=1000 \
     --my_config.lr_scheduler.warmup_lr=1e-6 \
     --my_config.lr_scheduler.eta_min=1e-6 \
