@@ -20,7 +20,7 @@ from loguru import logger
 import torch
 
 from inr4ssh._src.io import save_object
-from inr4ssh._src.datamodules.ssh_obs import SSHAltimetry
+from inr4ssh._src.datamodules.dc21a import SSHAltimetry
 from inr4ssh._src.metrics.psd import compute_psd_scores
 from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
@@ -35,7 +35,7 @@ import pytorch_lightning as pl
 
 import wandb
 from inr4ssh._src.io import simpleargs_2_ndict
-from inr4ssh._src.datamodules.osse_2020a import AlongTrackDataModule
+from inr4ssh._src.datamodules.dc20a import AlongTrackDataModule
 from inr4ssh._src.preprocess.coords import (
     correct_coordinate_labels,
     correct_longitude_domain,

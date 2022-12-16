@@ -16,7 +16,7 @@ from typing import List, Optional, Union
 from pathlib import Path
 import xarray as xr
 from inr4ssh._src.data.natl60 import download_obs, download_ref, URL_REF, URL_OBS
-from inr4ssh._src.data.natl60 import check_osse_files, get_raw_altimetry_files
+from inr4ssh._src.data.natl60 import check_dc20a_files, get_raw_altimetry_files
 from inr4ssh._src.data.utils import load_xr_datasets_list, load_alongtrack_parallel
 from inr4ssh._src.preprocess.swot import preprocess_karin_swot
 
@@ -50,7 +50,7 @@ def preprocess(config: ml_collections.ConfigDict) -> None:
 
     logger.info("checking osse files...")
     logger.debug(f"Checking file: {str(obs_dir)}")
-    check_osse_files(obs_dir, None, "obs")
+    check_dc20a_files(obs_dir, None, "obs")
 
     logger.info("Get NADIR track files...")
     alongtrack_files = get_raw_altimetry_files(obs_dir)

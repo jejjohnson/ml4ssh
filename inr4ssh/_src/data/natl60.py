@@ -100,14 +100,13 @@ def get_swot_obs_setup_files(files: List[str], setup: str = "nadir1"):
     return setup_files
 
 
-def check_osse_files(
+def check_dc20a_files(
     directory: str, json_file: dict = None, dataset: str = "obs"
 ) -> bool:
 
     if json_file is None:
-        json_file = get_root_path().joinpath("inr4ssh/_src/data/osse_2020a.json")
+        json_file = get_root_path().joinpath("inr4ssh/_src/data/dc20a.json")
 
-    print(json_file)
     check_if_file(json_file)
 
     # load json directory
@@ -118,9 +117,7 @@ def check_osse_files(
     obs_files = list_all_files(directory, ext="*.nc", full_path=False)
 
     # check if files are the same
-    check_list_equal_elem(obs_files, json_file_list[dataset])
-
-    return None
+    return check_list_equal_elem(obs_files, json_file_list[dataset])
 
 
 def get_raw_altimetry_files(obs_dir: str = None, dataset: str = "nadir") -> List[str]:

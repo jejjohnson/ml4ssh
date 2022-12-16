@@ -22,8 +22,10 @@ flags.DEFINE_string("stage", "train", "the experimental stage")
 
 def main(_):
 
-    if FLAGS.stage == "download":
+    if FLAGS.stage == "download_obs":
         data.download(FLAGS.dldir, dataset="obs")
+
+    elif FLAGS.stage == "download_ref":
         data.download(FLAGS.dldir, dataset="ref")
 
     elif FLAGS.stage == "preprocess":

@@ -28,7 +28,7 @@ import torch.nn as nn
 import pytorch_lightning as pl
 
 import wandb
-from inr4ssh._src.datamodules.osse_2020a import AlongTrackDataModule
+from inr4ssh._src.datamodules.dc20a import AlongTrackDataModule
 
 from pathlib import Path
 from inr4ssh._src.logging.wandb import load_wandb_checkpoint, load_wandb_run_config

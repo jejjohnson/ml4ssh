@@ -90,3 +90,67 @@ def download_results(datadir: str, username: str, password: str, dataset: str = 
                 )
 
     return None
+
+
+def get_dc21a_setup() -> config_dict.ConfigDict:
+    config = config_dict.ConfigDict()
+
+    config.raw_nadir = [
+        "dt_gulfstream_alg_phy_l3_20161201-20180131_285-315_23-53.nc",
+        "dt_gulfstream_h2g_phy_l3_20161201-20180131_285-315_23-53.nc",
+        "dt_gulfstream_j2g_phy_l3_20161201-20180131_285-315_23-53.nc",
+        "dt_gulfstream_j2n_phy_l3_20161201-20180131_285-315_23-53.nc",
+        "dt_gulfstream_j3_phy_l3_20161201-20180131_285-315_23-53.nc",
+        "dt_gulfstream_s3a_phy_l3_20161201-20180131_285-315_23-53.nc",
+        "dt_gulfstream_c2_phy_l3_20161201-20180131_285-315_23-53.nc",
+    ]
+
+    config.correction = ["mdt.nc"]
+
+    config.train = [
+        "dt_gulfstream_alg_phy_l3_20161201-20180131_285-315_23-53.nc",
+        "dt_gulfstream_h2g_phy_l3_20161201-20180131_285-315_23-53.nc",
+        "dt_gulfstream_j2g_phy_l3_20161201-20180131_285-315_23-53.nc",
+        "dt_gulfstream_j2n_phy_l3_20161201-20180131_285-315_23-53.nc",
+        "dt_gulfstream_j3_phy_l3_20161201-20180131_285-315_23-53.nc",
+        "dt_gulfstream_s3a_phy_l3_20161201-20180131_285-315_23-53.nc",
+    ]
+
+    config.test = [
+        "dt_gulfstream_c2_phy_l3_20161201-20180131_285-315_23-53.nc",
+    ]
+    return config
+
+
+def check_dc21a_files(
+    directory: str, json_file: dict = None, dataset: str = "obs"
+) -> bool:
+    if json_file is None:
+        json_file = get_root_path().joinpath("inr4ssh/_stc/data/dc21a.json")
+
+    check_if_file(json_file)
+
+    # load json file from dir
+    with open(json_file, "r") as f:
+        json_file_list = json.load(f)
+
+    # get files in directory
+    obs_files = list_all_files(directory, ext="*.nc", full_path=False)
+
+    # check if files are the same
+    return check_list_equal_elem(obs_files, json_file_list[dataset])
+
+
+def get_dc21a_obs_setup_files(files: List[str], setup: str = "train") -> List[str]:
+
+    # initialize setup config
+    setup_config = get_dc21a_setup()
+
+    # get specific scenario
+    setup_filenames = setup_config[setup]
+
+    setup_files = get_subset_elements(setup_filenames, files)
+
+    assert len(setup_files) == len(setup_filenames)
+
+    return setup_files

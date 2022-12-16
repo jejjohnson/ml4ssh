@@ -17,19 +17,26 @@ flags.DEFINE_string("experiment", "image", "the experimental")
 
 def main(_):
 
-    # perform image experiment
-    if FLAGS.stage == "download":
+    # =============================
+    # DOWNLOAD DATA
+    # =============================
+    if FLAGS.stage == "download_obs":
         data.download(FLAGS.datadir, FLAGS.credentials, "obs")
+
+    elif FLAGS.stage == "download_correction":
         data.download(FLAGS.datadir, FLAGS.credentials, "correction")
 
-    if FLAGS.stage == "download_results":
+    elif FLAGS.stage == "download_results":
         data.download(FLAGS.datadir, FLAGS.credentials, "results")
 
+    # =============================
+    # PREPROCESS DATA
+    # =============================
     elif FLAGS.stage == "preprocess":
         raise NotImplementedError()
 
     elif FLAGS.stage == "ml_ready":
-        raise NotImplementedError()
+        data.ml_ready(FLAGS.my_config)
 
     elif FLAGS.stage == "train":
         # train.train(FLAGS.my_config, None, None)
