@@ -155,7 +155,7 @@ def find_wavelength_crossing(
 
     x = 1.0 - psd_diff / psd_ref
 
-    f = interp1d(x, y)
+    f = interp1d(x, y, kind="slinear")
 
     try:
         ynew = f(query)

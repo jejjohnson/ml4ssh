@@ -120,7 +120,7 @@ def inference(config: ml_collections.ConfigDict, savedir):
     # ============================
 
     logger.info("Initializing Learning class...")
-    from inr4ssh._src.trainers.osse_2020a import INRModel
+    from inr4ssh._src.trainers.nerf import INRModel
 
     # update the number of epochs
     config.lr_scheduler.max_epochs = config.trainer.num_epochs

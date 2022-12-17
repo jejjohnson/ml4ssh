@@ -57,7 +57,7 @@ def get_transformations_config():
     config = transform = config_dict.ConfigDict()
     transform.time_transform = "minmax"
     transform.time_min = "2016-06-01"
-    transform.time_max = "2019-01-06"
+    transform.time_max = "2019-01-01"
 
     return config
 
@@ -93,6 +93,8 @@ def get_traintest_config():
 
     traintest.train_prct = 0.9
     traintest.seed = 42
+    traintest.subset_random = 0.0
+    traintest.subset_seed = 81
 
     return config
 
@@ -219,10 +221,10 @@ def get_evaluation_config():
     config = evaluation = config_dict.ConfigDict()
     evaluation.lon_min = -65.0  # 295.0
     evaluation.lon_max = -55.0  # 305.0
-    evaluation.dlon = 0.1
+    evaluation.dlon = 0.05
     evaluation.lat_min = 33.0
     evaluation.lat_max = 43.0
-    evaluation.dlat = 0.2
+    evaluation.dlat = 0.05
     # evaluation.lon_min = -65.0
     # evaluation.lon_max = -55.0
     # evaluation.dlon = 0.1
@@ -265,7 +267,7 @@ def get_config():
     config = config_dict.ConfigDict()
 
     # LOGGING
-    config.experiment = "swot1nadir5"
+    config.experiment = "dc21a"
     config.log = get_wandb_config()
 
     # DATA DIRECTORIES

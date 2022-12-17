@@ -2,8 +2,9 @@ from absl import app
 from absl import flags
 from ml_collections import config_flags
 
-# import train_v2 as train
+import train
 import data
+import inference
 
 FLAGS = flags.FLAGS
 
@@ -13,6 +14,7 @@ flags.DEFINE_string("workdir", None, "work directory")
 flags.DEFINE_string("datadir", None, "data download directory")
 flags.DEFINE_string("credentials", None, "credentials file directory")
 flags.DEFINE_string("experiment", "image", "the experimental")
+flags.DEFINE_string("results_name", None, "directory + save name for results file")
 
 
 def main(_):
@@ -39,14 +41,13 @@ def main(_):
         data.ml_ready(FLAGS.my_config)
 
     elif FLAGS.stage == "train":
-        # train.train(FLAGS.my_config, None, None)
-        raise NotImplementedError()
+        train.train(FLAGS.my_config, None, None)
 
     elif FLAGS.stage == "train_more":
         raise NotImplementedError()
 
     elif FLAGS.stage == "inference":
-        raise NotImplementedError()
+        inference.inference(FLAGS.my_config, FLAGS.results_name)
 
     elif FLAGS.stage == "metrics":
         raise NotImplementedError()

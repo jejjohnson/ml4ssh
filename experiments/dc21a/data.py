@@ -101,7 +101,7 @@ def ml_ready(config: ml_collections.ConfigDict) -> None:
     setup_files = get_dc21a_obs_setup_files(all_files, setup="train")
 
     def preprocess(x):
-        x = x["sla_unfiltered"]
+        x = x[["sla_unfiltered", "mdt", "lwe"]]
 
         # correct longitude dimensions
         x["longitude"] = convert_lon_360_180(x["longitude"])

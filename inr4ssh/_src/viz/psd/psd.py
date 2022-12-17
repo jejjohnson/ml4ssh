@@ -47,8 +47,8 @@ def plot_psd_score(psd_diff, psd_ref, wavenumber, resolved_scale, xmin: float = 
     # plot threshold for score
     ax.hlines(
         y=0.5,
-        xmin=np.ma.min(np.ma.masked_invalid(1.0 / wavenumber)),
-        xmax=np.ma.max(np.ma.masked_invalid(1.0 / wavenumber)),
+        xmin=np.ma.max(np.ma.masked_invalid(1.0 / wavenumber)),
+        xmax=resolved_scale,
         color="red",
         lw=1.2,
         ls="--",
@@ -72,7 +72,7 @@ def plot_psd_score(psd_diff, psd_ref, wavenumber, resolved_scale, xmin: float = 
     ax.set(
         xlabel="Wavelength [km]",
         ylabel="PSD Score [1. - PSD$_{err}$/PSD$_{ref}$]",
-        xlim=(10e3, 10e0),
+        xlim=(10e2, 10e0),
         xscale="log",
     )
     plt.legend(loc="best", fontsize=12)

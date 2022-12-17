@@ -14,8 +14,12 @@ sys.path.append(str(root))
 
 from loguru import logger
 from pathlib import Path
-from inr4ssh._src.logging.wandb import load_wandb_checkpoint, load_wandb_run_config
 from ml_collections import config_dict
+import xarray as xr
+import numpy as np
+from inr4ssh._src.logging.wandb import load_wandb_checkpoint, load_wandb_run_config
+from inr4ssh._src.preprocess.spatial import convert_lon_360_180
+from inr4ssh._src.preprocess.coords import correct_coordinate_labels
 
 
 def update_config_pretrain(config):
