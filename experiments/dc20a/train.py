@@ -56,7 +56,7 @@ def train(config: ml_collections.ConfigDict, workdir, savedir):
         mode=config.log.mode,
         project=config.log.project,
         entity=config.log.entity,
-        dir=config.log.log_dir,
+        save_dir=config.log.log_dir,
         resume=False,
         log_model=False,
     )
@@ -198,7 +198,6 @@ def train(config: ml_collections.ConfigDict, workdir, savedir):
     ds_ref = xr.open_mfdataset(str(ds_filenames), engine="netcdf4")
 
     logger.info("Postprocessing data...")
-
     logger.info(f"Correcting spatial coord labels...")
     ds_pred = correct_coordinate_labels(ds_pred)
     ds_ref = correct_coordinate_labels(ds_ref)
