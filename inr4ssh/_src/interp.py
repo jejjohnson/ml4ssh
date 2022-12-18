@@ -3,6 +3,42 @@ import numpy as np
 import pyinterp
 from .preprocess.coords import extract_gridded_coords
 from .metrics.types import AlongTrackData
+from inr4ssh._src.preprocess.regrid import create_pyinterp_grid_2dt
+from einops import rearrange
+
+
+def interp_2dt(
+    da: xr.DataArray, is_circle: bool = False, method: str = "gauss_seidel", **kwargs
+) -> xr.DataArray:
+
+    # create 2D+T pyinterp grid object
+    grid = create_pyinterp_grid_2dt(da, is_circle=is_circle)
+
+    # interpolate
+    if method == "gauss_seidel":
+        has_converged, da_filled = pyinterp.fill.gauss_seidel(grid, **kwargs)
+    elif method == "loess":
+        da_filled = pyinterp.fill.loess(grid, **kwargs)
+
+    da_filled = rearrange(
+        da_filled,
+        "Lon Lat Time -> Time Lat Lon",
+        Lon=da.longitude.shape[0],
+        Lat=da.latitude.shape[0],
+        Time=da.time.shape[0],
+    )
+
+    da = xr.DataArray(
+        da_filled,
+        dims=[
+            "time",
+            "latitude",
+            "longitude",
+        ],
+        coords={"longitude": da.longitude, "latitude": da.latitude, "time": da.time},
+    )
+
+    return da
 
 
 def interp_on_alongtrack(

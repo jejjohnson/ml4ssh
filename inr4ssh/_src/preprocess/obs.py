@@ -103,31 +103,45 @@ def add_obs_tracks(obs1, obs2):
     return obs
 
 
-def bin_observations(
-    ds_obs: xr.Dataset, ds_ref: xr.Dataset, variable: str, time_buffer: np.timedelta64
+def bin_observations_coords(
+    ds_obs: xr.Dataset,
+    variable: str,
+    lon_coords: np.ndarray,
+    lat_coords: np.ndarray,
+    time_coords: np.ndarray,
+    time_buffer: np.timedelta64,
 ) -> xr.Dataset:
 
+    # print("Coords:")
+    # print(lon_coords.shape, lat_coords.shape, time_coords.shape)
+
     # create binning object
-    binning = pyinterp.Binning2D(
-        pyinterp.Axis(ds_ref.longitude.values), pyinterp.Axis(ds_ref.latitude.values)
-    )
+    binning = pyinterp.Binning2D(pyinterp.Axis(lon_coords), pyinterp.Axis(lat_coords))
 
     # initialize datasets
     ds_obs_binned = []
 
-    for t in tqdm(ds_ref.time):
+    for itime in tqdm(time_coords):
         binning.clear()
 
         # get all indices within timestamp + buffer
-        ids = np.where((np.abs(ds_obs.time.values - t.values) < 2.0 * time_buffer))[0]
+        ids = np.where((np.abs(ds_obs.time.values - itime) < 2.0 * time_buffer))[0]
 
         # extract lat,lon,values
+        # print("Obs grid:")
+        # print(ds_obs[variable].values.shape,
+        #     ds_obs.longitude.values.shape, ds_obs.latitude.values.shape)
         values = np.ravel(ds_obs[variable].values[ids])
         lons = np.ravel(ds_obs.longitude.values[ids])
         lats = np.ravel(ds_obs.latitude.values[ids])
 
+        # print("Obs grid (Subsampled):")
+        # print(ids.shape, values.shape, lons.shape, lats.shape)
+
         # mask all nans
         msk = np.isfinite(values)
+
+        # print(msk.shape)
 
         binning.push(lons[msk], lats[msk], values[msk])
 
@@ -141,7 +155,7 @@ def bin_observations(
             xr.Dataset(
                 {variable: gridded},
                 {
-                    "time": [t.values],
+                    "time": [itime],
                     "latitude": np.array(binning.y),
                     "longitude": np.array(binning.x),
                 },
@@ -151,3 +165,62 @@ def bin_observations(
     # concatenate final dataset
     ds_obs_binned = xr.concat(ds_obs_binned, dim="time")
     return ds_obs_binned
+
+
+def bin_observations_xr(
+    ds_obs: xr.Dataset, ds_ref: xr.Dataset, variable: str, time_buffer: np.timedelta64
+) -> xr.Dataset:
+
+    return bin_observations_coords(
+        ds_obs=ds_obs,
+        variable=variable,
+        lon_coords=ds_ref.longitude.values,
+        lat_coords=ds_ref.latitude.values,
+        time_coords=ds_ref.time.values,
+        time_buffer=time_buffer,
+    )
+
+    # # create binning object
+    # binning = pyinterp.Binning2D(
+    #     pyinterp.Axis(ds_ref.longitude.values), pyinterp.Axis(ds_ref.latitude.values)
+    # )
+    #
+    # # initialize datasets
+    # ds_obs_binned = []
+    #
+    # for t in tqdm(ds_ref.time):
+    #     binning.clear()
+    #
+    #     # get all indices within timestamp + buffer
+    #     ids = np.where((np.abs(ds_obs.time.values - t.values) < 2.0 * time_buffer))[0]
+    #
+    #     # extract lat,lon,values
+    #     values = np.ravel(ds_obs[variable].values[ids])
+    #     lons = np.ravel(ds_obs.longitude.values[ids])
+    #     lats = np.ravel(ds_obs.latitude.values[ids])
+    #
+    #     # mask all nans
+    #     msk = np.isfinite(values)
+    #
+    #     binning.push(lons[msk], lats[msk], values[msk])
+    #
+    #     gridded = (
+    #         ("time", "latitude", "longitude"),
+    #         binning.variable("mean").T[None, ...],
+    #     )
+    #
+    #     # create gridded dataset
+    #     ds_obs_binned.append(
+    #         xr.Dataset(
+    #             {variable: gridded},
+    #             {
+    #                 "time": [t.values],
+    #                 "latitude": np.array(binning.y),
+    #                 "longitude": np.array(binning.x),
+    #             },
+    #         ).astype("float32", casting="same_kind")
+    #     )
+    #
+    # # concatenate final dataset
+    # ds_obs_binned = xr.concat(ds_obs_binned, dim="time")
+    # return ds_obs_binned
