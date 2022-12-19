@@ -1,5 +1,6 @@
 import pyinterp
 import pyinterp.fill
+import pyinterp.backends.xarray
 from loguru import logger
 import numpy as np
 import xarray as xr
@@ -30,6 +31,9 @@ def regrid_2dt_from_grid(
 
     # create spatial temporal pyinterp grid
     grid_source = create_pyinterp_grid_2dt(da, is_circle=is_circle)
+
+    # # TODO: try to integrate pyinterp.backends.xarray
+    # grid_source = pyinterp.backends.xarray.Grid3D(da)
 
     safe_cast = lambda x: pyinterp.TemporalAxis(da.time.values).safe_cast(x)
 

@@ -102,6 +102,14 @@ class Coordinates2DT:
     def create_grid_xr(self):
         raise NotImplementedError()
 
+    @staticmethod
+    def create_from_xr(da):
+        return Coordinates2DT(
+            lon_coords=da.longitude.values,
+            lat_coords=da.latitude.values,
+            time_coords=da.time.values,
+        )
+
     def create_bounds(self):
         # get easy bounds
         lon_min = self.lon_coords.min()
