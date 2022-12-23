@@ -15,10 +15,15 @@ import time
 from typing import List, Optional, Union
 from pathlib import Path
 import xarray as xr
+import numpy as np
 from inr4ssh._src.data.natl60 import download_obs, download_ref, URL_REF, URL_OBS
 from inr4ssh._src.data.natl60 import check_dc20a_files, get_raw_altimetry_files
 from inr4ssh._src.data.utils import load_xr_datasets_list, load_alongtrack_parallel
 from inr4ssh._src.preprocess.swot import preprocess_karin_swot
+from inr4ssh._src.io import list_all_files
+from inr4ssh._src.data.natl60 import get_swot_obs_setup_files
+from inr4ssh._src.preprocess.spatial import convert_lon_360_180
+from inr4ssh._src.data.utils import load_alongtrack_parallel
 
 
 def download(datadir: str = None, dataset: str = "obs") -> None:
@@ -106,8 +111,6 @@ def preprocess(config: ml_collections.ConfigDict) -> None:
 
 
 def ml_ready(config: ml_collections.ConfigDict, experiment: str) -> None:
-    from inr4ssh._src.io import list_all_files
-    from inr4ssh._src.data.natl60 import get_swot_obs_setup_files
 
     logger.info(f"Starting preprocess (ml_ready) script...")
     logger.info(f"Dataset: {experiment}...")
@@ -123,10 +126,6 @@ def ml_ready(config: ml_collections.ConfigDict, experiment: str) -> None:
     variables = ["ssh_obs", "ssh_model", "lon", "lat"]
     logger.info(f"Selecting variables:")
     logger.info(f"{variables}")
-
-    import numpy as np
-    from inr4ssh._src.preprocess.spatial import convert_lon_360_180
-    from inr4ssh._src.data.utils import load_alongtrack_parallel
 
     def preprocess(x):
         x = x[variables]
