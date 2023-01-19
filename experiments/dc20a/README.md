@@ -11,11 +11,14 @@
 This includes all data related scripts including download, preprocessing and cleaning to be ML ready.
 
 ---
+---
 #### Data: Download
+
+
 
 > This script will download the simulated NATL60 data and the simulated altimetry observations.
 
-Example Script:
+**Example Python Script**:
 
 ```bash
 python experiments/dc20a/main.py \
@@ -23,6 +26,13 @@ python experiments/dc20a/main.py \
     --my_config=experiments/dc20a/configs/local_config.py \
     --dldir=/gpfswork/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2020a/raw
 ```
+
+**Example Bash Script**:
+
+```bash
+bash dl_meom.sh /gpfswork/rech/yrf/commun/data_challenges/dc20a_osse/raw
+```
+
 
 ---
 #### Data: Preprocess

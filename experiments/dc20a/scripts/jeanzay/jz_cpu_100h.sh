@@ -22,8 +22,8 @@ module load git-lfs/3.0.2
 module load ffmpeg/4.2.2
 
 # go to appropriate directory
-cd $WORK/projects/inr4ssh
-export PYTHONPATH=$WORK/projects/inr4ssh:${PYTHONPATH}
+cd /gpfswork/rech/cli/uvo53rl/projects/inr4ssh/
+export PYTHONPATH=/gpfswork/rech/cli/uvo53rl/projects/inr4ssh:${PYTHONPATH}
 
 # loading of modules
 source activate torch_py39

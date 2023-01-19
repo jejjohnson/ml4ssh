@@ -34,9 +34,10 @@ dependencies:
 - conda-forge::zarr               # optimized zarr storage
 - conda-forge::netcdf4
 # CUDA ECOSYSTEM
-- conda-forge::cudatoolkit=11.6   # CUDA libraries
+- nvidia::cudatoolkit=11.7   # CUDA libraries
 # PYTORCH ECOSYSTEM
 - pytorch::pytorch                # pytorch tensor library
+- pytorch::pytorch-cuda=11.7
 #- pytorch::torchvision            # pytorch vision library
 - pytorch::torchaudio             # pytorch audio library
 - conda-forge::pytorch-lightning  # pytorch training utils/org

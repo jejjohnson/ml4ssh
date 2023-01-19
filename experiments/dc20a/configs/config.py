@@ -2,15 +2,23 @@ from ml_collections import config_dict
 import math
 
 
+def get_wandb_config() -> config_dict.ConfigDict:
+    config = config_dict.ConfigDict()
+
+    config.mode = "offline"
+    config.project = "inr4ssh"
+    config.entity = "ige"
+    config.log_dir = "/gpfsscratch/rech/cli/uvo53rl/"
+    config.resume = False
+    config.id = config_dict.placeholder(str)
+    return config
+
+
 def get_datadir_raw():
     config = config_dict.ConfigDict()
 
-    config.ref_dir = (
-        "/gpfswork/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2020a/raw/dc_ref"
-    )
-    config.obs_dir = (
-        "/gpfswork/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2020a/raw/dc_obs/"
-    )
+    config.ref_dir = "/gpfswork/rech/yrf/commun/data_challenges/dc20a_osse/raw/dc_ref"
+    config.obs_dir = "/gpfswork/rech/yrf/commun/data_challenges/dc20a_osse/raw/dc_obs/"
 
     return config
 
@@ -18,11 +26,9 @@ def get_datadir_raw():
 def get_datadir_clean():
     config = config_dict.ConfigDict()
 
-    config.ref_dir = (
-        "/gpfswork/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2020a/raw/dc_ref/"
-    )
+    config.ref_dir = "/gpfswork/rech/yrf/commun/data_challenges/dc20a_osse/raw/dc_ref/"
     config.obs_dir = (
-        "/gpfswork/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2020a/clean/"
+        "/gpfswork/rech/yrf/commun/data_challenges/dc20a_osse/work_eman/clean/"
     )
 
     return config
@@ -33,7 +39,7 @@ def get_datadir_staging():
     config = config_dict.ConfigDict()
 
     config.staging_dir = (
-        "/gpfswork/rech/cli/uvo53rl/data/data_challenges/ssh_mapping_2020a/ml_ready"
+        "/gpfswork/rech/yrf/commun/data_challenges/dc20a_osse/work_eman/ml_ready"
     )
 
     return config
@@ -110,18 +116,6 @@ def get_train_period() -> config_dict.ConfigDict:
     return config
 
 
-def get_wandb_config() -> config_dict.ConfigDict:
-    config = config_dict.ConfigDict()
-
-    config.mode = "offline"
-    config.project = "inr4ssh"
-    config.entity = "ige"
-    config.log_dir = "/gpfsscratch/rech/cli/uvo53rl/"
-    config.resume = False
-    config.id = config_dict.placeholder(str)
-    return config
-
-
 def get_transformations_config():
     config = transform = config_dict.ConfigDict()
     transform.time_transform = "minmax"
@@ -134,25 +128,25 @@ def get_transformations_config():
 def get_dataloader_config():
     config = dataloader = config_dict.ConfigDict()
     # train dataloader
-    dataloader.batchsize_train = 32
+    dataloader.batchsize_train = 4096
     dataloader.num_workers_train = 16
     dataloader.shuffle_train = True
-    dataloader.pin_memory_train = False
+    dataloader.pin_memory_train = True
     # valid dataloader
-    dataloader.batchsize_valid = 32
+    dataloader.batchsize_valid = 4096
     dataloader.num_workers_valid = 16
     dataloader.shuffle_valid = False
-    dataloader.pin_memory_valid = False
+    dataloader.pin_memory_valid = True
     # test dataloader
-    dataloader.batchsize_test = 32
+    dataloader.batchsize_test = 4096
     dataloader.num_workers_test = 16
     dataloader.shuffle_test = False
-    dataloader.pin_memory_test = False
+    dataloader.pin_memory_test = True
     # predict dataloader
-    dataloader.batchsize_predict = 32
+    dataloader.batchsize_predict = 10000
     dataloader.num_workers_predict = 16
     dataloader.shuffle_predict = False
-    dataloader.pin_memory_predict = False
+    dataloader.pin_memory_predict = True
 
     return config
 
@@ -169,7 +163,7 @@ def get_traintest_config():
 def get_optimizer_config():
     # OPTIMIZER
     config = optimizer = config_dict.ConfigDict()
-    optimizer.optimizer = "adam"
+    optimizer.optimizer = "adamw"
     optimizer.learning_rate = 1e-4
     return config
 
@@ -177,11 +171,11 @@ def get_optimizer_config():
 def get_trainer_config():
     config = trainer = config_dict.ConfigDict()
     trainer.num_epochs = 10
-    trainer.accelerator = "cpu"  # "cpu", "gpu"
+    trainer.accelerator = "gpu"  # "cpu", "gpu"
     trainer.devices = 1
     trainer.strategy = config_dict.placeholder(str)
     trainer.num_nodes = 1
-    trainer.grad_batches = 0
+    trainer.grad_batches = 10
     trainer.dev_run = False
     trainer.deterministic = True
 
@@ -314,9 +308,9 @@ def get_preprocess_config():
     subset_spatial.lat_max = 43.0
 
     preprocess.resample = resample = config_dict.ConfigDict()
-    resample.time_resample = "12h"  # config_dict.placeholder(str)
-    resample.coarsen_lon = 5
-    resample.coarsen_lat = 5
+    resample.time_resample = config_dict.placeholder(str)  # "12h"
+    resample.coarsen_lon = 0
+    resample.coarsen_lat = 0
 
     return config
 

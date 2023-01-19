@@ -1,45 +1,35 @@
 #!/bin/bash
 
+module purge
+
+#module load cuda/11.2
+#module load cudnn/9.2-v7.5.1.10
+module load cudnn/10.1-v7.5.1.10
+module load git/2.31.1
+module load github-cli/1.13.1
+module load git-lfs/3.0.2
+module load ffmpeg/4.2.2
+
 # go to appropriate directory
 cd /gpfswork/rech/cli/uvo53rl/projects/inr4ssh/
-export PYTHONPATH=/gpfswork/rech/cli/uvo53rl/projects/inr4ssh/:${PYTHONPATH}
+export PYTHONPATH=/gpfswork/rech/cli/uvo53rl/projects/inr4ssh:${PYTHONPATH}
 
 # loading of modules
-conda activate torch_py39
+source activate torch_py39
 
-# run script (smoke-test: subset)
 python experiments/dc20a/main.py \
     --stage="train" \
     --my_config=experiments/dc20a/configs/config.py \
-    --my_config.experiment="nadir4" \
-    --my_config.trainer.num_epochs=10 \
-    --my_config.lr_scheduler.warmup_epochs=5 \
-    --my_config.lr_scheduler.max_epochs=10 \
+    --my_config.experiment="swot1nadir5" \
+    --my_config.trainer.num_epochs=10000 \
+    --my_config.lr_scheduler.warmup_epochs=50 \
+    --my_config.lr_scheduler.max_epochs=100 \
     --my_config.lr_scheduler.eta_min=1e-5 \
-    --my_config.preprocess.subset_time.time_max="2012-11-01" \
-    --my_config.evaluation.time_max="2012-11-01" \
+    --my_config.log.mode="disabled" \
     --my_config.model.hidden_dim=256 \
-    --my_config.preprocess.subset_spatial.lon_min=-62.0 \
-    --my_config.preprocess.subset_spatial.lon_max=-58.0 \
-    --my_config.preprocess.subset_spatial.lat_min=35.0 \
-    --my_config.preprocess.subset_spatial.lat_max=40.0 \
-    --my_config.evaluation.lon_min=-62.0 \
-    --my_config.evaluation.lon_max=-58.0 \
-    --my_config.evaluation.lat_min=35.0 \
-    --my_config.evaluation.lat_max=40.0 \
-    # --my_config.preprocess.subset_time.time_max="2012-11-01" \
-    # --my_config.evaluation.time_max="2012-11-01" \
-    # --my_config.data.train_data_dir="/Users/eman/.CMVolumes/cal1_workdir/data/dc_2021/raw/train" \
-    # --my_config.data.ref_data_dir="/Users/eman/.CMVolumes/cal1_workdir/data/dc_2021/raw/ref" \
-    # --my_config.data.test_data_dir="/Users/eman/.CMVolumes/cal1_workdir/data/dc_2021/raw/test" \
-    # --my_config.preprocess.time_min="2017-01-01" \
-    # --my_config.preprocess.time_max="2017-02-01" \
-    # --my_config.eval_data.time_min="2017-01-01" \
-    # --my_config.eval_data.time_max="2017-02-01" \
-    # --my_config.trainer.accelerator="mps" \
-    # --my_config.optimizer.num_epochs=2 \
-    # --my_config.lr_scheduler.warmup_epochs=1 \
-    # --my_config.lr_scheduler.max_epochs=2 \
-    # --my_config.dataloader.num_workers=0 \
-    # --my_config.dataloader.pin_memory=False \
-    # --my_config.trainer.dev_run=False
+    --my_config.trainer.accelerator="gpu" \
+    --my_config.trainer.strategy="dp" \
+    --my_config.trainer.devices=4 \
+    --my_config.trainer.grad_batches=1
+#    --my_config.evaluation.lon_coarsen=5 \
+#    --my_config.evaluation.lat_coarsen=5 \

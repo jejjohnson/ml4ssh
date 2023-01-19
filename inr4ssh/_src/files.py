@@ -70,3 +70,23 @@ def get_subset_elements(sublist, suplist):
         combined_list += result
 
     return combined_list
+
+
+def get_subset_files_str(files_list: List[str], element: str):
+
+    assert isinstance(element, str)
+
+    files = list(filter(lambda ifile: element in str(ifile), files_list))
+
+    return files
+
+
+def get_subset_files_list(files_list: List[str], elements: List[str]):
+
+    assert isinstance(elements, list)
+
+    files = list()
+    for ielement in elements:
+        files += get_subset_files_str(files_list, ielement)
+
+    return files
