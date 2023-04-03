@@ -1,0 +1,9 @@
+observations:
+  _target_: inr4ssh._src.data.natl60.download_obs
+  datadir: "${paths.raw_obs_dir}"
+  verbose: True
+
+references:
+  _target_: inr4ssh._src.data.natl60.download_ref
+  datadir: "${paths.raw_data_dir}"
+  verbose: True

@@ -265,6 +265,8 @@ def get_model_config():
 def get_evaluation_config():
     # EVALUATION
     config = evaluation = config_dict.ConfigDict()
+    evaluation.dataset = "natl60"
+
     evaluation.lon_min = -65.0
     evaluation.lon_max = -55.0
     evaluation.dlon = 0.1
@@ -285,6 +287,7 @@ def get_evaluation_config():
 def get_preprocess_config():
     # preprocessing
     config = preprocess = config_dict.ConfigDict()
+    preprocess.dataset = "alongtrack"
     preprocess.subset_time = subset_time = config_dict.ConfigDict()
     subset_time.subset_time = True
     subset_time.time_min = "2012-10-22"
@@ -296,6 +299,11 @@ def get_preprocess_config():
     subset_spatial.lon_max = -55.0
     subset_spatial.lat_min = 33.0
     subset_spatial.lat_max = 43.0
+
+    preprocess.resample = resample = config_dict.ConfigDict()
+    resample.time_resample = config_dict.placeholder(str)  # "12h"
+    resample.coarsen_lon = 0
+    resample.coarsen_lat = 0
 
     return config
 

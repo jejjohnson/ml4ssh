@@ -1,0 +1,11 @@
+_target_:
+_target_:
+num_layers: True
+hidden_dim: 256
+use_bias: True
+final_activation: "identity"
+model_seed: 42
+w0_initial: 1.0
+w0: 1.0
+final_scale: 1.0
+c: 6.0

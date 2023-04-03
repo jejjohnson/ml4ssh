@@ -90,3 +90,10 @@ def get_subset_files_list(files_list: List[str], elements: List[str]):
         files += get_subset_files_str(files_list, ielement)
 
     return files
+
+
+def make_directory(directory: str):
+
+    datadir = Path(directory)
+
+    datadir.mkdir(parents=True, exist_ok=True)

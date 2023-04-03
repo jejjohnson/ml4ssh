@@ -44,6 +44,7 @@ from inr4ssh._src.preprocess.regrid import oi_regrid
 import xarray as xr
 
 seed_everything(123, workers=True)
+import experiment
 
 
 def train(config: ml_collections.ConfigDict, workdir, savedir):

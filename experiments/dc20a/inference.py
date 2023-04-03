@@ -231,7 +231,18 @@ def inference(config: ml_collections.ConfigDict, savedir):
     ds_pred["time"] = (ds_pred.time - ds_pred.time[0]) / time_norm
 
     # Time-Longitude (Lat avg) PSD Score
-    psd_score = psd_spacetime_score(ds_pred["ssh_model_predict"], ds_pred["ssh_model"])
+    ds_field = ds_pred.chunk(
+        {
+            "time": 1,
+            "longitude": ds_pred["longitude"].size,
+            "latitude": ds_pred["latitude"].size,
+        }
+    ).compute()
+
+    # Time-Longitude (Lat avg) PSD Score
+    psd_score = psd_spacetime_score(
+        ds_field["ssh_model_predict"], ds_field["ssh_model"]
+    )
 
     logger.info("PSD Space-time statistics...")
     spatial_resolved, time_resolved = wavelength_resolved_spacetime(psd_score)

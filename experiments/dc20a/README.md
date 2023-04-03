@@ -146,7 +146,7 @@ python -u experiments/dc20a/main.py
 **SRun Job**
 
 ```bash
-bash experiments/dc20a/scripts/jeanzay/train.sh
+bash experiments/dc20a/scripts/jeanzay/train_v100_swot1nadir5.sh
 ```
 
 **SBatch Job** (CPU)

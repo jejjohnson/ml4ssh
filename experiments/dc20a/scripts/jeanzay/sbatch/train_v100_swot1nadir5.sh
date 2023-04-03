@@ -4,8 +4,8 @@
 #SBATCH --nodes=1                            # we ALWAYS request one node
 #SBATCH --ntasks-per-node=1                  # number of tasks per node
 #SBATCH --cpus-per-task=40                   # number of cpus per task
-#SBATCH -C v100-16g                          # V100 GPU + 16 GBs RAM
-#SBATCH --gres=gpu:4                         # number of GPUs (4/4 of GPUs)
+#SBATCH -C v100-16g                          # V100 GPU + 32 GBs RAM
+#SBATCH --gres=gpu:2                         # number of GPUs (4/4 of GPUs)
 #SBATCH --qos=qos_gpu-t3                     # GPU partition (max 20 hrs)
 #SBATCH --time=20:00:00                      # maximum execution time requested (HH:MM:SS)
 #SBATCH --output=/gpfsscratch/rech/cli/uvo53rl/logs/nerf4ssh_dc20a_%j.log      # name of output file
@@ -42,16 +42,18 @@ srun python experiments/dc20a/main.py \
     --my_config.trainer.num_epochs=10000 \
     --my_config.lr_scheduler.warmup_epochs=500 \
     --my_config.lr_scheduler.max_epochs=100 \
-    --my_config.lr_scheduler.eta_min=1e-6 \
+    --my_config.lr_scheduler.eta_min=1e-5 \
     --my_config.log.mode="offline" \
     --my_config.model.hidden_dim=256 \
     --my_config.trainer.accelerator="gpu" \
     --my_config.trainer.strategy="dp" \
-    --my_config.trainer.devices=4 \
-    --my_config.trainer.grad_batches=1 \
+    --my_config.trainer.devices=2 \
+    --my_config.dataloader.batchsize_train=8192 \
+    --my_config.trainer.grad_batches=4 \
     --my_config.dataloader.num_workers_train=40 \
     --my_config.dataloader.num_workers_valid=40 \
     --my_config.dataloader.num_workers_test=40 \
-    --my_config.dataloader.num_workers_predict=40
+    --my_config.dataloader.num_workers_predict=40 \
+    --my_config.optimizer.optimizer="adam"
 #    --my_config.evaluation.lon_coarsen=5 \
 #    --my_config.evaluation.lat_coarsen=5 \

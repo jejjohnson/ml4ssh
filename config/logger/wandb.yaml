@@ -1,0 +1,16 @@
+wandb:
+  _target_: pytorch_lightning.loggers.wandb.WandbLogger
+  # name: ""
+  save_dir: "${paths.log_dir}"
+  offline: null
+  mode: "disabled"
+  id: null
+  anonymous: null
+  project: "inr4ssh"
+  entity: "ige"
+  log_model: False
+  resume: False
+  prefix: ""
+  group: ""
+  tags: []
+  job_type: ""

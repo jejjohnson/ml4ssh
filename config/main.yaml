@@ -1,0 +1,20 @@
+defaults:
+  - _self_
+  - logger: wandb
+  - paths: local
+  - data: natl60
+  - preprocess: preprocess_dc20a
+  - geoprocess: geoprocess_dc20a
+#   - experiment: experiment_dc20a
+
+logdir: /Users/eman/code_projects/logs/${now:'%y-%m-%d--%H-%M-%S'}
+
+stage: "preprocess"
+
+ckpt_path: null
+experiment: "dc20a" # "dc21a", "natl60", "dc22a"
+case: "swot1nadir5"
+variables: ["ssh_obs", "ssh_model", "lon", "lat"]
+clean_obs_dir: "/Volumes/EMANS_HDD/xsdata/dc20a_osse/hydra_test/clean/dc_obs/"
+save_name: "test_data_dc20"
+dataset: "alongtrack"

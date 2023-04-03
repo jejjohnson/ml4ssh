@@ -1,14 +1,16 @@
 import pytorch_lightning as pl
 import torch
 
-from ..data.images import load_fox, load_cameraman
-from ..features.coords import get_image_coordinates
+from jejeqx._src.data.images import load_fox, load_cameraman
+from jejeqx._src.features.coords import get_image_coordinates
 from torch.utils.data import random_split, DataLoader, TensorDataset
 from einops import rearrange
 
 
 class Image(pl.LightningDataModule):
-    def __init__(self, batch_size: int=32, shuffle: bool=False, split_style: str="regular"):
+    def __init__(
+        self, batch_size: int = 32, shuffle: bool = False, split_style: str = "regular"
+    ):
         super().__init__()
         self.batch_size = batch_size
         self.split_style = split_style
@@ -35,13 +37,17 @@ class Image(pl.LightningDataModule):
         raise NotImplementedError
 
     def coordinates_2_image(self, coords):
-        return rearrange(coords, "(h w) c -> h w c", h=self.image_height, w=self.image_width)
+        return rearrange(
+            coords, "(h w) c -> h w c", h=self.image_height, w=self.image_width
+        )
 
     def image_2_coordinates(self, image):
         return get_image_coordinates(image)
 
     def train_dataloader(self):
-        return DataLoader(self.ds_train, batch_size=self.batch_size, shuffle=self.shuffle)
+        return DataLoader(
+            self.ds_train, batch_size=self.batch_size, shuffle=self.shuffle
+        )
 
     def val_dataloader(self):
         return DataLoader(self.ds_valid, batch_size=self.batch_size)
@@ -60,9 +66,10 @@ class ImageFox(Image):
     def load_image(self):
         return load_fox()
 
+
 class ImageCameraman(Image):
     image_height = 512
     image_width = 512
+
     def load_image(self):
         return load_cameraman()
-

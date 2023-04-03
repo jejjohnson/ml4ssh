@@ -1,0 +1,12 @@
+# path to root directory
+root_dir: ${oc.env:ROOT}
+# log directory
+log_dir: "/Users/eman/code_projects/logs"
+# raw data directory
+raw_data_dir: "/Volumes/EMANS_HDD/data/dc20a_osse/test/raw/dc_ref/"
+raw_obs_dir: "/Volumes/EMANS_HDD/data/dc20a_osse/test/raw/dc_obs/"
+# clean data directory
+clean_ref_dir: "/Volumes/EMANS_HDD/data/dc20a_osse/test_2/raw/dc_ref/"
+clean_obs_dir: "/Volumes/EMANS_HDD/data/dc20a_osse/test_2/clean/"
+# staging directory
+staging_dir: "/Volumes/EMANS_HDD/data/dc20a_osse/hydra_test/ml_ready"

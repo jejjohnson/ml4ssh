@@ -1,0 +1,7 @@
+logdir: /Users/eman/code_projects/logs/${now:'%y-%m-%d--%H-%M-%S'}
+
+defaults:
+  - _self_
+  - logger: wandb
+  - paths: local
+  - data: natl60

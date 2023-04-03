@@ -7,32 +7,37 @@ from inr4ssh._src.files import (
     check_list_equal_elem,
     list_all_files,
     check_if_file,
+    make_directory,
 )
 import json
 from inr4ssh._src.paths import get_root_path
+import loguru
 
 URL_OBS = "https://ige-meom-opendap.univ-grenoble-alpes.fr/thredds/fileServer/meomopendap/extract/ocean-data-challenges/dc_data1/dc_obs.tar.gz"
 URL_REF = "https://ige-meom-opendap.univ-grenoble-alpes.fr/thredds/fileServer/meomopendap/extract/ocean-data-challenges/dc_data1/dc_ref.tar.gz"
 
 
-def download_obs(datadir: str) -> None:
+def download_obs(datadir: str, verbose: False) -> None:
+    make_directory(datadir)
 
-    runcmd(f"wget --directory-prefix={datadir} {URL_OBS}")
+    loguru.logger.info(f"Download NATL60 Obs to directory: {datadir}")
+    runcmd(f"wget --directory-prefix={datadir} {URL_OBS}", verbose=verbose)
 
-    runcmd(f"tar -xvf {datadir}/dc_obs.tar.gz --directory={datadir}")
+    runcmd(f"tar -xvf {datadir}/dc_obs.tar.gz --directory={datadir}", verbose=verbose)
 
-    runcmd(f"rm -f {datadir}/dc_obs.tar.gz")
+    runcmd(f"rm -f {datadir}/dc_obs.tar.gz", verbose=verbose)
 
     return None
 
 
-def download_ref(datadir: str) -> None:
+def download_ref(datadir: str, verbose: False) -> None:
+    make_directory(datadir)
 
-    runcmd(f"wget --directory-prefix={datadir} {URL_REF}")
+    runcmd(f"wget --directory-prefix={datadir} {URL_REF}", verbose)
 
-    runcmd(f"tar -xvf {datadir}/dc_ref.tar.gz --directory={datadir}")
+    runcmd(f"tar -xvf {datadir}/dc_ref.tar.gz --directory={datadir}", verbose)
 
-    runcmd(f"rm -f {datadir}/dc_ref.tar.gz")
+    runcmd(f"rm -f {datadir}/dc_ref.tar.gz", verbose)
 
     return None
 
@@ -86,7 +91,6 @@ def get_osse_2020a_setup() -> config_dict.ConfigDict:
 
 
 def get_swot_obs_setup_files(files: List[str], setup: str = "nadir1"):
-
     # initialize setup config
     setup_config = get_osse_2020a_setup()
 
@@ -103,7 +107,6 @@ def get_swot_obs_setup_files(files: List[str], setup: str = "nadir1"):
 def check_dc20a_files(
     directory: str, json_file: dict = None, dataset: str = "obs"
 ) -> bool:
-
     if json_file is None:
         json_file = get_root_path().joinpath("inr4ssh/_src/data/dc20a.json")
 

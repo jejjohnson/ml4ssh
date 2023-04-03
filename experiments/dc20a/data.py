@@ -27,7 +27,6 @@ from inr4ssh._src.data.utils import load_alongtrack_parallel
 
 
 def download(datadir: str = None, dataset: str = "obs") -> None:
-
     if dataset.lower() == "obs":
         logger.info(f"Downloading obs data from:")
         logger.info(f"{URL_OBS}")
@@ -47,7 +46,6 @@ def download(datadir: str = None, dataset: str = "obs") -> None:
 
 
 def preprocess(config: ml_collections.ConfigDict) -> None:
-
     logger.info("Running preprocess (clean) script...")
     t0 = time.time()
 
@@ -111,7 +109,6 @@ def preprocess(config: ml_collections.ConfigDict) -> None:
 
 
 def ml_ready(config: ml_collections.ConfigDict, experiment: str) -> None:
-
     logger.info(f"Starting preprocess (ml_ready) script...")
     logger.info(f"Dataset: {experiment}...")
     t0 = time.time()

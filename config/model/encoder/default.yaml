@@ -1,0 +1,8 @@
+encoder_spatial:
+  transform: "deg2grad"
+  scaler: [1.0 / 3.14159265359, 1.0 / (3.14159265359 / 2.0)]
+  output_dim: 2
+
+encoder_temporal:
+  transform: "identity"
+  output_dim: 2

@@ -1,0 +1,29 @@
+transforms:
+  - _target_: inr4ssh._src.geoprocess.coords.transform_360_to_180
+    _partial_: True
+
+  - _target_: inr4ssh._src.geoprocess.subset.subset_time
+    _partial_: True
+    time_min: "2012-10-02"
+    time_max: "2012-12-02"
+    drop: True
+
+  # - _target_: inr4ssh._src.geoprocess.subset.subset_longitude
+  #   _partial_: True
+  #   lon_min: -65.0
+  #   lon_max: -55.0
+  #   drop: True
+
+  - _target_: inr4ssh._src.geoprocess.subset.subset_latitude
+    _partial_: True
+    lat_min: 33.0
+    lat_max: 43.0
+    drop: True
+
+  - _target_: inr4ssh._src.geoprocess.resample.resample_mean
+    _partial_: True
+    time: "1D"
+# # resample_time:
+# # coarsen:
+# #   lon: 0
+# #   lat: 0

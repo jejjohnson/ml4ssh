@@ -1,0 +1,3 @@
+raw_obs_dir: "/Volumes/EMANS_HDD/data/dc20a_osse/test/raw/dc_obs/"
+clean_obs_dir: "/Volumes/EMANS_HDD/data/dc20a_osse/hydra_test/clean/dc_obs/"
+# raw_obs_dir: ${paths.raw_obs_dir}
